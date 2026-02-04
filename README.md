@@ -11,15 +11,15 @@ Modern social platform for network engineers, built with Vue 3, Vite, Pinia, and
 - Axios (API client)
 
 ## Project Structure
-src/
-  assets/
-  components/
-  views/
-  stores/
-  router/
-  api/
-  styles/
-  utils/
+- src/
+  - assets/
+  - components/
+  - views/
+  - stores/
+  - router/
+  - api/
+  - styles/
+  - utils/
 
 ## Setup
 npm install

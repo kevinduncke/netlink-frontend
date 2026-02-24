@@ -28,3 +28,86 @@ body {
   font-family: "Montserrat Light";
   src: url("./assets/fonts/Montserrat-Light.ttf") format("truetype");
 }
+
+/* SIGN IN. SING UP. FORGOT PASSWORD */
+.ntl-wrapper {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+.ntl-group {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  color: #000000;
+}
+.ntl-group p {
+  text-align: center;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 18px;
+}
+.ntl-form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: normal;
+  background-color: #006145;
+  color: #ffffff;
+}
+.ntl-form-container h2 {
+  font-size: 1rem;
+  text-align: left;
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.02rem;
+  margin-bottom: 2rem;
+}
+.form-wrapper {
+  margin: 0 5rem;
+}
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  row-gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.formGroup input {
+  padding: 1.2rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 14px;
+  color: #3f3f3f;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+}
+.submit-btn {
+  width: 100%;
+  padding: 1.1rem;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  background-color: transparent;
+  color: #ffffff;
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 15px;
+}
+.options-btns {
+  display: grid;
+  grid-template-columns: auto auto;
+  margin-top: 0.5rem;
+  gap: 0.5rem;
+}
+.opt-btn {
+  width: 100%;
+  padding: 1.2rem 0;
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  font-family: "Montserrat Regular", sans-serif;
+  border-radius: 5px;
+}
+
+

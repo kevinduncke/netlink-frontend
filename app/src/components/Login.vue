@@ -13,7 +13,7 @@ const router = useRouter();
 async function onSubmit() {
   try {
     await authStore.login(formData.value.email, formData.value.password);
-    router.push("/home");
+    router.push("/dashboard");
   } catch (error) {
     return error;
   }

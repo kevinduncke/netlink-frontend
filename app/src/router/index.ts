@@ -6,6 +6,7 @@ import HomeView from "../components/HomeView.vue";
 import Register from "../components/Register.vue";
 import Forgot from "../components/Forgot.vue";
 import Dashboard from "../components/Dashboard.vue";
+import Profile from "../components/Profile.vue";
 
 const routes = [
   { path: "/", component: HomeView },
@@ -13,6 +14,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/forgot", component: Forgot },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/profile", component: Profile, meta: { requiresAuth: true } },
 ];
 
 export const router = createRouter({

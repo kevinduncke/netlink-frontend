@@ -110,4 +110,35 @@ body {
   border-radius: 5px;
 }
 
-
+@media screen and (max-width: 768px) {
+  .ntl-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+  }
+  .ntl-group {
+    height: auto;
+  }
+  .ntl-group:nth-child(1){
+    flex-direction: row;
+  }
+  .ntl-group img {
+    height: 75px;
+    margin-right: 1rem;
+  }
+  .ntl-group p {
+    font-size: 0.8rem;
+  }
+  .ntl-form-container h2 {
+    font-size: 0.9rem;
+  }
+  .form-wrapper {
+    margin: 0 2rem;
+  }
+  .formGroup input {
+    font-size: 12px;
+  }
+  .submit-btn {
+    font-size: 0.9rem;
+  }
+}

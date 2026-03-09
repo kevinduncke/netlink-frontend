@@ -32,7 +32,7 @@
             </div>
             <button type="submit" class="submit-btn">Sign Up</button>
           </form>
-          <router-link to="/login">
+          <router-link :to="{ name: 'login' }">
             <button type="button" class="submit-btn" id="regAccount">
               Already have an account?
             </button>

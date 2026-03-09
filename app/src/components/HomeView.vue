@@ -2,7 +2,7 @@
 
 <template>
   <div class="home-base">
-    <router-link to="/login">
+    <router-link :to="{ name: 'login' }">
       <img
         src="../assets/logos/netlink-logo.png"
         alt="Netlink Logo"

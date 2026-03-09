@@ -55,12 +55,12 @@ async function onSubmit() {
           </form>
           <div class="options-btns">
             <div>
-              <router-link to="/forgot">
+              <router-link :to="{ name: 'forgot-password' }">
                 <button class="opt-btn">Forgot Password?</button>
               </router-link>
             </div>
             <div>
-              <router-link to="/register">
+              <router-link :to="{ name: 'register' }">
                 <button class="opt-btn">Create Account</button>
               </router-link>
             </div>

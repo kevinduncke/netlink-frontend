@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+</script>
 
 <template>
   <div class="dash-navside">
@@ -11,21 +15,23 @@
     </div>
     <div class="dash-navigation">
       <div class="dash-mainnav">
-        <div class="dash-navbtns dash-navactive">
-          <button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#FFFFFF"
-            >
-              <path
-                d="M520-600v-240h320v240H520ZM120-440v-400h320v400H120Zm400 320v-400h320v400H520Zm-400 0v-240h320v240H120Zm80-400h160v-240H200v240Zm400 320h160v-240H600v240Zm0-480h160v-80H600v80ZM200-200h160v-80H200v80Zm160-320Zm240-160Zm0 240ZM360-280Z"
-              />
-            </svg>
-            <span>Dashboard</span>
-          </button>
+        <div class="dash-navbtns" :class="{ 'dash-navactive': route.name === 'dashboard' }">
+          <router-link to="/dashboard">
+            <button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#FFFFFF"
+              >
+                <path
+                  d="M520-600v-240h320v240H520ZM120-440v-400h320v400H120Zm400 320v-400h320v400H520Zm-400 0v-240h320v240H120Zm80-400h160v-240H200v240Zm400 320h160v-240H600v240Zm0-480h160v-80H600v80ZM200-200h160v-80H200v80Zm160-320Zm240-160Zm0 240ZM360-280Z"
+                />
+              </svg>
+              <span>Dashboard</span>
+            </button>
+          </router-link>
         </div>
         <div class="dash-navbtns">
           <button>
@@ -93,7 +99,7 @@
         </div>
       </div>
       <div class="dash-lownav">
-        <div class="dash-navbtns">
+        <div class="dash-navbtns" :class="{ 'dash-navactive': route.name === 'profile' }">
           <router-link to="/profile">
             <button>
               <svg

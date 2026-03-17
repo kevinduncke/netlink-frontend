@@ -11,10 +11,30 @@ import Profile from "../components/Profile.vue";
 import PageNotFound from "../components/404.vue";
 
 const routes: RouteRecordRaw[] = [
-  { path: "/", component: HomeView, name: "home" },
-  { path: "/login", component: Login, name: "login" },
-  { path: "/register", component: Register, name: "register" },
-  { path: "/forgot", component: Forgot, name: "forgot-password" },
+  {
+    path: "/",
+    component: HomeView,
+    name: "home",
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/login",
+    component: Login,
+    name: "login",
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/register",
+    component: Register,
+    name: "register",
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/forgot",
+    component: Forgot,
+    name: "forgot-password",
+    meta: { requiresAuth: false },
+  },
   {
     path: "/dashboard",
     component: Dashboard,
@@ -31,6 +51,7 @@ const routes: RouteRecordRaw[] = [
     path: "/:pathMatch(.*)*",
     component: PageNotFound,
     name: "page-not-found",
+    meta: { requiresAuth: false },
   },
 ];
 
@@ -39,10 +60,11 @@ export const router = createRouter({
   routes,
 });
 
+// NAVIGATION GUARD TO CHECK AUTHENTICATION
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore();
 
-  if (to.meta.requiresAuth && !auth.token) {
+  if (to.meta?.requiresAuth && !auth.token) {
     next("/login");
   } else {
     next();

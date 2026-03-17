@@ -1,5 +1,25 @@
 <script setup lang="ts">
+import { onBeforeRouteLeave } from 'vue-router';
 import Navigation from './Navigation.vue';
+
+// COMPONENT DEACTIVATION GUARD FOR UNSAVED CHANGES
+onBeforeRouteLeave((to, from, next) => {
+  // CHECK IF THERE ARE UNSAVED CHANGES
+  if(hasUnsavedChanges()) {
+    const answer = window.confirm("You have unsaved changes. Do you really want to leave?");
+    if(answer){
+      next();
+    } else {
+      next(false);
+    }
+  } else {
+    next();
+  }
+});
+
+function hasUnsavedChanges(){
+  return true; // REPLACE WITH ACTUAL LOGIC TO CHECK FOR UNSAVED CHANGES
+}
 </script>
 
 <template>

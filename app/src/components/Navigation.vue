@@ -177,6 +177,7 @@ const route = useRoute();
 .dash-baselogo {
   display: flex;
   justify-content: center;
+  margin-top: 1rem;
 }
 .dash-mainnav {
   display: flex;

@@ -1,27 +1,97 @@
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
+import api from "../services/api";
 import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 
-// COMPONENT DEACTIVATION GUARD FOR UNSAVED CHANGES
-onBeforeRouteLeave((to, from, next) => {
-  // CHECK IF THERE ARE UNSAVED CHANGES
-  if (hasUnsavedChanges()) {
-    const answer = window.confirm(
-      "You have unsaved changes. Do you really want to leave?",
-    );
-    if (answer) {
-      next();
-    } else {
-      next(false);
-    }
-  } else {
-    next();
-  }
+type UserProfile = {
+  name: string;
+  username: string;
+  bio: string;
+  url: string;
+  avatarUrl: string;
+};
+
+const originalProfile = ref({} as UserProfile);
+
+const name = ref("");
+const username = ref("");
+const bio = ref("");
+const url = ref("");
+const avatarUrl = ref("");
+
+const postsCount = ref(0);
+const followersCount = ref(0);
+const followingCount = ref(0);
+
+const editing = ref({
+  name: false,
+  username: false,
+  bio: false,
+  url: false,
+  avatarUrl: false,
 });
 
-function hasUnsavedChanges() {
-  return true; // REPLACE WITH ACTUAL LOGIC TO CHECK FOR UNSAVED CHANGES
+function toggleEdit(field: keyof typeof editing.value) {
+  editing.value[field] = !editing.value[field];
 }
+
+onMounted(async () => {
+  const res = await api.get("/users/me");
+  name.value = res.data.name ?? "";
+  username.value = res.data.username ?? "";
+  bio.value = res.data.bio ?? "";
+  url.value = res.data.url ?? "";
+  avatarUrl.value = res.data.avatarUrl ?? "";
+
+  postsCount.value = res.data.postsCount ?? 0;
+  followersCount.value = res.data.followersCount ?? 0;
+  followingCount.value = res.data.followingCount ?? 0;
+
+  originalProfile.value = structuredClone(res.data);
+});
+
+async function saveProfile() {
+  try {
+    await api.patch("/users/me", {
+      name: name.value,
+      username: username.value,
+      bio: bio.value,
+      url: url.value,
+      avatarUrl: avatarUrl.value,
+    });
+
+    editing.value = {
+      name: false,
+      username: false,
+      bio: false,
+      url: false,
+      avatarUrl: false,
+    };
+
+    alert("Profile updated successfully!");
+  } catch (error) {
+    console.error("Error updating profile: ", error);
+    alert("Failed to update profile. Please try again.");
+  }
+}
+
+// COMPONENT DEACTIVATION GUARD FOR UNSAVED CHANGES
+onBeforeRouteLeave(() => {
+  const hasUnsavedChanges = Object.values(editing.value).some(
+    (isEditing) => isEditing
+  );
+
+  if(!hasUnsavedChanges){
+    return true;
+  }
+
+  const confirmLeave = confirm(
+    "You have unsaved changes. Are you sure you want to leave without saving?"
+  );
+
+  return confirmLeave;
+});
 </script>
 
 <template>
@@ -33,58 +103,109 @@ function hasUnsavedChanges() {
         <div class="profile-box">
           <div class="profile-boxinput">
             <label>Name</label>
-            <input type="text" name="name" id="profile-name" />
+            <input
+              type="text"
+              name="name"
+              v-model="name"
+              id="profile-name"
+              :disabled="!editing.name"
+            />
           </div>
-          <button type="button">
+          <button type="button" @click="toggleEdit('name')">
             <svg
+              v-if="!editing.name"
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="18px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="18px"
               fill="#535353"
             >
               <path
-                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"
+                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#535353"
+            >
+              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
             </svg>
           </button>
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
-            <label for="username">Username</label>
-            <input type="text" name="username" id="profile-username" />
+            <label>Username</label>
+            <input
+              type="text"
+              name="username"
+              v-model="username"
+              id="profile-username"
+              :disabled="!editing.username"
+            />
           </div>
-          <button type="button">
+          <button type="button" @click="toggleEdit('username')">
             <svg
+              v-if="!editing.username"
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="18px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="18px"
               fill="#535353"
             >
               <path
-                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"
+                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#535353"
+            >
+              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
+            </svg>            
           </button>
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
-            <label for="bio">Bio</label>
-            <input type="text" name="bio" id="profile-bio" />
+            <label>Bio</label>
+            <input
+              type="text"
+              name="bio"
+              v-model="bio"
+              id="profile-bio"
+              :disabled="!editing.bio"
+            />
           </div>
-          <button type="button">
+          <button type="button" @click="toggleEdit('bio')">
             <svg
+              v-if="!editing.bio"
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="18px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="18px"
               fill="#535353"
             >
               <path
-                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"
+                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#535353"
+            >
+              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
+            </svg>            
           </button>
         </div>
       </div>
@@ -93,26 +214,39 @@ function hasUnsavedChanges() {
         <p>Your links are visible to everyone on Netlink.</p>
         <div class="profile-box">
           <div class="profile-boxinput">
-            <label for="url">URL</label>
+            <label>URL</label>
             <input
               type="text"
               name="url"
+              v-model="url"
               id="profile-url"
               placeholder="https://"
+              :disabled="!editing.url"
             />
           </div>
-          <button type="button">
+          <button type="button" @click="toggleEdit('url')">
             <svg
+              v-if="!editing.url"
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="18px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="18px"
               fill="#535353"
             >
               <path
-                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"
+                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              height="20px"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#535353"
+            >
+              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
+            </svg>            
           </button>
         </div>
       </div>
@@ -129,36 +263,32 @@ function hasUnsavedChanges() {
         <p>Your profile is currently <span>unlocked</span>.</p>
         <button type="button" class="profile-privacy-btn">Lock</button>
       </div>
+      <button type="button" class="save-btn" @click="saveProfile">Save Changes</button>
     </div>
     <div class="dash-content">
       <div class="profile-content">
         <h2>Profile</h2>
         <div class="profile-head">
           <div class="profile-info">
-            <h1>Kyla Dodds</h1>
-            <h2>@kyladodds</h2>
+            <h1>{{ name }}</h1>
+            <h2>@{{ username }}</h2>
             <div class="profile-stats">
               <div>
-                <p>1 Posts</p>
+                <p>{{ postsCount }} Posts</p>
               </div>
               <div>
-                <p>24 Followers</p>
+                <p>{{ followersCount }} Followers</p>
               </div>
               <div>
-                <p>231 Following</p>
+                <p>{{ followingCount }} Following</p>
               </div>
             </div>
             <div class="profile-titles">
-              <p>Network Architect</p>
-              <p>
-                Let's grow together | Tech & Engineer Lifestyle <br />
-                Founder of @kyladoddsnetworks | Host of @netlinkpodcast <br />
-                Florida | DM for collabs
-              </p>
+              <p>{{ bio }}</p>
             </div>
           </div>
           <div class="profile-avatar">
-
+            <img :src="avatarUrl" alt="Avatar" />
           </div>
         </div>
       </div>
@@ -169,8 +299,9 @@ function hasUnsavedChanges() {
 <style scoped>
 .dash-wrapper {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 2fr;
+  grid-template-columns: 1fr 2fr 3fr;
   grid-template-rows: 100vh;
+  overflow-y: hidden;
 }
 .dash-navside,
 .dash-sidepanel,
@@ -182,6 +313,7 @@ function hasUnsavedChanges() {
 .dash-sidepanel {
   background-color: #ffffff;
   color: #000000;
+  overflow-y: scroll;
 }
 .profile-edit,
 .profile-links,
@@ -242,6 +374,10 @@ function hasUnsavedChanges() {
   outline: none;
   padding: 0.2rem 0;
 }
+.profile-boxinput input:disabled {
+  background-color: transparent;
+  color: #535353;
+}
 .profile-privacy-btn {
   width: 100%;
   border-radius: 10px;
@@ -252,11 +388,21 @@ function hasUnsavedChanges() {
   border: none;
   outline: none;
 }
+.save-btn {
+  width: 100%;
+  padding: 0.8rem 0;
+  border: 2px solid #006145;
+  border-radius: 10px;
+  background-color: #ffffff;
+  font-family: "Montserrat SemiBold", sans-serif;
+  color: #006145;
+}
 
 /* PROFILE CONTENT */
 .dash-content {
   background-color: #f4f4f4;
   color: #000000;
+  overflow-y: auto;
 }
 .profile-content h2 {
   font-family: "Montserrat Regular", sans-serif;
@@ -267,7 +413,7 @@ function hasUnsavedChanges() {
 .profile-head {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 .profile-info h1 {
   font-family: "Montserrat SemiBold", sans-serif;
@@ -283,5 +429,12 @@ function hasUnsavedChanges() {
 .profile-titles p {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
+  line-height: 1rem;
+}
+.profile-avatar {
+  background-color: #e8e8e8;
+  height: 125px;
+  width: 125px;
+  border-radius: 30px;
 }
 </style>

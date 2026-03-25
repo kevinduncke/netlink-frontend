@@ -1,7 +1,19 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { useAuthStore } from "../stores/auth";
+import { useRoute, useRouter } from "vue-router";
 
+const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
+
+function signOut() {
+  try {
+    authStore.logout();
+    router.push("/login");
+  } catch (error) {
+    console.error("Error during logout: ", error);
+  }
+}
 </script>
 
 <template>
@@ -15,14 +27,17 @@ const route = useRoute();
     </div>
     <div class="dash-navigation">
       <div class="dash-mainnav">
-        <div class="dash-navbtns" :class="{ 'dash-navactive': route.name === 'dashboard' }">
+        <div
+          class="dash-navbtns"
+          :class="{ 'dash-navactive': route.name === 'dashboard' }"
+        >
           <router-link to="/dashboard">
             <button>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                height="24px"
+                height="22px"
                 viewBox="0 -960 960 960"
-                width="24px"
+                width="22px"
                 fill="#FFFFFF"
               >
                 <path
@@ -37,9 +52,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -53,9 +68,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -69,9 +84,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -85,9 +100,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -99,14 +114,17 @@ const route = useRoute();
         </div>
       </div>
       <div class="dash-lownav">
-        <div class="dash-navbtns" :class="{ 'dash-navactive': route.name === 'profile' }">
+        <div
+          class="dash-navbtns"
+          :class="{ 'dash-navactive': route.name === 'profile' }"
+        >
           <router-link to="/profile">
             <button>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                height="24px"
+                height="22px"
                 viewBox="0 -960 960 960"
-                width="24px"
+                width="22px"
                 fill="#FFFFFF"
               >
                 <path
@@ -121,9 +139,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -137,9 +155,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -153,9 +171,9 @@ const route = useRoute();
           <button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
+              height="22px"
               viewBox="0 -960 960 960"
-              width="24px"
+              width="22px"
               fill="#FFFFFF"
             >
               <path
@@ -163,6 +181,22 @@ const route = useRoute();
               />
             </svg>
             <span>More</span>
+          </button>
+        </div>
+        <div class="dash-navbtns">
+          <button @click="signOut">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="22px"
+              viewBox="0 -960 960 960"
+              width="22px"
+              fill="#FFFFFF"
+            >
+              <path
+                d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h560v-560H200v160h-80v-160q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm220-160-56-58 102-102H120v-80h346L364-622l56-58 200 200-200 200Z"
+              />
+            </svg>
+            <span>Logout</span>
           </button>
         </div>
       </div>
@@ -177,18 +211,18 @@ const route = useRoute();
 .dash-baselogo {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 .dash-mainnav {
   display: flex;
   flex-direction: column;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 .dash-navbtns {
-  padding: 0.5rem 1rem;
+  padding: 0.2rem 1rem;
   border-radius: 1rem;
   border: 1px solid transparent;
-  margin: 0.2rem 0;
+  margin: 0.3rem 0;
 }
 .dash-navbtns a {
   text-decoration: none;
@@ -198,7 +232,7 @@ const route = useRoute();
   justify-content: start;
   align-items: center;
   font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   color: #ffffff;
   width: 100%;
   background-color: transparent;

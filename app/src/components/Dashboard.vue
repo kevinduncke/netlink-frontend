@@ -80,7 +80,7 @@ import Navigation from "./Navigation.vue";
 <style scoped>
 .dash-wrapper {
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr;
+  grid-template-columns: 1fr 2fr 3fr;
   grid-template-rows: 100vh;
 }
 .dash-navside,

@@ -270,21 +270,21 @@ onBeforeRouteLeave(() => {
         <h2>Profile</h2>
         <div class="profile-head">
           <div class="profile-info">
-            <h1>{{ name }}</h1>
-            <h2>@{{ username }}</h2>
+            <h1>{{ name || "Unknown User" }}</h1>
+            <h2>@{{ username || "Unknown Username" }}</h2>
             <div class="profile-stats">
               <div>
-                <p>{{ postsCount }} Posts</p>
+                <p>{{ postsCount || 0 }} Posts</p>
               </div>
               <div>
-                <p>{{ followersCount }} Followers</p>
+                <p>{{ followersCount || 0 }} Followers</p>
               </div>
               <div>
-                <p>{{ followingCount }} Following</p>
+                <p>{{ followingCount || 0 }} Following</p>
               </div>
             </div>
             <div class="profile-titles">
-              <p>{{ bio }}</p>
+              <p>{{ bio || "No bio available." }}</p>
             </div>
           </div>
           <div class="profile-avatar">

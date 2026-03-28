@@ -41,7 +41,7 @@ async function onSubmit() {
                 placeholder="Email or Username"
                 v-model="formData.email"
               />
-            </div>
+            </div>           
 
             <div class="formGroup">
               <input

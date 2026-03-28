@@ -232,7 +232,7 @@ function signOut() {
   justify-content: start;
   align-items: center;
   font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: #ffffff;
   width: 100%;
   background-color: transparent;

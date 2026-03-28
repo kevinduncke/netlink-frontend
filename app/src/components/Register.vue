@@ -1,4 +1,27 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref } from "vue";
+import { useAuthStore } from "../stores/auth";
+import { useRouter } from "vue-router";
+
+const formData = ref({
+  email: "",
+  name: "",
+  password: "",
+  confirmPassword: "",
+});
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+async function onSubmit(){
+  try {
+    await authStore.register(formData.value.email, formData.value.name, formData.value.password);
+    router.push("/login");
+  } catch (error) {
+    return error;
+  }
+}
+</script>
 
 <template>
   <div class="ntl-wrapper">
@@ -14,13 +37,17 @@
       <div class="form-wrapper">
         <h2>Get Started on Netlink</h2>
         <div class="form-base">
-          <form @submit.prevent="" method="post" id="loginForm">
+          <form @submit.prevent="onSubmit()" method="post" id="loginForm">
             <div class="formGroup">
-              <input type="email" id="net-email" placeholder="Email" />
+              <input type="email" id="net-email" placeholder="Email" v-model="formData.email" />
             </div>
 
             <div class="formGroup">
-              <input type="password" id="net-password" placeholder="Password" />
+              <input type="text" id="net-name" placeholder="Full Name" v-model="formData.name" />
+            </div>            
+
+            <div class="formGroup">
+              <input type="password" id="net-password" placeholder="Password" v-model="formData.password" />
             </div>
 
             <div class="formGroup">
@@ -28,6 +55,7 @@
                 type="password"
                 id="net-password-confirm"
                 placeholder="Confirm Password"
+                v-model="formData.confirmPassword"
               />
             </div>
             <button type="submit" class="submit-btn">Sign Up</button>

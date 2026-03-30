@@ -48,21 +48,26 @@ function signOut() {
             </button>
           </router-link>
         </div>
-        <div class="dash-navbtns">
-          <button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#FFFFFF"
-            >
-              <path
-                d="M160-120q-33 0-56.5-23.5T80-200v-560q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v560q0 33-23.5 56.5T800-120H160Zm0-80h640v-560H160v560Zm80-80h480v-80H240v80Zm0-160h160v-240H240v240Zm240 0h240v-80H480v80Zm0-160h240v-80H480v80ZM160-200v-560 560Z"
-              />
-            </svg>
-            <span>My Posts</span>
-          </button>
+        <div
+          class="dash-navbtns"
+          :class="{ 'dash-navactive': route.name === 'create-post' }"
+        >
+          <router-link to="/create">
+            <button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="22px"
+                viewBox="0 -960 960 960"
+                width="22px"
+                fill="#FFFFFF"
+              >
+                <path
+                  d="M160-120q-33 0-56.5-23.5T80-200v-560q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v560q0 33-23.5 56.5T800-120H160Zm0-80h640v-560H160v560Zm80-80h480v-80H240v80Zm0-160h160v-240H240v240Zm240 0h240v-80H480v80Zm0-160h240v-80H480v80ZM160-200v-560 560Z"
+                />
+              </svg>
+              <span>Create & Post</span>
+            </button>
+          </router-link>
         </div>
         <div class="dash-navbtns">
           <button>
@@ -94,22 +99,6 @@ function signOut() {
               />
             </svg>
             <span>Following</span>
-          </button>
-        </div>
-        <div class="dash-navbtns">
-          <button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#FFFFFF"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h357l-80 80H200v560h560v-278l80-80v358q0 33-23.5 56.5T760-120H200Zm280-360ZM360-360v-170l367-367q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 57q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L530-360H360Zm481-424-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"
-              />
-            </svg>
-            <span>Create Post</span>
           </button>
         </div>
       </div>

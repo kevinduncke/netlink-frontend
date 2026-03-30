@@ -9,6 +9,7 @@ import Forgot from "../components/Forgot.vue";
 import Dashboard from "../components/Dashboard.vue";
 import Profile from "../components/Profile.vue";
 import PageNotFound from "../components/404.vue";
+import Create from "../components/Create.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -53,6 +54,12 @@ const routes: RouteRecordRaw[] = [
     name: "page-not-found",
     meta: { requiresAuth: false },
   },
+  {
+    path: "/create",
+    component: Create,
+    name: "create-post",
+    meta: { requiresAuth: true },
+  }
 ];
 
 export const router = createRouter({

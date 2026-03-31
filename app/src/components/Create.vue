@@ -160,7 +160,7 @@ function toggleDisableComments() {
       <div class="optionsPost">
         <h2>Options</h2>
         <div class="visibilityPost">
-          <p>Who can view your post? {{ visibility }}</p>
+          <p>Who can view your post?</p>
           <div class="modesOptions">
             <button type="button" @click="changeVisibility('PUBLIC')">
               <div class="btnIcon" :class="{ selected: visibility === 'PUBLIC' }">

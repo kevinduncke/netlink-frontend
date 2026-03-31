@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 
@@ -18,6 +18,15 @@ async function onSubmit() {
     return error;
   }
 }
+
+// CHECK IF USER IS ALREADY LOGGED IN
+onMounted(() => {
+  if (authStore.isAuthenticated()){
+    router.push("/dashboard");
+  } else {
+    return;
+  }
+})
 </script>
 
 <template>

@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import api from "../services/api";
 import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
+import Post from "./Post.vue";
 
 type UserProfile = {
   name: string;
@@ -36,19 +37,28 @@ function toggleEdit(field: keyof typeof editing.value) {
   editing.value[field] = !editing.value[field];
 }
 
+async function loadProfile() {
+  try {
+    const res = await api.get("/users/me");
+
+    name.value = res.data.name ?? "";
+    username.value = res.data.username ?? "";
+    bio.value = res.data.bio ?? "";
+    url.value = res.data.url ?? "";
+    avatarUrl.value = res.data.avatarUrl ?? "";
+
+    postsCount.value = res.data.postsCount ?? 0;
+    followersCount.value = res.data.followersCount ?? 0;
+    followingCount.value = res.data.followingCount ?? 0;
+
+    originalProfile.value = structuredClone(res.data);
+  } catch (error) {
+    console.error("Error loading profile: ", error);
+  }
+}
+
 onMounted(async () => {
-  const res = await api.get("/users/me");
-  name.value = res.data.name ?? "";
-  username.value = res.data.username ?? "";
-  bio.value = res.data.bio ?? "";
-  url.value = res.data.url ?? "";
-  avatarUrl.value = res.data.avatarUrl ?? "";
-
-  postsCount.value = res.data.postsCount ?? 0;
-  followersCount.value = res.data.followersCount ?? 0;
-  followingCount.value = res.data.followingCount ?? 0;
-
-  originalProfile.value = structuredClone(res.data);
+  await loadProfile();
 });
 
 async function saveProfile() {
@@ -79,15 +89,15 @@ async function saveProfile() {
 // COMPONENT DEACTIVATION GUARD FOR UNSAVED CHANGES
 onBeforeRouteLeave(() => {
   const hasUnsavedChanges = Object.values(editing.value).some(
-    (isEditing) => isEditing
+    (isEditing) => isEditing,
   );
 
-  if(!hasUnsavedChanges){
+  if (!hasUnsavedChanges) {
     return true;
   }
 
   const confirmLeave = confirm(
-    "You have unsaved changes. Are you sure you want to leave without saving?"
+    "You have unsaved changes. Are you sure you want to leave without saving?",
   );
 
   return confirmLeave;
@@ -169,7 +179,7 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
+            </svg>
           </button>
         </div>
         <div class="profile-box">
@@ -205,7 +215,7 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
+            </svg>
           </button>
         </div>
       </div>
@@ -246,7 +256,7 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
+            </svg>
           </button>
         </div>
       </div>
@@ -263,7 +273,9 @@ onBeforeRouteLeave(() => {
         <p>Your profile is currently <span>unlocked</span>.</p>
         <button type="button" class="profile-privacy-btn">Lock</button>
       </div>
-      <button type="button" class="save-btn" @click="saveProfile">Save Changes</button>
+      <button type="button" class="save-btn" @click="saveProfile">
+        Save Changes
+      </button>
     </div>
     <div class="dash-content">
       <div class="profile-content">
@@ -292,6 +304,7 @@ onBeforeRouteLeave(() => {
           </div>
         </div>
       </div>
+      <Post />
     </div>
   </div>
 </template>
@@ -313,7 +326,7 @@ onBeforeRouteLeave(() => {
 .dash-sidepanel {
   background-color: #ffffff;
   color: #000000;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .profile-edit,
 .profile-links,

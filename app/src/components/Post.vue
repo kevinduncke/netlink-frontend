@@ -4,31 +4,14 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
+import type { UserPost, Post } from "../types/post";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-// TYPE FOR POST AND RESPONSE
-type Post = {
-  id: string | number;
-  name: string;
-  content: string;
-  commentsCount?: number;
-  likesCount?: number;
-  sharesCount?: number;
-  location?: string;
-};
-type Response = {
-  id: string | number;
-  name: string;
-  posts: Post[];
-  postsCount: number;
-  username: string;
-};
-
 // LOAD POSTS
-const data = ref<Response | null>(null);
-const myPosts = ref<Post[]>([]);
+const userdata = ref<UserPost | null>(null);
+const posts = ref<Post[]>([]);
 async function loadPosts() {
   // CHECK IF USER IS AUTHENTICATED
   if (!authStore.token) {
@@ -38,9 +21,8 @@ async function loadPosts() {
 
   try {
     const response = await api.get("/post/my-posts");
-    data.value = response.data;
-    myPosts.value = data.value?.posts || [];
-    console.log(myPosts.value);
+    userdata.value = response.data;
+    posts.value = response.data.posts;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       authStore.logout();
@@ -81,11 +63,11 @@ function closeEditModal() {
   openEditModalFor.value = "";
 }
 async function saveEdit() {
-  if(!editingPost.value) return;
+  if (!editingPost.value) return;
 
   try {
     await api.put(`/post/update/${editingPost.value.id}`, {
-      content: editingPost.value.content
+      content: editingPost.value.content,
     });
 
     await loadPosts();
@@ -105,15 +87,15 @@ async function likePost(postId: number | string) {
     console.error("Error liking post: ", error);
   }
 }
-async function unlikePost(postId: number | string) {
-  try {
-    await api.post(`/post/unlike/${postId}`);
-    await loadPosts();
-    console.log("Post unliked successfully");
-  } catch (error) {
-    console.error("Error unliking post: ", error);
-  }
-}
+// async function unlikePost(postId: number | string) {
+//   try {
+//     await api.post(`/post/unlike/${postId}`);
+//     await loadPosts();
+//     console.log("Post unliked successfully");
+//   } catch (error) {
+//     console.error("Error unliking post: ", error);
+//   }
+// }
 
 // EXPOSE LOAD POST FN TO PARENT COMPONENT
 defineExpose({
@@ -124,7 +106,7 @@ defineExpose({
 <template>
   <div class="dash-globalposts">
     <p class="dash-title">My Posts</p>
-    <div v-for="post in myPosts" :key="post.id" class="dash-post">
+    <div v-for="post in posts" :key="post.id" class="dash-post">
       <div class="dash-user-post">
         <div class="dash-username">
           <svg
@@ -139,8 +121,8 @@ defineExpose({
             />
           </svg>
           <span>
-            <RouterLink :to="`/profile/${data?.username}`">{{
-              data?.name
+            <RouterLink :to="`/profile/${userdata?.username}`">{{
+              userdata?.name || "Unknown User"
             }}</RouterLink>
           </span>
         </div>
@@ -168,7 +150,10 @@ defineExpose({
         <p>{{ post.content }}</p>
       </div>
       <div class="dash-options-post">
-        <button type="button" :class="{ 'dash-commented': post.commentsCount }">
+        <button
+          type="button"
+          :class="{ 'dash-commented': post.commentsCount }"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
@@ -182,7 +167,11 @@ defineExpose({
           </svg>
           <span>{{ post.commentsCount || 0 }}</span>
         </button>
-        <button type="button" @click="likePost(post.id)" :class="{ 'dash-liked': post.likesCount }">
+        <button
+          type="button"
+          @click="likePost(post.id)"
+          :class="{ 'dash-liked': post.likesCount }"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
@@ -196,7 +185,10 @@ defineExpose({
           </svg>
           <span>{{ post.likesCount || 0 }}</span>
         </button>
-        <button type="button" :class="{ 'dash-shared': post.sharesCount }">
+        <button
+          type="button"
+          :class="{ 'dash-shared': post.sharesCount }"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
@@ -211,10 +203,17 @@ defineExpose({
           <span>{{ post.sharesCount || 0 }}</span>
         </button>
       </div>
-      <div class="edit-post-modal" v-if="openEditModalFor === post.id && editingPost">
+      <div
+        class="edit-post-modal"
+        v-if="openEditModalFor === post.id && editingPost"
+      >
         <h2 class="edit-title">Edit Post</h2>
         <div class="edit-post">
-          <textarea name="text" id="text" v-model="editingPost.content"></textarea>
+          <textarea
+            name="text"
+            id="text"
+            v-model="editingPost.content"
+          ></textarea>
           <div class="edit-actions">
             <button type="button" @click="closeEditModal()">Cancel</button>
             <button type="button" @click="saveEdit()">Save</button>
@@ -230,7 +229,7 @@ defineExpose({
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: 1rem;
 }
-.dash-post{
+.dash-post {
   background-color: #ffffff;
   padding: 0.8rem;
   border-radius: 10px;
@@ -330,10 +329,10 @@ defineExpose({
   fill: #c31010;
 }
 .dash-shared svg {
-  fill: #005261
+  fill: #005261;
 }
 .dash-commented svg {
-  fill: #006145
+  fill: #006145;
 }
 .edit-post-modal {
   background-color: #fafafa;
@@ -342,7 +341,7 @@ defineExpose({
 .edit-post-modal h2 {
   padding: 0;
   margin: 0;
-  font-family: 'Montserrat Light', sans-serif;
+  font-family: "Montserrat Light", sans-serif;
   font-size: 0.8rem;
 }
 .edit-post textarea {
@@ -368,7 +367,7 @@ defineExpose({
   background: transparent;
   padding: 0.2rem;
   width: 4rem;
-  font-family: 'Montserrat Medium', sans-serif;
+  font-family: "Montserrat Medium", sans-serif;
   font-size: 0.7rem;
   cursor: pointer;
 }

@@ -10,6 +10,7 @@ import Dashboard from "../components/Dashboard.vue";
 import Profile from "../components/Profile.vue";
 import PageNotFound from "../components/404.vue";
 import Create from "../components/Create.vue";
+import Explore from "../components/Explore.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -43,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/explore",
+    component: Explore,
+    name: "explore",
+    meta: { requiresAuth: false },
+  },
+  {
     path: "/profile",
     component: Profile,
     name: "profile",
@@ -59,7 +66,7 @@ const routes: RouteRecordRaw[] = [
     component: Create,
     name: "create-post",
     meta: { requiresAuth: true },
-  }
+  },
 ];
 
 export const router = createRouter({

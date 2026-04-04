@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import api from "../services/api";
-
-interface SearchUser {
-  id: number;
-  username: string;
-}
+import type { SearchUser } from "../types/search";
 
 const props = defineProps({
   mode: { type: String, required: true },

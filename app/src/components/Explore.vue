@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from "axios";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
@@ -11,7 +11,67 @@ import type { FollowUser } from "../types/users";
 const router = useRouter();
 const authStore = useAuthStore();
 
-// LOAD POSTS
+// SEARCH USERS | SEARCH FILTERS
+const query = ref("");
+const searchByPeople = ref("anyone");
+const searchByShared = ref("all");
+const searchByFromDate = ref("");
+const searchByToDate = ref("");
+let latestSearchRequestId = 0;
+
+function toUtcStartOfDay(date: string): string {
+  return date ? `${date}T00:00:00.000Z` : "";
+}
+
+function toUtcEndOfDay(date: string): string {
+  return date ? `${date}T23:59:59.999Z` : "";
+}
+
+function resetFilters() {
+  query.value = "";
+  searchByPeople.value = "anyone";
+  searchByShared.value = "all";
+  searchByFromDate.value = "";
+  searchByToDate.value = "";
+}
+async function searchPost() {
+  try {
+    const requestId = ++latestSearchRequestId;
+    const hasActiveFilters =
+      searchByPeople.value !== "anyone" ||
+      searchByShared.value !== "all" ||
+      !!searchByFromDate.value ||
+      !!searchByToDate.value;
+
+    if (!query.value.trim() && !hasActiveFilters) {
+      await loadPosts();
+      return;
+    }
+
+    const params = new URLSearchParams({
+      query: query.value,
+      people: searchByPeople.value,
+      shared: searchByShared.value,
+      fromDate: toUtcStartOfDay(searchByFromDate.value),
+      toDate: toUtcEndOfDay(searchByToDate.value),
+    });
+
+    const response = await api.get(`/post/search?${params.toString()}`);
+    if (requestId !== latestSearchRequestId) {
+      return;
+    }
+
+    allPosts.value = response.data.posts || [];
+  } catch (error) {
+    console.error("Error searching posts: ", error);
+  }
+}
+watch(
+  [query, searchByPeople, searchByShared, searchByFromDate, searchByToDate],
+  searchPost,
+);
+
+// LOAD POSTS | LIKE/UNLIKE POSTS
 const allPosts = ref<ExplorePost[]>([]);
 async function loadPosts() {
   // CHECK IF USER IS AUTHENTICATED
@@ -33,89 +93,16 @@ async function loadPosts() {
     throw error;
   }
 }
-
-// SEARCH USERS
-// SEARCH FILTERS
-const query = ref("");
-
-type SearchFilters = {
-  people: "anyone" | "following";
-  shared: "all" | "posts";
-  fromDate: string | null;
-  toDate: string | null;
-};
-
-function toUtcStartOfDay(date: string | null): string {
-  return date ? `${date}T00:00:00.000Z` : "";
-}
-
-function toUtcEndOfDay(date: string | null): string {
-  return date ? `${date}T23:59:59.999Z` : "";
-}
-
-const filters = ref<SearchFilters>({
-  people: "anyone", // "anyone" || "following"
-  shared: "all", // "all" | "posts"
-  fromDate: null,
-  toDate: null,
-});
-
-async function searchPost() {
+async function likePost(postId: number | string) {
   try {
-    if (!query.value.trim()) {
-      await loadPosts();
-      return;
-    }
-
-    const params = new URLSearchParams({
-      query: query.value,
-    });
-
-    const response = await api.get(`/post/search?${params.toString()}`);
-    allPosts.value = response.data.posts || [];
+    await api.post(`/post/like/${postId}`);
+    await loadPosts();
   } catch (error) {
-    console.error("Error searching posts: ", error);
+    console.error("Error liking post: ", error);
   }
 }
-watch(query, searchPost);
 
-const filteredPosts = computed(() => {
-  let posts = allPosts.value;
-
-  // PEOPLE FILTER
-  if (filters.value.people === "following") {
-    posts = posts.filter((p) => p.author.isFollowedByMe);
-  }
-
-  // SHARES FILTER
-  if (filters.value.shared === "posts") {
-    posts = posts.filter((p) => !p.isShared);
-  }
-
-  // DATE FILTERS
-  if (filters.value.fromDate) {
-    const fromDate = new Date(toUtcStartOfDay(filters.value.fromDate));
-    posts = posts.filter((p) => new Date(p.createdAt) >= fromDate);
-  }
-  if (filters.value.toDate) {
-    const toDate = new Date(toUtcEndOfDay(filters.value.toDate));
-    posts = posts.filter((p) => new Date(p.createdAt) <= toDate);
-  }
-
-  console.log(posts);
-  return posts;
-});
-
-function resetFilters() {
-  filters.value = {
-    people: "anyone",
-    shared: "all",
-    fromDate: null,
-    toDate: null,
-  };
-}
-
-// LOAD USERS
+// LOAD USERS | FOLLOW USERS
 const users = ref<FollowUser[]>([]);
 async function loadUsers() {
   try {
@@ -131,32 +118,10 @@ async function loadUsers() {
     throw error;
   }
 }
-
-// FOLLOW USER
 async function followUser(userId: string | number) {
   await api.post(`/follow/${userId}`);
   await loadUsers();
 }
-
-// LIKE AND UNLIKE POST
-async function likePost(postId: number | string) {
-  try {
-    await api.post(`/post/like/${postId}`);
-    await loadPosts();
-    console.log("Post liked successfully");
-  } catch (error) {
-    console.error("Error liking post: ", error);
-  }
-}
-// async function unlikePost(postId: number | string) {
-//   try {
-//     await api.post(`/post/unlike/${postId}`);
-//     await loadPosts();
-//     console.log("Post unliked successfully");
-//   } catch (error) {
-//     console.error("Error unliking post: ", error);
-//   }
-// }
 
 onMounted(async () => {
   await loadUsers();
@@ -197,17 +162,17 @@ onMounted(async () => {
           <h3>People</h3>
           <div
             class="filter-check"
-            :class="{ 'filter-selected': filters.people === 'anyone' }"
+            :class="{ 'filter-selected': searchByPeople === 'anyone' }"
           >
             <p>From anyone</p>
-            <button type="button" @click="filters.people = 'anyone'">
+            <button type="button" @click="searchByPeople = 'anyone'">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
                 viewBox="0 -960 960 960"
                 width="24px"
                 fill="#C5C5C5"
-                v-if="filters.people !== 'anyone'"
+                v-if="searchByPeople !== 'anyone'"
               >
                 <path
                   d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
@@ -229,17 +194,17 @@ onMounted(async () => {
           </div>
           <div
             class="filter-check"
-            :class="{ 'filter-selected': filters.people === 'following' }"
+            :class="{ 'filter-selected': searchByPeople === 'following' }"
           >
             <p>People you follow</p>
-            <button type="button" @click="filters.people = 'following'">
+            <button type="button" @click="searchByPeople = 'following'">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
                 viewBox="0 -960 960 960"
                 width="24px"
                 fill="#C5C5C5"
-                v-if="filters.people !== 'following'"
+                v-if="searchByPeople !== 'following'"
               >
                 <path
                   d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
@@ -264,17 +229,17 @@ onMounted(async () => {
           <h3>Posts</h3>
           <div
             class="filter-check"
-            :class="{ 'filter-selected': filters.shared === 'all' }"
+            :class="{ 'filter-selected': searchByShared === 'all' }"
           >
             <p>Shares and Posts</p>
-            <button type="button" @click="filters.shared = 'all'">
+            <button type="button" @click="searchByShared = 'all'">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
                 viewBox="0 -960 960 960"
                 width="24px"
                 fill="#C5C5C5"
-                v-if="filters.shared !== 'all'"
+                v-if="searchByShared !== 'all'"
               >
                 <path
                   d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
@@ -296,17 +261,17 @@ onMounted(async () => {
           </div>
           <div
             class="filter-check"
-            :class="{ 'filter-selected': filters.shared === 'posts' }"
+            :class="{ 'filter-selected': searchByShared === 'posts' }"
           >
             <p>Only show Posts</p>
-            <button type="button" @click="filters.shared = 'posts'">
+            <button type="button" @click="searchByShared = 'posts'">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
                 viewBox="0 -960 960 960"
                 width="24px"
                 fill="#C5C5C5"
-                v-if="filters.shared !== 'posts'"
+                v-if="searchByShared !== 'posts'"
               >
                 <path
                   d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
@@ -335,7 +300,7 @@ onMounted(async () => {
               type="date"
               name="from-date"
               id="from-date"
-              v-model="filters.fromDate"
+              v-model="searchByFromDate"
             />
           </div>
           <div class="filter-check">
@@ -344,7 +309,7 @@ onMounted(async () => {
               type="date"
               name="to-date"
               id="to-date"
-              v-model="filters.toDate"
+              v-model="searchByToDate"
             />
           </div>
         </div>
@@ -389,7 +354,7 @@ onMounted(async () => {
     <div class="dash-content">
       <div class="explore-content">
         <h2>Explore</h2>
-        <div v-for="post in filteredPosts" :key="post.id" class="dash-post">
+        <div v-for="post in allPosts" :key="post.id" class="dash-post">
           <div class="dash-user-post">
             <div class="dash-username">
               <svg
@@ -568,12 +533,12 @@ onMounted(async () => {
 }
 .filter-reset button {
   background: transparent;
-  border: 2px solid #C5C5C5;
+  border: 2px solid #c5c5c5;
   width: 100%;
   padding: 1rem 0;
   -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;  
-  font-family: 'Montserrat Medium', sans-serif;
+  box-shadow: -1px 3px 26px -3px #e8e8e8;
+  font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
   color: #616161;
   letter-spacing: 0.03rem;

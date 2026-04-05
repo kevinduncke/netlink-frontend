@@ -11,6 +11,7 @@ import Profile from "../components/Profile.vue";
 import PageNotFound from "../components/404.vue";
 import Create from "../components/Create.vue";
 import Explore from "../components/Explore.vue";
+import Connections from "../components/Connections.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -49,6 +50,12 @@ const routes: RouteRecordRaw[] = [
     name: "explore",
     meta: { requiresAuth: false },
   },
+  {
+    path: "/connections",
+    component: Connections,
+    name: "connections",
+    meta: { requiresAuth: false },
+  },  
   {
     path: "/profile",
     component: Profile,

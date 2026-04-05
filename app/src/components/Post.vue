@@ -226,8 +226,8 @@ defineExpose({
 
 <style scoped>
 .dash-title {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 1rem;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
 }
 .dash-post {
   background-color: #ffffff;

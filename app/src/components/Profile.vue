@@ -4,14 +4,7 @@ import api from "../services/api";
 import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
-
-type UserProfile = {
-  name: string;
-  username: string;
-  bio: string;
-  url: string;
-  avatarUrl: string;
-};
+import type { UserProfile } from "../types/users";
 
 const originalProfile = ref({} as UserProfile);
 
@@ -40,7 +33,7 @@ function toggleEdit(field: keyof typeof editing.value) {
 async function loadProfile() {
   try {
     const res = await api.get("/users/me");
-
+    
     name.value = res.data.name ?? "";
     username.value = res.data.username ?? "";
     bio.value = res.data.bio ?? "";
@@ -297,10 +290,10 @@ onBeforeRouteLeave(() => {
             </div>
             <div class="profile-titles">
               <p>{{ bio || "No bio available." }}</p>
-            </div>
+            </div>          
           </div>
           <div class="profile-avatar">
-            <img :src="avatarUrl" alt="Avatar" />
+            <img :src="avatarUrl" />
           </div>
         </div>
       </div>
@@ -421,12 +414,13 @@ onBeforeRouteLeave(() => {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.05rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .profile-head {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
+  margin: 0 2rem 2rem 2rem;
 }
 .profile-info h1 {
   font-family: "Montserrat SemiBold", sans-serif;
@@ -438,6 +432,7 @@ onBeforeRouteLeave(() => {
   justify-content: space-between;
   font-family: "Montserrat Light", sans-serif;
   font-size: 0.7rem;
+  gap: 1rem;
 }
 .profile-titles p {
   font-family: "Montserrat Regular", sans-serif;
@@ -448,6 +443,6 @@ onBeforeRouteLeave(() => {
   background-color: #e8e8e8;
   height: 125px;
   width: 125px;
-  border-radius: 30px;
+  border-radius: 100px;
 }
 </style>

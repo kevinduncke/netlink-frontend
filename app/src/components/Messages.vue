@@ -1,0 +1,708 @@
+<script setup lang="ts">
+import axios from "axios";
+import { ref, onMounted, watch, computed } from "vue";
+import { useRouter } from "vue-router";
+import api from "../services/api";
+import { useAuthStore } from "../stores/auth";
+
+import type { SearchUser } from "../types/search";
+import type { FollowUser } from "../types/users";
+import type { UserChat } from "../types/users";
+import type { ChatMessage, ChatUser } from "../types/chat";
+
+import Navigation from "./Navigation.vue";
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+// SEARCH USERS | SEARCH FILTERS
+const query = ref("");
+const results = ref<SearchUser[]>([]);
+async function searchUsers() {
+  try {
+    const response = await api.get(`/users/search?query=${query.value}`);
+    results.value = response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+function clearQuery() {
+  query.value = "";
+  results.value = [];
+}
+watch(query, searchUsers);
+
+// LOAD USER CHATS
+const userChats = ref<UserChat[]>([]);
+async function loadUserChats() {
+  try {
+    const response = await api.get("/chats");
+    userChats.value = response.data || [];
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+
+// LOAD OF SUGGESTED USERS
+const suggestedUsers = ref<FollowUser[]>([]);
+async function loadSuggestedUsers() {
+  try {
+    const response = await api.get("/follow/following");
+    suggestedUsers.value = response.data || [];
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+const filteredSuggestedUsers = computed(() =>
+  suggestedUsers.value.filter(
+    (user) => !userChats.value.some((chat) => chat.receiver.id === user.id),
+  ),
+);
+
+// LOAD CHAT BASED ON SELECTED USER
+const selectedChat = ref<string | number>("");
+const chatUserInfo = ref<ChatUser>({
+  id: "",
+  name: "",
+  username: "",
+  avatarUrl: "",
+});
+const chatMessages = ref<ChatMessage[]>([]);
+async function selectChat(chatId: string | number) {
+  try {
+    selectedChat.value = chatId;
+    if (!chatId) {
+      console.error("No chat ID provided");
+      return;
+    }
+    const response = await api.get(`/chats/${chatId}/messages`);
+    chatMessages.value = response.data.message || [];
+    chatUserInfo.value = response.data.receiver;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+const groupMessagesByDate = computed(() => {
+  const groups: Record<string, ChatMessage[]> = {};
+
+  for (const message of chatMessages.value) {
+    const date = new Date(message.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+
+    groups[date].push(message);
+  }
+
+  return groups;
+});
+
+onMounted(async () => {
+  await loadSuggestedUsers();
+  await loadUserChats();
+});
+</script>
+
+<template>
+  <div class="dash-wrapper">
+    <Navigation />
+    <div class="dash-sidepanel">
+      <div class="dash-messages">
+        <h2>New Message</h2>
+        <div class="dash-message-form">
+          <span>To:</span>
+          <input
+            type="text"
+            name="search"
+            id="search-users"
+            placeholder="Search..."
+            v-model="query"
+          />
+          <div type="button" v-if="query.length <= 0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="18px"
+              viewBox="0 -960 960 960"
+              width="18px"
+              fill="#777777"
+            >
+              <path
+                d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
+              />
+            </svg>
+          </div>
+          <button type="button" v-else @click="clearQuery()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="18px"
+              viewBox="0 -960 960 960"
+              width="18px"
+              fill="#777777"
+            >
+              <path
+                d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="dash-users-modal" v-if="results.length > 0">
+          <div
+            class="dash-user-item dash-search-item"
+            v-for="user in results"
+            :key="user.id"
+          >
+            <button type="button">
+              <img
+                src="../assets/avatars/40x40.png"
+                alt="User Avatar"
+                class="bar-user-avatar"
+                height="40px"
+                width="40px"
+              />
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ user.name }}</h2>
+                <p class="bar-user-username">{{ user.username }}</p>
+              </div>
+            </button>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#C5C5C5"
+              >
+                <path
+                  d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="dash-chats" v-if="userChats.length > 0">
+        <h2>Chats</h2>
+        <div
+          class="bar-user-box selected"
+          v-for="chat in userChats"
+          :key="chat.chatId"
+        >
+          <button type="button" @click="selectChat(chat.chatId)">
+            <div class="bar-user-info">
+              <img
+                src="../assets/avatars/40x40.png"
+                alt="User Avatar"
+                class="bar-user-avatar"
+                height="40px"
+                width="40px"
+              />
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ chat.receiver.name }}</h2>
+                <p class="bar-user-username">@{{ chat.receiver.username }}</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="dash-suggestions">
+        <h2>Suggestions</h2>
+        <div
+          class="bar-user-box"
+          v-for="user in filteredSuggestedUsers"
+          :key="user.id"
+        >
+          <button type="button">
+            <div class="bar-user-info">
+              <img
+                src="../assets/avatars/40x40.png"
+                alt="User Avatar"
+                class="bar-user-avatar"
+                height="40px"
+                width="40px"
+              />
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ user.name }}</h2>
+                <p class="bar-user-username">@{{ user.username }}</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="dash-content">
+      <div class="dash-header-user" v-if="selectedChat">
+        <div class="bar-user-box">
+          <button type="button">
+            <div class="bar-user-info">
+              <img
+                src="../assets/avatars/40x40.png"
+                alt="User Avatar"
+                class="bar-user-avatar"
+                height="40px"
+                width="40px"
+              />
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ chatUserInfo.name }}</h2>
+                <p class="bar-user-username">@{{ chatUserInfo.username }}</p>
+              </div>
+            </div>
+          </button>
+          <div class="bar-useractions">
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#C5C5C5"
+              >
+                <path
+                  d="M160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z"
+                />
+              </svg>
+            </button>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#C5C5C5"
+              >
+                <path
+                  d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+                />
+              </svg>
+            </button>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#C5C5C5"
+              >
+                <path
+                  d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="dash-body-msg" v-if="selectedChat">
+        <div
+          class="dash-date-group"
+          v-for="(messages, date) in groupMessagesByDate"
+          :key="date"
+        >
+          <div class="dash-date-msg">
+            <span>{{ date }}</span>
+          </div>
+          <div v-for="msg in messages" :key="msg.id">
+            <div
+              class="dash-message-boxuser"
+              v-if="msg.senderId === chatUserInfo.id"
+            >
+              <div class="dash-user-msg">
+                <p>{{ msg.content }}</p>
+                <time datetime="msg.createdAt">
+                  {{
+                    new Date(msg.createdAt).toLocaleDateString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  }}
+                </time>
+              </div>
+            </div>
+            <div class="dash-message-boxme" v-else>
+              <div class="dash-my-msg">
+                <p>{{ msg.content }}</p>
+                <time datetime="msg.createdAt">
+                  {{
+                    new Date(msg.createdAt).toLocaleDateString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  }}
+                </time>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-footer-user" v-if="selectedChat">
+        <button type="button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#C5C5C5"
+          >
+            <path
+              d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520Zm263.5 221.5Q659-337 684-400h-66q-22 37-58.5 58.5T480-320q-43 0-79.5-21.5T342-400h-66q25 63 80.5 101.5T480-260q68 0 123.5-38.5ZM324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-480Zm227 227q93-93 93-227t-93-227q-93-93-227-93t-227 93q-93 93-93 227t93 227q93 93 227 93t227-93Z"
+            />
+          </svg>
+        </button>
+        <input
+          type="text"
+          name="send-message"
+          id="send-message"
+          placeholder="Type a message..."
+        />
+        <div class="dash-msg-media">
+          <button type="button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#C5C5C5"
+            >
+              <path
+                d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
+              />
+            </svg>
+          </button>
+          <button type="button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#C5C5C5"
+            >
+              <path
+                d="M395-435q-35-35-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35q-50 0-85-35Zm85-205Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm68.5-371.5Q520-503 520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480q17 0 28.5-11.5Z"
+              />
+            </svg>
+          </button>
+          <button type="button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#C5C5C5"
+            >
+              <path
+                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div v-else>
+        Select a chat to view messages or start a new conversation.
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.dash-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 2fr 3fr;
+  grid-template-rows: 100vh;
+  overflow-y: hidden;
+}
+.dash-navside,
+.dash-sidepanel,
+.dash-content {
+  padding: 10px 20px;
+}
+
+/* PROFILE SIDEPANEL */
+.dash-sidepanel {
+  background-color: #ffffff;
+  color: #000000;
+  overflow-y: auto;
+}
+.dash-messages h2,
+.dash-chats h2,
+.dash-suggestions h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
+
+.dash-message-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 1rem 0;
+  background-color: #f4f4f4;
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+.dash-message-form span {
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-message-form input {
+  width: 100%;
+  margin: 0 0.5rem;
+  border: none;
+  outline: none;
+  padding: 0.5rem 0;
+  background: transparent;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-message-form button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.dash-message-form button:hover > svg {
+  fill: #006145;
+}
+/* Remove autocomplete background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px #f4f4f4 inset !important; /* Set to your background */
+  box-shadow: 0 0 0px 1000px #f4f4f4 inset !important;
+  -webkit-text-fill-color: #000 !important; /* Set to your text color */
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dash-chats,
+.dash-suggestions {
+  box-sizing: border-box;
+  margin: 1.5rem 0;
+}
+.bar-user-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  padding: 0 1rem;
+}
+.selected {
+  border-radius: 10px;
+  background-color: #efefef;
+  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
+  box-shadow: -1px 3px 26px -3px #e8e8e8;
+}
+.bar-user-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+.bar-userdata h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+  text-align: left;
+}
+.bar-userdata p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+  text-align: left;
+}
+.bar-user-box button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 100%;
+  cursor: pointer;
+}
+.bar-user-box:hover {
+  border-radius: 10px;
+  background-color: #efefef;
+  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
+  box-shadow: -1px 3px 26px -3px #e8e8e8;
+}
+.bar-user-box button:first-child:hover {
+  color: #006145;
+}
+.bar-useractions {
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.bar-useractions button {
+  cursor: pointer;
+}
+.bar-useractions button > svg:hover {
+  fill: #006145;
+}
+.dash-user-item {
+  padding: 0 1rem;
+}
+.dash-user-item button {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  cursor: pointer;
+}
+.dash-user-item:hover {
+  background-color: #f4f4f4;
+  border-radius: 10px;
+}
+.dash-search-item {
+  display: flex;
+  box-sizing: border-box;
+}
+.dash-search-item button:last-child {
+  display: flex;
+  justify-content: flex-end;
+}
+.dash-search-item button:last-child > svg:hover {
+  fill: #006145;
+}
+
+/* PROFILE CONTENT */
+.dash-content {
+  background-color: #f4f4f4;
+  color: #000000;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+.dash-header-user {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  -webkit-box-shadow: -1px 3px 26px -3px #d3d3d3;
+  box-shadow: -1px 3px 26px -3px #d3d3d3;
+}
+.dash-footer-user {
+  background-color: #efefef;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 1rem;
+  -webkit-box-shadow: -1px 3px 26px -3px #b9b9b9;
+  box-shadow: -1px 3px 26px -3px #b9b9b9;
+}
+.dash-footer-user button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.dash-footer-user input {
+  width: 100%;
+  margin: 0 1rem;
+  border: none;
+  background: transparent;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  outline: none;
+}
+.dash-footer-user button > svg:hover {
+  fill: #006145;
+}
+.dash-msg-media {
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.dash-msg-media button:first-child > svg {
+  fill: #006145;
+}
+.dash-body-msg {
+  height: 100%;
+  overflow-y: auto;
+}
+.dash-date-group {
+  padding: 1rem 0;
+  text-align: center;
+  box-sizing: border-box;
+}
+.dash-date-group span {
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+  background-color: #c5c5c5;
+  color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 10px;
+}
+.dash-message-boxuser {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dash-message-boxme {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.dash-user-msg,
+.dash-my-msg {
+  box-sizing: border-box;
+  width: fit-content;
+  background-color: #006145;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  margin: 1rem 0;
+}
+.dash-user-msg p,
+.dash-my-msg p {
+  padding: 0;
+  margin: 0;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.7rem;
+  padding-bottom: 0.2rem;
+}
+.dash-user-msg time,
+.dash-my-msg time {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.6rem;
+}
+</style>

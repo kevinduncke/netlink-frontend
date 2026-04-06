@@ -12,6 +12,7 @@ import PageNotFound from "../components/404.vue";
 import Create from "../components/Create.vue";
 import Explore from "../components/Explore.vue";
 import Connections from "../components/Connections.vue";
+import Messages from "../components/Messages.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -55,7 +56,7 @@ const routes: RouteRecordRaw[] = [
     component: Connections,
     name: "connections",
     meta: { requiresAuth: false },
-  },  
+  },
   {
     path: "/profile",
     component: Profile,
@@ -72,6 +73,12 @@ const routes: RouteRecordRaw[] = [
     path: "/create",
     component: Create,
     name: "create-post",
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/messages",
+    component: Messages,
+    name: "messages",
     meta: { requiresAuth: true },
   },
 ];

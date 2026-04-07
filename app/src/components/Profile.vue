@@ -30,6 +30,10 @@ function toggleEdit(field: keyof typeof editing.value) {
   editing.value[field] = !editing.value[field];
 }
 
+function toggleCloseEdit(field: keyof typeof editing.value) {
+  editing.value[field] = false;
+}
+
 async function loadProfile() {
   try {
     const res = await api.get("/users/me");
@@ -85,6 +89,8 @@ onBeforeRouteLeave(() => {
     (isEditing) => isEditing,
   );
 
+  console.log(hasUnsavedChanges);
+
   if (!hasUnsavedChanges) {
     return true;
   }
@@ -114,9 +120,8 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.name"
             />
           </div>
-          <button type="button" @click="toggleEdit('name')">
+          <button type="button" @click="toggleEdit('name')" v-if="!editing.name">
             <svg
-              v-if="!editing.name"
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
               viewBox="0 -960 960 960"
@@ -127,8 +132,9 @@ onBeforeRouteLeave(() => {
                 d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+          </button>
+          <button type="button" @click="toggleCloseEdit('name')" v-else>
             <svg
-              v-else
               xmlns="http://www.w3.org/2000/svg"
               height="20px"
               viewBox="0 -960 960 960"
@@ -136,8 +142,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
-          </button>
+            </svg>            
+          </button>           
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
@@ -150,9 +156,8 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.username"
             />
           </div>
-          <button type="button" @click="toggleEdit('username')">
-            <svg
-              v-if="!editing.username"
+          <button type="button" @click="toggleEdit('username')" v-if="!editing.username">
+            <svg              
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
               viewBox="0 -960 960 960"
@@ -163,8 +168,9 @@ onBeforeRouteLeave(() => {
                 d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+          </button>
+          <button type="button" @click="toggleCloseEdit('username')" v-else>
             <svg
-              v-else
               xmlns="http://www.w3.org/2000/svg"
               height="20px"
               viewBox="0 -960 960 960"
@@ -172,8 +178,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
-          </button>
+            </svg>            
+          </button>          
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
@@ -186,9 +192,8 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.bio"
             />
           </div>
-          <button type="button" @click="toggleEdit('bio')">
+          <button type="button" @click="toggleEdit('bio')" v-if="!editing.bio">
             <svg
-              v-if="!editing.bio"
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
               viewBox="0 -960 960 960"
@@ -198,9 +203,10 @@ onBeforeRouteLeave(() => {
               <path
                 d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
-            </svg>
+            </svg>          
+          </button>
+          <button type="button" @click="toggleCloseEdit('bio')" v-else>
             <svg
-              v-else
               xmlns="http://www.w3.org/2000/svg"
               height="20px"
               viewBox="0 -960 960 960"
@@ -208,8 +214,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
-          </button>
+            </svg>            
+          </button>           
         </div>
       </div>
       <div class="profile-links">
@@ -227,9 +233,8 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.url"
             />
           </div>
-          <button type="button" @click="toggleEdit('url')">
+          <button type="button" @click="toggleEdit('url')" v-if="!editing.url">
             <svg
-              v-if="!editing.url"
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
               viewBox="0 -960 960 960"
@@ -240,8 +245,9 @@ onBeforeRouteLeave(() => {
                 d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
             </svg>
+          </button>
+          <button type="button" @click="toggleCloseEdit('url')" v-else>
             <svg
-              v-else
               xmlns="http://www.w3.org/2000/svg"
               height="20px"
               viewBox="0 -960 960 960"
@@ -249,7 +255,7 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
+            </svg>            
           </button>
         </div>
       </div>
@@ -402,6 +408,7 @@ onBeforeRouteLeave(() => {
   background-color: #ffffff;
   font-family: "Montserrat SemiBold", sans-serif;
   color: #006145;
+  cursor: pointer;
 }
 
 /* PROFILE CONTENT */

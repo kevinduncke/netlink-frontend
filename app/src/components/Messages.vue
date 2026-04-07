@@ -32,6 +32,18 @@ async function searchUsers() {
     throw error;
   }
 }
+function verifyNewChatSearch(userId: string | number) {
+  const existingChat = userChats.value.find(
+    (chat) => chat.receiver.id === userId,
+  );
+  if (existingChat) {
+    selectChat(existingChat.chatId);
+    query.value = "";
+    results.value = [];
+  } else {
+    createChat(userId);
+  }
+}
 function clearQuery() {
   query.value = "";
   results.value = [];
@@ -84,8 +96,10 @@ const chatUserInfo = ref<ChatUser>({
   name: "",
   username: "",
   avatarUrl: "",
+  createdAt: "",
 });
 const chatMessages = ref<ChatMessage[]>([]);
+const userChatId = ref<string | number>("");
 async function selectChat(chatId: string | number) {
   try {
     selectedChat.value = chatId;
@@ -96,6 +110,8 @@ async function selectChat(chatId: string | number) {
     const response = await api.get(`/chats/${chatId}/messages`);
     chatMessages.value = response.data.message || [];
     chatUserInfo.value = response.data.receiver;
+    userChatId.value = chatId;
+    displayUserInfo.value = false;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       authStore.logout();
@@ -126,6 +142,85 @@ const groupMessagesByDate = computed(() => {
   return groups;
 });
 
+// SEND MESSAGE ON SELECTED USER
+const message = ref<string>("");
+async function sendMessage(chatId: string | number) {
+  try {
+    // PREVENT SENDING EMPTY MESSAGES
+    if (!message.value.trim()) return;
+
+    await api.post(`/chats/${chatId}/new`, {
+      content: message.value.trim(),
+    });
+    message.value = "";
+
+    // RELOAD MESSAGES AFTER SENDING
+    await selectChat(chatId);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+
+// CREATE A NEW CHAT WITH SELECTED USER
+async function createChat(userId: string | number) {
+  try {
+    const response = await api.post("/chats/new", { userId: userId });
+    const newChatId = response.data.chatId;
+    console.log("New chat created with ID: ", newChatId);
+    await selectChat(newChatId);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+
+// DELETE CHAT WITH SELECTED USER
+async function deleteChat(chatId: string | number) {
+  try {
+    await api.delete(`/chats/${chatId}`);
+    selectedChat.value = "";
+    chatMessages.value = [];
+    userChatId.value = "";
+    await loadUserChats();
+    await loadSuggestedUsers();
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+
+// INFORMATION ABOUT THE USER ACCOUNT
+const displayUserInfo = ref<boolean>(false);
+const dateJoinedUser = computed(
+  // FORMAT THE MONTH NUMBER TO TEXT AND SHOW ONLY THE MONTH AND YEAR
+  () => {
+    const date = new Date(chatUserInfo.value.createdAt);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+  },
+);
+function getUserInfo() {
+  displayUserInfo.value = !displayUserInfo.value;
+}
+
 onMounted(async () => {
   await loadSuggestedUsers();
   await loadUserChats();
@@ -137,7 +232,7 @@ onMounted(async () => {
     <Navigation />
     <div class="dash-sidepanel">
       <div class="dash-messages">
-        <h2>New Message</h2>
+        <h2>New Chat</h2>
         <div class="dash-message-form">
           <span>To:</span>
           <input
@@ -180,7 +275,7 @@ onMounted(async () => {
             v-for="user in results"
             :key="user.id"
           >
-            <button type="button">
+            <button type="button" @click="verifyNewChatSearch(user.id)">
               <img
                 src="../assets/avatars/40x40.png"
                 alt="User Avatar"
@@ -193,7 +288,7 @@ onMounted(async () => {
                 <p class="bar-user-username">{{ user.username }}</p>
               </div>
             </button>
-            <button type="button">
+            <button type="button" @click="verifyNewChatSearch(user.id)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
@@ -212,7 +307,8 @@ onMounted(async () => {
       <div class="dash-chats" v-if="userChats.length > 0">
         <h2>Chats</h2>
         <div
-          class="bar-user-box selected"
+          class="bar-user-box"
+          :class="{ selected: chat.chatId === userChatId }"
           v-for="chat in userChats"
           :key="chat.chatId"
         >
@@ -240,7 +336,7 @@ onMounted(async () => {
           v-for="user in filteredSuggestedUsers"
           :key="user.id"
         >
-          <button type="button">
+          <button type="button" @click="createChat(user.id)">
             <div class="bar-user-info">
               <img
                 src="../assets/avatars/40x40.png"
@@ -290,7 +386,7 @@ onMounted(async () => {
                 />
               </svg>
             </button>
-            <button type="button">
+            <button type="button" @click="deleteChat(userChatId)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
@@ -303,7 +399,7 @@ onMounted(async () => {
                 />
               </svg>
             </button>
-            <button type="button">
+            <button type="button" @click="getUserInfo()">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
@@ -319,8 +415,13 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="dash-body-msg" v-if="selectedChat">
+      <div
+        class="dash-body-msg"
+        v-if="selectedChat"
+        :class="{ 'dash-modal-info': displayUserInfo === true }"
+      >
         <div
+          v-if="!displayUserInfo"
           class="dash-date-group"
           v-for="(messages, date) in groupMessagesByDate"
           :key="date"
@@ -335,9 +436,9 @@ onMounted(async () => {
             >
               <div class="dash-user-msg">
                 <p>{{ msg.content }}</p>
-                <time datetime="msg.createdAt">
+                <time :datetime="msg.createdAt">
                   {{
-                    new Date(msg.createdAt).toLocaleDateString([], {
+                    new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })
@@ -348,14 +449,87 @@ onMounted(async () => {
             <div class="dash-message-boxme" v-else>
               <div class="dash-my-msg">
                 <p>{{ msg.content }}</p>
-                <time datetime="msg.createdAt">
+                <time :datetime="msg.createdAt">
                   {{
-                    new Date(msg.createdAt).toLocaleDateString([], {
+                    new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })
                   }}
                 </time>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <div class="dash-data-box">
+            <h2>Share Profile</h2>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path
+                  d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
+                />
+              </svg>
+              <p>Share via Email</p>
+            </button>
+          </div>
+          <div class="dash-data-box">
+            <h2>Block User</h2>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path
+                  d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-160q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448ZM480-480Z"
+                />
+              </svg>
+              <p>Block</p>
+            </button>
+          </div>
+          <div class="dash-data-box"> 
+            <h2>About this Account</h2>
+            <div class="dash-about-user">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path
+                  d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-160q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448ZM480-480Z"
+                />
+              </svg>
+              <div>
+                <p>Date Joined</p>
+                <p>{{ dateJoinedUser }}</p>
+              </div>
+            </div>
+            <div class="dash-about-user">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path
+                  d="M318-120q-82 0-140-58t-58-140q0-40 15-76t43-64l134-133 56 56-134 134q-17 17-25.5 38.5T200-318q0 49 34.5 83.5T318-200q23 0 45-8.5t39-25.5l133-134 57 57-134 133q-28 28-64 43t-76 15Zm79-220-57-57 223-223 57 57-223 223Zm251-28-56-57 134-133q17-17 25-38t8-44q0-50-34-85t-84-35q-23 0-44.5 8.5T558-726L425-592l-57-56 134-134q28-28 64-43t76-15q82 0 139.5 58T839-641q0 39-14.5 75T782-502L648-368Z"
+                />
+              </svg>
+              <div>
+                <p>URL</p>
+                <p>https://netlink.local/{{ chatUserInfo.username }}</p>
               </div>
             </div>
           </div>
@@ -380,9 +554,10 @@ onMounted(async () => {
           name="send-message"
           id="send-message"
           placeholder="Type a message..."
+          v-model="message"
         />
         <div class="dash-msg-media">
-          <button type="button">
+          <button type="button" @click="sendMessage(userChatId)">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
@@ -423,8 +598,19 @@ onMounted(async () => {
           </button>
         </div>
       </div>
-      <div v-else>
-        Select a chat to view messages or start a new conversation.
+      <div class="dash-empty-chats" v-else>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="64px"
+          viewBox="0 -960 960 960"
+          width="64px"
+          fill="#006145"
+        >
+          <path
+            d="M880-80 720-240H320q-33 0-56.5-23.5T240-320v-40h440q33 0 56.5-23.5T760-440v-280h40q33 0 56.5 23.5T880-640v560ZM160-473l47-47h393v-280H160v327ZM80-280v-520q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v280q0 33-23.5 56.5T600-440H240L80-280Zm80-240v-280 280Z"
+          />
+        </svg>
+        <h2>Start a conversation</h2>
       </div>
     </div>
   </div>
@@ -608,13 +794,18 @@ input:-webkit-autofill:active {
   flex-direction: column;
 }
 .dash-header-user {
-  background-color: #f0f0f0;
+  background-color: #ffffff;
   border-radius: 10px;
   -webkit-box-shadow: -1px 3px 26px -3px #d3d3d3;
   box-shadow: -1px 3px 26px -3px #d3d3d3;
 }
+.dash-header-user .bar-user-box:hover {
+  background-color: transparent;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
 .dash-footer-user {
-  background-color: #efefef;
+  background-color: #ffffff;
   border-radius: 10px;
   display: flex;
   flex-direction: row;
@@ -622,6 +813,7 @@ input:-webkit-autofill:active {
   padding: 1rem;
   -webkit-box-shadow: -1px 3px 26px -3px #b9b9b9;
   box-shadow: -1px 3px 26px -3px #b9b9b9;
+  margin-bottom: 1rem;
 }
 .dash-footer-user button {
   background: transparent;
@@ -659,6 +851,7 @@ input:-webkit-autofill:active {
   padding: 1rem 0;
   text-align: center;
   box-sizing: border-box;
+  margin-top: 1rem;
 }
 .dash-date-group span {
   font-family: "Montserrat Medium", sans-serif;
@@ -682,6 +875,12 @@ input:-webkit-autofill:active {
   flex-direction: column;
   align-items: flex-end;
 }
+.dash-user-msg {
+  text-align: left;
+}
+.dash-my-msg {
+  text-align: right;
+}
 .dash-user-msg,
 .dash-my-msg {
   box-sizing: border-box;
@@ -703,6 +902,76 @@ input:-webkit-autofill:active {
 .dash-user-msg time,
 .dash-my-msg time {
   font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.5rem;
+  letter-spacing: 0.05rem;
+}
+.dash-empty-chats {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dash-empty-chats h2 {
+  font-family: "Montserrat Light", sans-serif;
+  font-size: 1.25rem;
+}
+
+.dash-modal-info {
+  background-color: #ffffff;
+  border-radius: 10px;
+  -webkit-box-shadow: -1px 3px 26px -3px #d3d3d3;
+  box-shadow: -1px 3px 26px -3px #d3d3d3;
+  margin: 1rem 0;
+}
+.dash-data-box h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  padding: 1rem 1rem 0 1rem;
+}
+.dash-data-box button {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  background-color: #ffffff;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0 1rem;
+}
+.dash-data-box button:hover {
+  background-color: #f3f3f3;
+}
+.dash-data-box button:hover > svg,
+.dash-about-user:hover > svg {
+  fill: #006145;
+}
+.dash-data-box button > p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-about-user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+.dash-about-user p:first-child {
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-about-user p:last-child {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+}
+.dash-about-user:last-child {
+  padding-bottom: 1rem;
 }
 </style>

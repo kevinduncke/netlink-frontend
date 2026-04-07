@@ -3,6 +3,7 @@ export type ChatUser = {
   name: string;
   username: string;
   avatarUrl?: string;
+  createdAt: string;
 };
 
 export type ChatMessage = {

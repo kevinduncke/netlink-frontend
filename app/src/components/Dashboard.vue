@@ -54,17 +54,19 @@ const ntfState = ref<boolean>(false);
       <div class="dash-fav-base">
         <div class="fav-head">
           <h2>Favorites</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="20px"
-            viewBox="0 -960 960 960"
-            width="20px"
-            fill="#e3e3e3"
-          >
-            <path
-              d="M288-600v-72h528v72H288Zm0 156v-72h528v72H288Zm0 156v-72h528v72H288ZM180-600q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-636q0 14-10.35 25T180-600Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-480q0 14-10.35 25T180-444Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-324q0 14-10.35 25T180-288Z"
-            />
-          </svg>
+          <button type="button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="22px"
+              viewBox="0 -960 960 960"
+              width="22px"
+              fill="#e3e3e3"
+            >
+              <path
+                d="M288-600v-72h528v72H288Zm0 156v-72h528v72H288Zm0 156v-72h528v72H288ZM180-600q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-636q0 14-10.35 25T180-600Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-480q0 14-10.35 25T180-444Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-324q0 14-10.35 25T180-288Z"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -135,6 +137,15 @@ const ntfState = ref<boolean>(false);
 .fav-head h2 {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
+}
+.fav-head button {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+.fav-head button:hover svg {
+  fill: #006145;
 }
 
 .dash-content {

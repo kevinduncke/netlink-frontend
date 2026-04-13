@@ -245,6 +245,7 @@ defineExpose({
   justify-content: start;
   align-items: center;
 }
+
 .dash-post-opts {
   position: relative;
   display: inherit;
@@ -282,6 +283,7 @@ defineExpose({
 .dash-pop-delete button:hover {
   background-color: #eeeeee;
 }
+
 .dash-user-post svg {
   height: 18px;
   width: 18px;
@@ -302,6 +304,7 @@ defineExpose({
   font-size: 0.8rem;
   padding: 0.5rem;
 }
+
 .dash-options-post {
   display: flex;
   flex-direction: row;
@@ -325,6 +328,7 @@ defineExpose({
   font-family: "Montserrat Light", sans-serif;
   font-size: 0.7rem;
 }
+
 .dash-liked svg {
   fill: #c31010;
 }
@@ -334,6 +338,7 @@ defineExpose({
 .dash-commented svg {
   fill: #006145;
 }
+
 .edit-post-modal {
   background-color: #fafafa;
   padding: 1.5rem;

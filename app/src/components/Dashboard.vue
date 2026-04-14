@@ -7,21 +7,32 @@ import { useAuthStore } from "../stores/auth";
 import Navigation from "./Navigation.vue";
 import type { FollowUser } from "../types/users";
 
-
 const router = useRouter();
 const authStore = useAuthStore();
-
 
 // NOTIFICATIONS
 const ntfState = ref<boolean>(false);
 
 // FAVORITES
+const favSearchQuery = ref<string>("");
 const favStateEdit = ref<boolean>(false);
+const favoriteUsers = ref<FollowUser[]>([]);
 const suggestedUsers = ref<FollowUser[]>([]);
-async function loadSuggestedUsers() {
+async function searchFavoriteUsers(query: string) {
   try {
-    const response = await api.get("/users/suggested");
-    suggestedUsers.value = response.data;
+    const response = await api.get("/favorites/search", {
+      params: { q: query },
+    });
+    favoriteUsers.value = response.data;
+  } catch (error) {
+    console.error("Error searching favorite users: ", error);
+  }
+}
+async function loadFavoriteUsers() {
+  try {
+    const response = await api.get("/favorites");
+    favoriteUsers.value = response.data.users;
+    console.log(response.data.users);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       authStore.logout();
@@ -32,10 +43,52 @@ async function loadSuggestedUsers() {
     throw error;
   }
 }
+async function deleteFavoriteUser(userId: string | number) {
+  try {
+    // await api.delete(`/favorites/${userId}`);
+    console.log(`Deleted user ${userId} from favorites.`);
+    // await loadSuggestedUsers();
+  } catch (error) {
+    console.log("Error deleting favorite user: ", error);
+  }
+}
+async function loadSuggestedUsers() {
+  try {
+    const response = await api.get("/favorites/suggested");
+    suggestedUsers.value = response.data.users;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+async function addFavoriteUser(userId: string | number) {
+  try {
+    await api.post("/favorites", { favoriteUserId: userId });
+    await loadSuggestedUsers();
+    await loadFavoriteUsers();
+  } catch (error) {
+    console.error("Error adding favorite user: ", error);
+  }
+}
+
+watch(favSearchQuery, (newQuery) => {
+  if (newQuery.trim() === "") {
+    // loadFavoriteUsers();
+  } else {
+    // searchFavoriteUsers(newQuery);
+    console.log(`Searching for favorite users with query: ${newQuery}`);
+  }
+});
 
 onMounted(async () => {
+  await loadFavoriteUsers();
   await loadSuggestedUsers();
-})
+});
 </script>
 
 <template>
@@ -185,6 +238,7 @@ onMounted(async () => {
               name="search"
               id="fav-search"
               placeholder="Search"
+              v-model="favSearchQuery"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -204,34 +258,11 @@ onMounted(async () => {
               <button type="button">Remove all</button>
             </div>
             <div class="fav-edit-users">
-              <div class="fav-user">
-                <div class="fav-user-data">
-                  <div class="fav-user-icon">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="28px"
-                      viewBox="0 -960 960 960"
-                      width="28px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"
-                      />
-                    </svg>
-                  </div>
-                  <div class="fav-user-names">
-                    <p>user</p>
-                    <p>@username</p>
-                  </div>
-                </div>
-                <button type="button">Remove</button>
-              </div>
-            </div>
-          </div>
-          <div class="fav-add-suggestions">
-            <p>Suggestions</p>
-            <div class="fav-add-users">
-              <div class="fav-user" v-for="user in suggestedUsers" :key="user.id">
+              <div
+                class="fav-user"
+                v-for="user in favoriteUsers"
+                :key="user.id"
+              >
                 <div class="fav-user-data">
                   <div class="fav-user-icon">
                     <svg
@@ -251,7 +282,42 @@ onMounted(async () => {
                     <p>@{{ user.username }}</p>
                   </div>
                 </div>
-                <button type="button">Add</button>
+                <button type="button" @click="deleteFavoriteUser(user.id)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="fav-add-suggestions">
+            <p>Suggestions</p>
+            <div class="fav-add-users">
+              <div
+                class="fav-user"
+                v-for="user in suggestedUsers"
+                :key="user.id"
+              >
+                <div class="fav-user-data">
+                  <div class="fav-user-icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="28px"
+                      viewBox="0 -960 960 960"
+                      width="28px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="fav-user-names">
+                    <p>{{ user.name }}</p>
+                    <p>@{{ user.username }}</p>
+                  </div>
+                </div>
+                <button type="button" @click="addFavoriteUser(user.id)">
+                  Add
+                </button>
               </div>
             </div>
           </div>
@@ -277,6 +343,7 @@ onMounted(async () => {
 .dash-sidepanel {
   background-color: #ffffff;
   color: #000000;
+  overflow-y: auto;
 }
 .dash-ntf-base h2 {
   font-family: "Montserrat Regular", sans-serif;
@@ -353,7 +420,7 @@ onMounted(async () => {
   padding: 0.8rem;
   border-radius: 10px;
   margin-bottom: 1rem;
-}
+}   
 .fav-users p {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
@@ -490,6 +557,7 @@ onMounted(async () => {
 
 .fav-add-suggestions {
   margin-top: 2rem;
+  overflow-y: auto;
 }
 
 .dash-content {

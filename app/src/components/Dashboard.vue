@@ -6,33 +6,23 @@ import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import Navigation from "./Navigation.vue";
 import type { FollowUser } from "../types/users";
+import type { SearchFavoriteUser } from "../types/search";
+import type { FollowingPost, FavoritePost } from "../types/post";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-// NOTIFICATIONS
-const ntfState = ref<boolean>(false);
-
-// FAVORITES
+// FAVORITES AND LASTEST POSTS
+const latestPosts = ref<FollowingPost[]>([]);
+const favUsersPosts = ref<FavoritePost[]>([]);
 const favSearchQuery = ref<string>("");
 const favStateEdit = ref<boolean>(false);
 const favoriteUsers = ref<FollowUser[]>([]);
 const suggestedUsers = ref<FollowUser[]>([]);
-async function searchFavoriteUsers(query: string) {
+async function loadLatestPosts() {
   try {
-    const response = await api.get("/favorites/search", {
-      params: { q: query },
-    });
-    favoriteUsers.value = response.data;
-  } catch (error) {
-    console.error("Error searching favorite users: ", error);
-  }
-}
-async function loadFavoriteUsers() {
-  try {
-    const response = await api.get("/favorites");
-    favoriteUsers.value = response.data.users;
-    console.log(response.data.users);
+    const response = await api.get("/post/following");
+    latestPosts.value = response.data.posts;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       authStore.logout();
@@ -43,11 +33,79 @@ async function loadFavoriteUsers() {
     throw error;
   }
 }
+async function loadFavoriteUsersPosts() {
+  try {
+    const response = await api.get("/favorites/posts");
+    favUsersPosts.value = response.data.posts;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+async function likePost(postId: number | string) {
+  try {
+    await api.post(`/post/like/${postId}`);
+    await loadFavoriteUsersPosts();
+  } catch (error) {
+    console.error("Error liking post: ", error);
+  }
+}
+// async function unlikePost(postId: number | string) {
+//   try {
+//     await api.post(`/post/unlike/${postId}`);
+//     await loadPosts();
+//     console.log("Post unliked successfully");
+//   } catch (error) {
+//     console.error("Error unliking post: ", error);
+//   }
+// }
+async function searchFavoriteUsers(query: string) {
+  try {
+    const response = await api.get("/favorites/search", {
+      params: { q: query },
+    });
+
+    const users: SearchFavoriteUser[] = response.data.users || [];
+    favoriteUsers.value = users.filter((u) => u.isFavorite);
+    suggestedUsers.value = users.filter((u) => !u.isFavorite);
+  } catch (error) {
+    console.error("Error searching favorite users: ", error);
+  }
+}
+async function loadFavoriteUsers() {
+  try {
+    const response = await api.get("/favorites");
+    favoriteUsers.value = response.data.users;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      authStore.logout();
+      router.push("/login");
+      return;
+    }
+
+    throw error;
+  }
+}
+async function removeAllFavoriteUsers() {
+  try {
+    await api.delete("/favorites/all");
+    await loadFavoriteUsers();
+    await loadSuggestedUsers();
+  } catch (error) {
+    console.log("Error removing all favorite users: ", error);
+  }
+}
 async function deleteFavoriteUser(userId: string | number) {
   try {
-    // await api.delete(`/favorites/${userId}`);
-    console.log(`Deleted user ${userId} from favorites.`);
-    // await loadSuggestedUsers();
+    await api.delete(`/favorites/${userId}`);
+    await loadFavoriteUsers();
+    await loadSuggestedUsers();
+    await loadFavoriteUsersPosts();
   } catch (error) {
     console.log("Error deleting favorite user: ", error);
   }
@@ -68,9 +126,10 @@ async function loadSuggestedUsers() {
 }
 async function addFavoriteUser(userId: string | number) {
   try {
-    await api.post("/favorites", { favoriteUserId: userId });
+    await api.post(`/favorites/${userId}`);
     await loadSuggestedUsers();
     await loadFavoriteUsers();
+    await loadFavoriteUsersPosts();
   } catch (error) {
     console.error("Error adding favorite user: ", error);
   }
@@ -78,16 +137,18 @@ async function addFavoriteUser(userId: string | number) {
 
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
-    // loadFavoriteUsers();
+    loadFavoriteUsers();
+    loadSuggestedUsers();
   } else {
-    // searchFavoriteUsers(newQuery);
-    console.log(`Searching for favorite users with query: ${newQuery}`);
+    searchFavoriteUsers(newQuery);
   }
 });
 
 onMounted(async () => {
   await loadFavoriteUsers();
   await loadSuggestedUsers();
+  await loadFavoriteUsersPosts();
+  await loadLatestPosts();
 });
 </script>
 
@@ -95,46 +156,6 @@ onMounted(async () => {
   <div class="dash-wrapper">
     <Navigation />
     <div class="dash-sidepanel">
-      <div class="dash-ntf-base">
-        <h2>Notifications</h2>
-        <div class="dash-ntf-users" v-if="ntfState">
-          <div class="ntf-user">
-            <div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="20px"
-                viewBox="0 -960 960 960"
-                width="20px"
-                fill="#000000"
-              >
-                <path
-                  d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p><span>User Test</span> shared a new post.</p>
-            </div>
-          </div>
-        </div>
-        <div class="dash-ntf-empty" v-else>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="64px"
-            viewBox="0 -960 960 960"
-            width="64px"
-            fill="#e3e3e3"
-          >
-            <path
-              d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
-            />
-          </svg>
-          <div class="ntf-empty-text">
-            <p>Activity On Your Posts</p>
-            <p>No Activity.</p>
-          </div>
-        </div>
-      </div>
       <div class="dash-fav-base">
         <div class="fav-head">
           <h2>Favorites</h2>
@@ -152,7 +173,12 @@ onMounted(async () => {
             </svg>
           </button>
         </div>
-        <div class="fav-users" v-if="favStateEdit">
+        <div
+          class="fav-users"
+          v-if="!favStateEdit"
+          v-for="post in favUsersPosts"
+          :key="post.id"
+        >
           <div class="fav-head-post">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -166,14 +192,17 @@ onMounted(async () => {
               />
             </svg>
             <div>
-              <p>Name</p>
-              <p>@username</p>
+              <p>{{ post.author.name }}</p>
+              <p>@{{ post.author.username }}</p>
             </div>
           </div>
-          <p>Description of the favorite post.</p>
+          <p>{{ post.content }}</p>
           <div class="fav-foot-post">
             <div class="fav-foot-actions">
-              <button type="button">
+              <button
+                type="button"
+                :class="{ 'fav-commented': post.commentsCount > 0 }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="16px"
@@ -185,9 +214,13 @@ onMounted(async () => {
                     d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120v120ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
                   />
                 </svg>
-                <span>0</span>
+                <span>{{ post.commentsCount }}</span>
               </button>
-              <button type="button">
+              <button
+                type="button"
+                :class="{ 'fav-liked': post.likesCount > 0 }"
+                @click="likePost(post.id)"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="16px"
@@ -199,9 +232,12 @@ onMounted(async () => {
                     d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
                   />
                 </svg>
-                <span>0</span>
+                <span>{{ post.likesCount }}</span>
               </button>
-              <button type="button">
+              <button
+                type="button"
+                :class="{ 'fav-shared': post.sharesCount > 0 }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="16px"
@@ -213,7 +249,7 @@ onMounted(async () => {
                     d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z"
                   />
                 </svg>
-                <span>0</span>
+                <span>{{ post.sharesCount }}</span>
               </button>
             </div>
             <button type="button">
@@ -252,10 +288,12 @@ onMounted(async () => {
               />
             </svg>
           </div>
-          <div class="fav-edit-favorites">
+          <div class="fav-edit-favorites" v-if="favoriteUsers.length > 0">
             <div class="fav-edit-listhead">
               <p>Users</p>
-              <button type="button">Remove all</button>
+              <button type="button" @click="removeAllFavoriteUsers()">
+                Remove all
+              </button>
             </div>
             <div class="fav-edit-users">
               <div
@@ -324,7 +362,105 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div class="dash-content"></div>
+    <div class="dash-content">
+      <div class="dash-lposts">
+        <h2>Lastest Posts</h2>
+        <div
+          class="fav-users"
+          v-if="!favStateEdit"
+          v-for="post in latestPosts"
+          :key="post.id"
+        >
+          <div class="fav-head-post">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="22px"
+              viewBox="0 -960 960 960"
+              width="22px"
+              fill="#535353"
+            >
+              <path
+                d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+              />
+            </svg>
+            <div>
+              <p>{{ post.author.name }}</p>
+              <p>@{{ post.author.username }}</p>
+            </div>
+          </div>
+          <p>{{ post.content }}</p>
+          <div class="fav-foot-post">
+            <div class="fav-foot-actions">
+              <button
+                type="button"
+                :class="{ 'fav-commented': post._count.comments > 0 }"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="16px"
+                  viewBox="0 -960 960 960"
+                  width="16px"
+                  fill="#535353"
+                >
+                  <path
+                    d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120v120ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
+                  />
+                </svg>
+                <span>{{ post._count.comments }}</span>
+              </button>
+              <button
+                type="button"
+                :class="{ 'fav-liked': post._count.likes > 0 }"
+                @click="likePost(post.id)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="16px"
+                  viewBox="0 -960 960 960"
+                  width="16px"
+                  fill="#535353"
+                >
+                  <path
+                    d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
+                  />
+                </svg>
+                <span>{{ post._count.likes }}</span>
+              </button>
+              <button
+                type="button"
+                :class="{ 'fav-shared': post._count.shares > 0 }"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="16px"
+                  viewBox="0 -960 960 960"
+                  width="16px"
+                  fill="#535353"
+                >
+                  <path
+                    d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z"
+                  />
+                </svg>
+                <span>{{ post._count.shares }}</span>
+              </button>
+            </div>
+            <button type="button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="16px"
+                viewBox="0 -960 960 960"
+                width="16px"
+                fill="#535353"
+              >
+                <path
+                  d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm508.5-291.5Q720-743 720-760t-11.5-28.5Q697-800 680-800t-28.5 11.5Q640-777 640-760t11.5 28.5Q663-720 680-720t28.5-11.5ZM680-200ZM200-480Zm480-280Z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -344,41 +480,6 @@ onMounted(async () => {
   background-color: #ffffff;
   color: #000000;
   overflow-y: auto;
-}
-.dash-ntf-base h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-.ntf-user {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 0.5rem;
-}
-.ntf-user span {
-  font-family: "Montserrat SemiBold", sans-serif;
-}
-.ntf-user p {
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-ntf-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem 0;
-}
-.ntf-empty-text {
-  text-align: center;
-}
-.ntf-empty-text p:first-child {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 0.7rem;
-}
-.ntf-empty-text p:last-child {
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.7rem;
 }
 
 .fav-head {
@@ -420,7 +521,7 @@ onMounted(async () => {
   padding: 0.8rem;
   border-radius: 10px;
   margin-bottom: 1rem;
-}   
+}
 .fav-users p {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
@@ -563,5 +664,10 @@ onMounted(async () => {
 .dash-content {
   background-color: #f4f4f4;
   color: #000000;
+  overflow-y: auto;
+}
+.dash-lposts h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
 }
 </style>

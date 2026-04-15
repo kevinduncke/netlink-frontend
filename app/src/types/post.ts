@@ -38,6 +38,41 @@ export type ExplorePost = {
   _count: {
     comments: number;
     likes: number;
-    shares?: number;
+    shares: number;
+  };
+};
+
+export type FavoritePost = {
+  id: string | number;
+  content: string;
+  location: string;
+  createdAt: string;
+  commentsCount: number;
+  likesCount: number;
+  sharesCount: number;
+  author: {
+    id: string | number;
+    name: string;
+    username: string;
+    avatarUrl?: string;
+  };
+};
+
+export type FollowingPost = {
+  id: string | number;
+  content: string;
+  createdAt: string;
+  location: string;
+  isShared: boolean;
+  author: {
+    id: string | number;
+    name: string;
+    username: string;
+    avatarUrl: string;
+  };
+  _count: {
+    comments: number;
+    likes: number;
+    shares: number;
   };
 };

@@ -43,7 +43,8 @@ async function createPost() {
     imageUrl.value = "";
     hideLikes.value = false;
     disableComments.value = false;
-    alert("Post created successfully!");
+
+    await postRef.value?.loadPosts();
     emit("postCreated");
   } catch (error) {
     console.error("Error creating post:", error);

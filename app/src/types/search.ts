@@ -4,3 +4,7 @@ export interface SearchUser {
   username: string;
   avatarUrl: string;
 }
+
+export interface SearchFavoriteUser extends SearchUser {
+  isFavorite: boolean;
+}

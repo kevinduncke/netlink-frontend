@@ -82,7 +82,6 @@ async function likePost(postId: number | string) {
   try {
     await api.post(`/post/like/${postId}`);
     await loadPosts();
-    console.log("Post liked successfully");
   } catch (error) {
     console.error("Error liking post: ", error);
   }

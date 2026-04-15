@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useAuthStore } from "../stores/auth";
+import { useRouter } from "vue-router";
 import api from "../services/api";
 import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 import type { UserProfile } from "../types/users";
+
+const authStore = useAuthStore();
+const router = useRouter();
 
 const originalProfile = ref({} as UserProfile);
 
@@ -25,15 +30,12 @@ const editing = ref({
   url: false,
   avatarUrl: false,
 });
-
 function toggleEdit(field: keyof typeof editing.value) {
   editing.value[field] = !editing.value[field];
 }
-
 function toggleCloseEdit(field: keyof typeof editing.value) {
   editing.value[field] = false;
 }
-
 async function loadProfile() {
   try {
     const res = await api.get("/users/me");
@@ -53,11 +55,6 @@ async function loadProfile() {
     console.error("Error loading profile: ", error);
   }
 }
-
-onMounted(async () => {
-  await loadProfile();
-});
-
 async function saveProfile() {
   try {
     await api.patch("/users/me", {
@@ -75,30 +72,37 @@ async function saveProfile() {
       url: false,
       avatarUrl: false,
     };
-
-    alert("Profile updated successfully!");
   } catch (error) {
     console.error("Error updating profile: ", error);
     alert("Failed to update profile. Please try again.");
   }
 }
+async function deleteProfile() {
+  if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")){
+    return;
+  }
+  try {
+    await api.delete("users/me");
+    authStore.logout();
+    router.push("/login");
+  } catch (error) {
+    console.error("Error deleting profile: ", error);
+  }
+}
 
-// COMPONENT DEACTIVATION GUARD FOR UNSAVED CHANGES
+onMounted(async () => {
+  await loadProfile();
+});
 onBeforeRouteLeave(() => {
   const hasUnsavedChanges = Object.values(editing.value).some(
     (isEditing) => isEditing,
   );
-
-  console.log(hasUnsavedChanges);
-
   if (!hasUnsavedChanges) {
     return true;
   }
-
   const confirmLeave = confirm(
     "You have unsaved changes. Are you sure you want to leave without saving?",
   );
-
   return confirmLeave;
 });
 </script>
@@ -270,11 +274,16 @@ onBeforeRouteLeave(() => {
           what you share and your followers list and found your profile.
         </p>
         <p>Your profile is currently <span>unlocked</span>.</p>
-        <button type="button" class="profile-privacy-btn">Lock</button>
       </div>
       <button type="button" class="save-btn" @click="saveProfile">
-        Save Changes
+        Save
       </button>
+      <div class="profile-delete">
+        <h2>Delete Account</h2>
+      <button type="button" class="delete-btn" @click="deleteProfile">
+        Delete
+      </button>        
+      </div>
     </div>
     <div class="dash-content">
       <div class="profile-content">
@@ -329,8 +338,9 @@ onBeforeRouteLeave(() => {
 }
 .profile-edit,
 .profile-links,
-.profile-privacy {
-  margin-bottom: 2rem;
+.profile-privacy,
+.profile-delete {
+  margin-bottom: 1.5rem;
 }
 .profile-edit h2,
 .profile-links h2,
@@ -390,25 +400,42 @@ onBeforeRouteLeave(() => {
   background-color: transparent;
   color: #535353;
 }
-.profile-privacy-btn {
-  width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 0.8rem 0;
-  background-color: #006145;
-  color: #ffffff;
-  border: none;
-  outline: none;
-}
 .save-btn {
   width: 100%;
   padding: 0.8rem 0;
+  margin-bottom: 1.5rem;
   border: 2px solid #006145;
   border-radius: 10px;
   background-color: #ffffff;
   font-family: "Montserrat SemiBold", sans-serif;
   color: #006145;
   cursor: pointer;
+}
+.save-btn:hover {
+  background-color: #006145;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+}
+
+.profile-delete h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
+.delete-btn {
+  width: 100%;
+  padding: 0.8rem 0;
+  border: 2px solid #a90000;
+  border-radius: 10px;
+  background-color: #ffffff;
+  font-family: "Montserrat SemiBold", sans-serif;
+  color: #a90000;
+  cursor: pointer;  
+  margin-top: 0.5rem;
+}
+.delete-btn:hover {
+  background-color: #a90000;
+  border: 2px solid #ffffff;
+  color: #ffffff;
 }
 
 /* PROFILE CONTENT */

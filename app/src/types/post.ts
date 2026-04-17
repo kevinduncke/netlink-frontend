@@ -4,6 +4,8 @@ export type UserPost = {
   postCount: number;
   username: string;
   avatarUrl?: string;
+  hideLikes: boolean;
+  disableComments: boolean;  
 };
 
 export type Post = {
@@ -15,6 +17,8 @@ export type Post = {
   commentsCount?: number;
   likesCount?: number;
   sharesCount?: number;
+  hideLikes: boolean;
+  disableComments: boolean;  
 };
 
 export type ExplorePost = {
@@ -50,6 +54,8 @@ export type FavoritePost = {
   commentsCount: number;
   likesCount: number;
   sharesCount: number;
+  hideLikes: boolean;
+  disableComments: boolean;  
   author: {
     id: string | number;
     name: string;
@@ -64,6 +70,8 @@ export type FollowingPost = {
   createdAt: string;
   location: string;
   isShared: boolean;
+  hideLikes: boolean;
+  disableComments: boolean;
   author: {
     id: string | number;
     name: string;

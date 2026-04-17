@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 import api from "../services/api";
@@ -30,6 +30,7 @@ const editing = ref({
   url: false,
   avatarUrl: false,
 });
+const hasUnsavedChanges = ref(false);
 function toggleEdit(field: keyof typeof editing.value) {
   editing.value[field] = !editing.value[field];
 }
@@ -39,7 +40,9 @@ function toggleCloseEdit(field: keyof typeof editing.value) {
 async function loadProfile() {
   try {
     const res = await api.get("/users/me");
-    
+
+    originalProfile.value = structuredClone(res.data);
+
     name.value = res.data.name ?? "";
     username.value = res.data.username ?? "";
     bio.value = res.data.bio ?? "";
@@ -49,8 +52,6 @@ async function loadProfile() {
     postsCount.value = res.data.postsCount ?? 0;
     followersCount.value = res.data.followersCount ?? 0;
     followingCount.value = res.data.followingCount ?? 0;
-
-    originalProfile.value = structuredClone(res.data);
   } catch (error) {
     console.error("Error loading profile: ", error);
   }
@@ -72,13 +73,26 @@ async function saveProfile() {
       url: false,
       avatarUrl: false,
     };
+    originalProfile.value = {
+      ...originalProfile.value,
+      name: name.value,
+      username: username.value,
+      bio: bio.value,
+      url: url.value,
+      avatarUrl: avatarUrl.value,
+    };
+    hasUnsavedChanges.value = false;
   } catch (error) {
     console.error("Error updating profile: ", error);
     alert("Failed to update profile. Please try again.");
   }
 }
 async function deleteProfile() {
-  if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")){
+  if (
+    !confirm(
+      "Are you sure you want to delete your account? This action cannot be undone.",
+    )
+  ) {
     return;
   }
   try {
@@ -89,7 +103,17 @@ async function deleteProfile() {
     console.error("Error deleting profile: ", error);
   }
 }
-
+watch(
+  [name, username, bio, url, avatarUrl],
+  () => {
+    hasUnsavedChanges.value =
+      name.value !== (originalProfile.value.name ?? "") ||
+      username.value !== (originalProfile.value.username ?? "") ||
+      bio.value !== (originalProfile.value.bio ?? "") ||
+      url.value !== (originalProfile.value.url ?? "") ||
+      avatarUrl.value !== (originalProfile.value.avatarUrl ?? "");
+  },
+);
 onMounted(async () => {
   await loadProfile();
 });
@@ -124,7 +148,11 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.name"
             />
           </div>
-          <button type="button" @click="toggleEdit('name')" v-if="!editing.name">
+          <button
+            type="button"
+            @click="toggleEdit('name')"
+            v-if="!editing.name"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
@@ -146,8 +174,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
-          </button>           
+            </svg>
+          </button>
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
@@ -160,8 +188,12 @@ onBeforeRouteLeave(() => {
               :disabled="!editing.username"
             />
           </div>
-          <button type="button" @click="toggleEdit('username')" v-if="!editing.username">
-            <svg              
+          <button
+            type="button"
+            @click="toggleEdit('username')"
+            v-if="!editing.username"
+          >
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
               viewBox="0 -960 960 960"
@@ -182,8 +214,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
-          </button>          
+            </svg>
+          </button>
         </div>
         <div class="profile-box">
           <div class="profile-boxinput">
@@ -207,7 +239,7 @@ onBeforeRouteLeave(() => {
               <path
                 d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
               />
-            </svg>          
+            </svg>
           </button>
           <button type="button" @click="toggleCloseEdit('bio')" v-else>
             <svg
@@ -218,8 +250,8 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
-          </button>           
+            </svg>
+          </button>
         </div>
       </div>
       <div class="profile-links">
@@ -259,7 +291,7 @@ onBeforeRouteLeave(() => {
               fill="#535353"
             >
               <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>            
+            </svg>
           </button>
         </div>
       </div>
@@ -275,14 +307,20 @@ onBeforeRouteLeave(() => {
         </p>
         <p>Your profile is currently <span>unlocked</span>.</p>
       </div>
-      <button type="button" class="save-btn" @click="saveProfile">
+      <button
+        type="button"
+        class="save-btn"
+        @click="saveProfile"
+        :disabled="!hasUnsavedChanges"
+        v-if="hasUnsavedChanges"
+      >
         Save
       </button>
       <div class="profile-delete">
         <h2>Delete Account</h2>
-      <button type="button" class="delete-btn" @click="deleteProfile">
-        Delete
-      </button>        
+        <button type="button" class="delete-btn" @click="deleteProfile">
+          Delete
+        </button>
       </div>
     </div>
     <div class="dash-content">
@@ -305,7 +343,7 @@ onBeforeRouteLeave(() => {
             </div>
             <div class="profile-titles">
               <p>{{ bio || "No bio available." }}</p>
-            </div>          
+            </div>
           </div>
           <div class="profile-avatar">
             <img :src="avatarUrl" />
@@ -429,7 +467,7 @@ onBeforeRouteLeave(() => {
   background-color: #ffffff;
   font-family: "Montserrat SemiBold", sans-serif;
   color: #a90000;
-  cursor: pointer;  
+  cursor: pointer;
   margin-top: 0.5rem;
 }
 .delete-btn:hover {

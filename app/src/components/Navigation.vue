@@ -92,7 +92,7 @@ function signOut() {
         </div>
         <div
           class="dash-navbtns"
-          :class="{ 'dash-navactive': route.name === 'following' }"
+          :class="{ 'dash-navactive': route.name === 'connections' }"
         >
           <router-link to="/connections">
             <button>

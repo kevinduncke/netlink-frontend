@@ -41,6 +41,8 @@ async function onSubmit() {
       formData.value.email.trim().toLowerCase(),
       formData.value.password.trim(),
     );
+    formData.value.email = "";
+    formData.value.password = "";
     router.push("/dashboard");
   } catch (error) {
     errors.value.general = "Invalid login credentials. Please try again.";
@@ -89,14 +91,27 @@ onMounted(() => {
                 placeholder="Password"
                 v-model="formData.password"
               />
-              <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
+              <p v-if="errors.password" class="form-error">
+                {{ errors.password }}
+              </p>
             </div>
-            <div v-if="errors.general" class="formValidation">              
+            <div v-if="errors.general" class="formValidation">
               <p class="form-error">
                 {{ errors.general }}
               </p>
             </div>
-            <button type="submit" class="submit-btn">Log in</button>
+            <button
+              type="submit"
+              class="submit-btn"
+              :class="{
+                disabled: !formData.email.length || !formData.password.length,
+                'animated-btn':
+                  formData.email.length && formData.password.length,
+              }"
+              :disabled="!formData.email.length || !formData.password.length"
+            >
+              Log in
+            </button>
           </form>
           <div class="options-btns">
             <div>
@@ -139,5 +154,20 @@ input:-webkit-autofill:active {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.9rem;
   padding: 0;
+}
+.disabled {
+  border: 2px solid #006a4c !important;
+  color: #00b582;
+  cursor: auto;
+}
+.animated-btn:hover {
+  border: 2px solid #ffffff;
+  background-color: #ffffff;
+  color: #006145;
+}
+.opt-btn:hover {
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+  color: #006145;  
 }
 </style>

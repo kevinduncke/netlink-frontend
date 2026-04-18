@@ -156,8 +156,8 @@ input:-webkit-autofill:active {
   padding: 0;
 }
 .disabled {
-  border: 2px solid #006a4c !important;
-  color: #00b582;
+  border: 2px solid #027f5c !important;
+  color: #01956b;
   cursor: auto;
 }
 .animated-btn:hover {

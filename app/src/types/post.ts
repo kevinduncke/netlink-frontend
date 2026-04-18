@@ -1,3 +1,5 @@
+import type { Comment } from "./comment";
+
 export type UserPost = {
   id: string | number;
   name: string;
@@ -5,7 +7,7 @@ export type UserPost = {
   username: string;
   avatarUrl?: string;
   hideLikes: boolean;
-  disableComments: boolean;  
+  disableComments: boolean;
 };
 
 export type Post = {
@@ -14,11 +16,12 @@ export type Post = {
   location: string;
   imageUrl?: string;
   createdAt: string;
+  comments: Comment[];
   commentsCount?: number;
   likesCount?: number;
   sharesCount?: number;
   hideLikes: boolean;
-  disableComments: boolean;  
+  disableComments: boolean;
 };
 
 export type ExplorePost = {
@@ -35,6 +38,7 @@ export type ExplorePost = {
   content: string;
   createdAt: string;
   disableComments: boolean;
+  comments: Comment[];
   hideLikes: boolean;
   id: string | number;
   imageUrl?: string;
@@ -55,7 +59,8 @@ export type FavoritePost = {
   likesCount: number;
   sharesCount: number;
   hideLikes: boolean;
-  disableComments: boolean;  
+  disableComments: boolean;
+  comments: Comment[];
   author: {
     id: string | number;
     name: string;
@@ -72,6 +77,7 @@ export type FollowingPost = {
   isShared: boolean;
   hideLikes: boolean;
   disableComments: boolean;
+  comments: Comment[];
   author: {
     id: string | number;
     name: string;

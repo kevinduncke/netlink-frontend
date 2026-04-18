@@ -7,6 +7,7 @@ import { useAuthStore } from "../stores/auth";
 import Navigation from "./Navigation.vue";
 import type { ExplorePost } from "../types/post";
 import type { FollowUser } from "../types/users";
+import type { Comment } from "../types/comment";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -18,15 +19,12 @@ const searchByShared = ref("all");
 const searchByFromDate = ref("");
 const searchByToDate = ref("");
 let latestSearchRequestId = 0;
-
 function toUtcStartOfDay(date: string): string {
   return date ? `${date}T00:00:00.000Z` : "";
 }
-
 function toUtcEndOfDay(date: string): string {
   return date ? `${date}T23:59:59.999Z` : "";
 }
-
 function resetFilters() {
   query.value = "";
   searchByPeople.value = "anyone";
@@ -93,6 +91,57 @@ async function loadPosts() {
     throw error;
   }
 }
+
+// LOAD COMMENTS FOR A POST
+const postComment = ref<string>("");
+const openCommentPostId = ref<number | string | null>(null);
+async function loadComments(postId: number | string) {
+  try {
+    const response = await api.get(`/post/comments/all/${postId}`);
+    const comments: Comment[] = response.data?.comments || [];
+
+    const post = allPosts.value.find((p) => p.id === postId);
+    if (!post) return;
+
+    post.comments = comments;
+  } catch (error) {
+    console.error("Error loading comments: ", error);
+  }
+}
+async function newComment(postId: number | string) {
+  try {
+    if (!postComment.value.trim()) return;
+
+    await api.post(`/post/comment/${postId}`, {
+      content: postComment.value,
+    });
+
+    postComment.value = "";
+    await loadPosts();
+    await loadComments(postId);
+  } catch (error) {
+    console.error("Error commenting on post: ", error);
+  }
+}
+function toggleCommentInput(postId: number | string) {
+  openCommentPostId.value = openCommentPostId.value === postId ? null : postId;
+  loadComments(postId);
+}
+function toUtcDateTime(date: string): string {
+  if (!date) return "";
+
+  const utcDate = new Date(date);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  }).format(utcDate);
+}
+
+// LIKE / UNLIKE POST
 async function likePost(postId: number | string) {
   try {
     await api.post(`/post/like/${postId}`);
@@ -335,10 +384,10 @@ onMounted(async () => {
             />
             <div class="bar-userdata">
               <h2 class="bar-user-name">
-                {{ user.name || "UNKNOWN NAME" }}
+                {{ user.name }}
               </h2>
               <p class="bar-user-username">
-                @{{ user.username || "UNKNOWN USERNAME" }}
+                @{{ user.username }}
               </p>
             </div>
           </div>
@@ -383,6 +432,7 @@ onMounted(async () => {
               type="button"
               :class="{ 'dash-commented': post._count.comments }"
               v-if="!post.disableComments"
+              @click="toggleCommentInput(post.id)"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -433,13 +483,47 @@ onMounted(async () => {
               <span>{{ post._count.shares || 0 }}</span>
             </button>
           </div>
-          <div class="dash-comments-post">
-            d
+          <div class="dash-comments-post" v-if="openCommentPostId === post.id && post._count.comments > 0">
+            <div v-for="comment in post.comments" :key="comment.createdAt">
+              <div class="dash-username-comment">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="18px"
+                  viewBox="0 -960 960 960"
+                  width="18px"
+                  fill="#000000"
+                >
+                  <path
+                    d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+                  />
+                </svg>
+                <span>
+                  <RouterLink :to="`/profile/${comment.author.id}`">{{
+                    comment.author.name
+                  }}</RouterLink>
+                </span>
+              </div>
+              <p>{{ comment.content }}</p>
+              <p>{{ toUtcDateTime(comment.createdAt) }}</p>
+            </div>
+          </div>
+          <div
+            class="dash-new-comment-post"
+            v-if="openCommentPostId === post.id"
+          >
+            <input
+              type="text"
+              name="post-comment"
+              id="post-comment"
+              placeholder="Add a comment..."
+              v-model="postComment"
+            />
+            <button type="button" @click="newComment(post.id)">Post</button>
           </div>
         </div>
       </div>
     </div>
-  </div>  
+  </div>
 </template>
 
 <style scoped>
@@ -620,20 +704,20 @@ onMounted(async () => {
   align-items: center;
 }
 .dash-username {
-  display: inherit;
+  display: flex;
   justify-content: start;
   align-items: center;
 }
 .dash-post-opts {
   position: relative;
-  display: inherit;
+  display: flex;
   justify-content: end;
   align-items: center;
 }
 .dash-post-opts button {
   background: transparent;
   border: none;
-  display: inherit;
+  display: flex;
   padding: 0;
   cursor: pointer;
 }
@@ -759,8 +843,55 @@ onMounted(async () => {
   border: 1px solid #626262;
 }
 
-.dash-comments-post {
-  margin-top: 1rem;
-  background-color: red;
+.dash-username-comment {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 0.5rem;
+}
+.dash-username-comment svg {
+  margin-right: 0.5rem;
+  fill: #006145;
+}
+.dash-username-comment span a {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.75rem;
+  color: #006145;
+  text-decoration: none;
+}
+
+.dash-comments-post,
+.dash-new-comment-post {
+  margin: 1.5rem 2rem 1rem 2rem;
+  border-top: 2px solid #f9f9f9;
+}
+.dash-new-comment-post {
+  padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+.dash-comments-post,
+.dash-new-comment-post {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+}
+.dash-new-comment-post input {
+  box-sizing: border-box;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: none;
+}
+.dash-new-comment-post button {
+  background: none;
+  border: none;
+  outline: none;
+  color: #006145;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.dash-comments-post div > p:nth-child(3) {
+  font-size: 0.65rem;
 }
 </style>

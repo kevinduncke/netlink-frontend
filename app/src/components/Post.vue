@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import type { UserPost, Post } from "../types/post";
+import type { Comment } from "../types/comment";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -34,6 +35,55 @@ async function loadPosts() {
   }
 }
 onMounted(loadPosts);
+
+// LOAD COMMENTS FOR A POST
+const postComment = ref<string>("");
+const openCommentPostId = ref<number | string | null>(null);
+async function loadComments(postId: number | string) {
+  try {
+    const response = await api.get(`/post/comments/all/${postId}`);
+    const comments: Comment[] = response.data?.comments || [];
+
+    const post = posts.value.find((p) => p.id === postId);
+    if (!post) return;
+
+    post.comments = comments;
+  } catch (error) {
+    console.error("Error loading comments: ", error);
+  }
+}
+async function newComment(postId: number | string) {
+  try {
+    if (!postComment.value.trim()) return;
+
+    await api.post(`/post/comment/${postId}`, {
+      content: postComment.value,
+    });
+
+    postComment.value = "";
+    loadPosts();
+    loadComments(postId);
+  } catch (error) {
+    console.error("Error commenting on post: ", error);
+  }
+}
+function toggleCommentInput(postId: number | string) {
+  openCommentPostId.value = openCommentPostId.value === postId ? null : postId;
+  loadComments(postId);
+}
+function toUtcDateTime(date: string): string {
+  if (!date) return "";
+
+  const utcDate = new Date(date);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  }).format(utcDate);
+}
 
 // DISPLAY UNIQUE POST OPTIONS
 const openOptionsFor = ref<number | string>("");
@@ -86,15 +136,6 @@ async function likePost(postId: number | string) {
     console.error("Error liking post: ", error);
   }
 }
-// async function unlikePost(postId: number | string) {
-//   try {
-//     await api.post(`/post/unlike/${postId}`);
-//     await loadPosts();
-//     console.log("Post unliked successfully");
-//   } catch (error) {
-//     console.error("Error unliking post: ", error);
-//   }
-// }
 
 // EXPOSE LOAD POST FN TO PARENT COMPONENT
 defineExpose({
@@ -153,6 +194,7 @@ defineExpose({
           type="button"
           :class="{ 'dash-commented': post.commentsCount }"
           v-if="!post.disableComments"
+          @click="toggleCommentInput(post.id)"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -203,6 +245,45 @@ defineExpose({
           <span>{{ post.sharesCount || 0 }}</span>
         </button>
       </div>
+          <div 
+            class="dash-comments-post" 
+            v-if="openCommentPostId === post.id && (post.commentsCount ?? 0) > 0">
+            <div v-for="comment in post.comments" :key="comment.createdAt">
+              <div class="dash-username-comment">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="18px"
+                  viewBox="0 -960 960 960"
+                  width="18px"
+                  fill="#000000"
+                >
+                  <path
+                    d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+                  />
+                </svg>
+                <span>
+                  <RouterLink :to="`/profile/${comment.author.id}`">{{
+                    comment.author.name
+                  }}</RouterLink>
+                </span>
+              </div>
+              <p>{{ comment.content }}</p>
+              <p>{{ toUtcDateTime(comment.createdAt) }}</p>
+            </div>
+          </div>
+          <div
+            class="dash-new-comment-post"
+            v-if="openCommentPostId === post.id"
+          >
+            <input
+              type="text"
+              name="post-comment"
+              id="post-comment"
+              placeholder="Add a comment..."
+              v-model="postComment"
+            />
+            <button type="button" @click="newComment(post.id)">Post</button>
+          </div>      
       <div
         class="edit-post-modal"
         v-if="openEditModalFor === post.id && editingPost"
@@ -380,5 +461,57 @@ defineExpose({
 .edit-actions button:first-child {
   color: #626262;
   border: 1px solid #626262;
+}
+
+.dash-username-comment {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 0.5rem;
+}
+.dash-username-comment svg {
+  margin-right: 0.5rem;
+  fill: #006145;
+}
+.dash-username-comment span a {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.75rem;
+  color: #006145;
+  text-decoration: none;
+}
+
+.dash-comments-post,
+.dash-new-comment-post {
+  margin: 1.5rem 2rem 1rem 2rem;
+  border-top: 2px solid #f9f9f9;
+}
+.dash-new-comment-post {
+  padding-top: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+.dash-comments-post,
+.dash-new-comment-post {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+}
+.dash-new-comment-post input {
+  box-sizing: border-box;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: none;
+}
+.dash-new-comment-post button {
+  background: none;
+  border: none;
+  outline: none;
+  color: #006145;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.dash-comments-post div > p:nth-child(3) {
+  font-size: 0.65rem;
 }
 </style>

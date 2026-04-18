@@ -55,9 +55,6 @@ export type FavoritePost = {
   content: string;
   location: string;
   createdAt: string;
-  commentsCount: number;
-  likesCount: number;
-  sharesCount: number;
   hideLikes: boolean;
   disableComments: boolean;
   comments: Comment[];
@@ -67,6 +64,11 @@ export type FavoritePost = {
     username: string;
     avatarUrl?: string;
   };
+  _count: {
+    comments: number;
+    likes: number;
+    shares: number;
+  }
 };
 
 export type FollowingPost = {

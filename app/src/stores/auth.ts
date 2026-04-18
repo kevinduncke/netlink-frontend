@@ -3,7 +3,20 @@ import api from "../services/api";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null as null,
+    user: (() => {
+      const rawUser = localStorage.getItem("user");
+      if (!rawUser) return null;
+
+      try {
+        return JSON.parse(rawUser) as {
+          id?: number | string;
+          [key: string]: unknown;
+        };
+      } catch {
+        localStorage.removeItem("user");
+        return null;
+      }
+    })(),
     token: localStorage.getItem("token") || null,
   }),
 
@@ -15,6 +28,10 @@ export const useAuthStore = defineStore("auth", {
 
       if (this.token) {
         localStorage.setItem("token", this.token);
+      }
+
+      if (this.user) {
+        localStorage.setItem("user", JSON.stringify(this.user));
       }
     },
 

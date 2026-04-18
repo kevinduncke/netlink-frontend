@@ -1,4 +1,5 @@
 export interface Comment {
+    id: string | number;
     content: string;
     createdAt: string;
     postId: string;

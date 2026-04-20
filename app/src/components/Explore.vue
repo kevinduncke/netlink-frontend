@@ -5,9 +5,7 @@ import { useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import Navigation from "./Navigation.vue";
-import type { ExplorePost } from "../types/post";
 import type { FollowUser } from "../types/users";
-import type { Comment } from "../types/comment";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -42,7 +40,7 @@ async function searchPost() {
       !!searchByToDate.value;
 
     if (!query.value.trim() && !hasActiveFilters) {
-      await loadPosts();
+      await loadPosts('all');
       return;
     }
 
@@ -59,7 +57,7 @@ async function searchPost() {
       return;
     }
 
-    allPosts.value = response.data.posts || [];
+    userdata.value = response.data.posts || [];
   } catch (error) {
     console.error("Error searching posts: ", error);
   }
@@ -69,87 +67,34 @@ watch(
   searchPost,
 );
 
-// LOAD POSTS | LIKE/UNLIKE POSTS
-const allPosts = ref<ExplorePost[]>([]);
-async function loadPosts() {
-  // CHECK IF USER IS AUTHENTICATED
-  if (!authStore.token) {
-    router.push("/login");
-    return;
-  }
+import {
+  usePosts,
+  userdata,
+  postComment,
+  editedCommentContent,
+  openCommentPostId,
+  editingCommentId,
+  openCommentActions,
+} from "../shared/usePosts";
 
-  try {
-    const response = await api.get("/post/all");
-    allPosts.value = response.data?.posts || [];
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
+// LOAD POSTS
+const {
+  loadPosts,
+  likePost,
+  newComment,
+  editComment,
+  deleteComment,
 
-    throw error;
-  }
-}
+  // OPTION MODALS
+  toggleCommentInput,
+  toggleCommentActions,
+  startEditComment,
 
-// LOAD COMMENTS FOR A POST
-const postComment = ref<string>("");
-const openCommentPostId = ref<number | string | null>(null);
-async function loadComments(postId: number | string) {
-  try {
-    const response = await api.get(`/post/comments/all/${postId}`);
-    const comments: Comment[] = response.data?.comments || [];
+  // HELPER FUNCTIONS
+  toUtcDateTime,
+  isAuthorComment,
+} = usePosts();
 
-    const post = allPosts.value.find((p) => p.id === postId);
-    if (!post) return;
-
-    post.comments = comments;
-  } catch (error) {
-    console.error("Error loading comments: ", error);
-  }
-}
-async function newComment(postId: number | string) {
-  try {
-    if (!postComment.value.trim()) return;
-
-    await api.post(`/post/comment/${postId}`, {
-      content: postComment.value,
-    });
-
-    postComment.value = "";
-    await loadPosts();
-    await loadComments(postId);
-  } catch (error) {
-    console.error("Error commenting on post: ", error);
-  }
-}
-function toggleCommentInput(postId: number | string) {
-  openCommentPostId.value = openCommentPostId.value === postId ? null : postId;
-  loadComments(postId);
-}
-function toUtcDateTime(date: string): string {
-  if (!date) return "";
-
-  const utcDate = new Date(date);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "UTC",
-  }).format(utcDate);
-}
-
-// LIKE / UNLIKE POST
-async function likePost(postId: number | string) {
-  try {
-    await api.post(`/post/like/${postId}`);
-    await loadPosts();
-  } catch (error) {
-    console.error("Error liking post: ", error);
-  }
-}
 
 // LOAD USERS | FOLLOW USERS
 const users = ref<FollowUser[]>([]);
@@ -174,7 +119,7 @@ async function followUser(userId: string | number) {
 
 onMounted(async () => {
   await loadUsers();
-  await loadPosts();
+  await loadPosts('all');
 });
 </script>
 
@@ -386,9 +331,7 @@ onMounted(async () => {
               <h2 class="bar-user-name">
                 {{ user.name }}
               </h2>
-              <p class="bar-user-username">
-                @{{ user.username }}
-              </p>
+              <p class="bar-user-username">@{{ user.username }}</p>
             </div>
           </div>
           <button class="follow-btn" @click="followUser(user.id)">
@@ -403,7 +346,7 @@ onMounted(async () => {
     <div class="dash-content">
       <div class="explore-content">
         <h2>Explore</h2>
-        <div v-for="post in allPosts" :key="post.id" class="dash-post">
+        <div v-for="post in userdata" :key="post.id" class="dash-post">
           <div class="dash-user-post">
             <div class="dash-username">
               <svg
@@ -449,7 +392,7 @@ onMounted(async () => {
             </button>
             <button
               type="button"
-              @click="likePost(post.id)"
+              @click="likePost(post.id, 'all')"
               :class="{ 'dash-liked': post._count.likes }"
             >
               <svg
@@ -483,27 +426,110 @@ onMounted(async () => {
               <span>{{ post._count.shares || 0 }}</span>
             </button>
           </div>
-          <div class="dash-comments-post" v-if="openCommentPostId === post.id && post._count.comments > 0">
+          <div
+            class="dash-comments-post"
+            v-if="openCommentPostId === post.id && post._count.comments > 0"
+          >
             <div v-for="comment in post.comments" :key="comment.createdAt">
               <div class="dash-username-comment">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="18px"
-                  viewBox="0 -960 960 960"
-                  width="18px"
-                  fill="#000000"
+                <div class="dash-usercmt-info">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="18px"
+                    viewBox="0 -960 960 960"
+                    width="18px"
+                    fill="#000000"
+                  >
+                    <path
+                      d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+                    />
+                  </svg>
+                  <span>
+                    <RouterLink :to="`/profile/${comment.author.id}`">{{
+                      comment.author.name
+                    }}</RouterLink>
+                  </span>
+                </div>
+                <div
+                  class="dash-usercmt-actions"
+                  v-if="isAuthorComment(comment.author.id)"
                 >
-                  <path
-                    d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-                  />
-                </svg>
-                <span>
-                  <RouterLink :to="`/profile/${comment.author.id}`">{{
-                    comment.author.name
-                  }}</RouterLink>
-                </span>
+                  <button
+                    type="button"
+                    v-if="openCommentActions === comment.id"
+                    @click="startEditComment(comment.id, comment.content)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    v-if="openCommentActions === comment.id"
+                    @click="deleteComment(comment.id, post.id)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    @click="toggleCommentActions(comment.id)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="M479.79-192Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm0-216Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <p>{{ comment.content }}</p>
+              <div
+                v-if="editingCommentId === comment.id"
+                class="dash-edit-comment"
+              >
+                <input type="text" v-model="editedCommentContent" />
+                <div class="dash-edit-comment-actions">
+                  <button
+                    type="button"
+                    @click="editComment(comment.id, post.id)"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    @click="
+                      editingCommentId = null;
+                      editedCommentContent = '';
+                    "
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p v-else>{{ comment.content }}</p>
               <p>{{ toUtcDateTime(comment.createdAt) }}</p>
             </div>
           </div>
@@ -846,7 +872,7 @@ onMounted(async () => {
 .dash-username-comment {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding-top: 0.5rem;
 }
 .dash-username-comment svg {
@@ -858,6 +884,22 @@ onMounted(async () => {
   font-size: 0.75rem;
   color: #006145;
   text-decoration: none;
+}
+
+.dash-usercmt-info {
+  display: flex;
+  align-items: center;
+}
+.dash-username-comment button {
+  background: none;
+  display: flex;
+  border: none;
+  outline: none;
+  padding: 0;
+  cursor: pointer;
+}
+.dash-username-comment button > svg {
+  margin: 0;
 }
 
 .dash-comments-post,
@@ -891,7 +933,45 @@ onMounted(async () => {
   font-size: 0.75rem;
   cursor: pointer;
 }
+.dash-usercmt-actions svg {
+  fill: #535353;
+}
+.dash-usercmt-actions button:hover > svg {
+  fill: #006145;
+}
 .dash-comments-post div > p:nth-child(3) {
   font-size: 0.65rem;
+}
+
+.dash-usercmt-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.dash-edit-comment input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 1rem 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+}
+.dash-edit-comment button {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.75rem;
+  color: #006145;
+  padding: 0;
+  padding-right: 1rem;
+  cursor: pointer;
+}
+.dash-edit-comment button:nth-child(2) {
+  color: #535353;
 }
 </style>

@@ -44,7 +44,7 @@ async function createPost() {
     hideLikes.value = false;
     disableComments.value = false;
 
-    await postRef.value?.loadPosts();
+    await postRef.value?.loadPosts('my-posts');
     emit("postCreated");
   } catch (error) {
     console.error("Error creating post:", error);
@@ -52,7 +52,7 @@ async function createPost() {
 }
 
 function refreshPosts() {
-  postRef.value?.loadPosts();
+  postRef.value?.loadPosts('my-posts');
 }
 
 function addMention() {

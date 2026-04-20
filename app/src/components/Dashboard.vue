@@ -1,14 +1,30 @@
 <script setup lang="ts">
-import axios from "axios";
+// VUE
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+
+// SERVICES
+import axios from "axios";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
+
+// COMPONENTS
 import Navigation from "./Navigation.vue";
+
+// TYPES
 import type { FollowUser } from "../types/users";
 import type { SearchFavoriteUser } from "../types/search";
-import type { FollowingPost, FavoritePost } from "../types/post";
-import type { Comment } from "../types/comment";
+
+// POSTS COMPOSITION
+import {
+  usePosts,
+  dashboardPosts,
+  postComment,
+  editedCommentContent,
+  openCommentPostId,
+  editingCommentId,
+  openCommentActions,
+} from "../shared/usePosts";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,47 +33,9 @@ const authStore = useAuthStore();
 const favSearchQuery = ref<string>("");
 const favStateEdit = ref<boolean>(false);
 
-const latestPosts = ref<FollowingPost[]>([]);
-const favUsersPosts = ref<FavoritePost[]>([]);
 const favoriteUsers = ref<FollowUser[]>([]);
 const suggestedUsers = ref<FollowUser[]>([]);
 
-async function loadLatestPosts() {
-  try {
-    const response = await api.get("/post/following");
-    latestPosts.value = response.data.posts;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-async function loadFavoriteUsersPosts() {
-  try {
-    const response = await api.get("/favorites/posts");
-    favUsersPosts.value = response.data.posts;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-async function likePost(postId: number | string) {
-  try {
-    await api.post(`/post/like/${postId}`);
-    await loadFavoriteUsersPosts();
-  } catch (error) {
-    console.error("Error liking post: ", error);
-  }
-}
 async function searchFavoriteUsers(query: string) {
   try {
     const response = await api.get("/favorites/search", {
@@ -99,7 +77,7 @@ async function deleteFavoriteUser(userId: string | number) {
     await api.delete(`/favorites/${userId}`);
     await loadFavoriteUsers();
     await loadSuggestedUsers();
-    await loadFavoriteUsersPosts();
+    await loadPosts('dashboard/posts');
   } catch (error) {
     console.log("Error deleting favorite user: ", error);
   }
@@ -123,146 +101,29 @@ async function addFavoriteUser(userId: string | number) {
     await api.post(`/favorites/${userId}`);
     await loadSuggestedUsers();
     await loadFavoriteUsers();
-    await loadFavoriteUsersPosts();
+    await loadPosts('dashboard/posts');
   } catch (error) {
     console.error("Error adding favorite user: ", error);
   }
 }
 
-// LOAD COMMENTS FOR A POST
-const postComment = ref<string>("");
-const openCommentPostId = ref<number | string | null>(null);
-const openCommentActions = ref<number | string | null>(null);
-const editedCommentContent = ref<string>("");
-const editingCommentId = ref<number | string | null>(null);
+// POST FUNCTIONS
+const {
+  loadPosts,
+  likePost,
+  newComment,
+  editComment,
+  deleteComment,
 
-async function loadComments(postId: number | string) {
-  try {
-    const response = await api.get(`/post/comments/all/${postId}`);
-    const comments: Comment[] = response.data?.comments || [];
+  // OPTION MODALS
+  toggleCommentInput,
+  toggleCommentActions,
+  startEditComment,
 
-    const selectedPost =
-      latestPosts.value.find((p) => p.id === postId) ||
-      favUsersPosts.value.find((p) => p.id === postId);
-
-    if (selectedPost) {
-      selectedPost.comments = comments;
-    }
-  } catch (error) {
-    console.error("Error loading comments: ", error);
-  }
-}
-async function newComment(postId: number | string) {
-  try {
-    if (!postComment.value.trim()) return;
-
-    await api.post(`/post/comment/${postId}`, {
-      content: postComment.value,
-    });
-
-    postComment.value = "";
-    await loadFavoriteUsersPosts();
-    await loadLatestPosts();
-    await loadComments(postId);
-  } catch (error) {
-    console.error("Error commenting on post: ", error);
-  }
-}
-function toggleCommentInput(postId: number | string) {
-  openCommentPostId.value = openCommentPostId.value === postId ? null : postId;
-  openCommentActions.value = null;
-  loadComments(postId);
-}
-function toUtcDateTime(date: string): string {
-  if (!date) return "";
-
-  const utcDate = new Date(date);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "UTC",
-  }).format(utcDate);
-}
-function toggleCommentActions(commentId: number | string) {
-  openCommentActions.value =
-    openCommentActions.value === commentId ? null : commentId;
-}
-function startEditComment(commentId: number | string, content: string) {
-  editingCommentId.value = commentId;
-  editedCommentContent.value = content;
-  openCommentActions.value = null;
-}
-// CHECK IF USER COMMENT ID IS THE SAME AS THE USER LOGGED IN
-function isAuthorComment(commentAuthorId: number | string): boolean {
-  const currentUser = authStore.user as {
-    id?: number | string;
-    userId?: number | string;
-  } | null;
-  const currentUserId = currentUser?.id ?? currentUser?.userId;
-
-  if (!currentUserId) return false;
-  return String(commentAuthorId) === String(currentUserId);
-}
-async function deleteComment(
-  commentId: number | string,
-  postId: number | string,
-) {
-  try {
-    await api.delete(`/post/comment/${commentId}`);
-
-    // REMOVE COMMENT LOCALLY
-    const selectedPost =
-      latestPosts.value.find((p) => p.id === postId) ||
-      favUsersPosts.value.find((p) => p.id === postId);
-
-    if (selectedPost) {
-      selectedPost.comments = selectedPost.comments?.filter(
-        (c) => c.id !== commentId,
-      );
-      selectedPost._count.comments = selectedPost._count.comments
-        ? selectedPost._count.comments - 1
-        : 0;
-    }
-  } catch (error) {
-    console.error("Error deleting comment: ", error);
-  }
-}
-async function editComment(
-  commentId: number | string,
-  postId: number | string,
-) {
-  try {
-    if (!editedCommentContent.value.trim()) return;
-
-    await api.put(`/post/comment/${commentId}`, {
-      content: editedCommentContent.value,
-      createdAt: new Date().toISOString(),
-    });
-
-    // UPDATE COMMENT LOCALLY, HERE HERE
-    const selectedPost =
-      latestPosts.value.find((p) => p.id === postId) ||
-      favUsersPosts.value.find((p) => p.id === postId);
-
-    if (selectedPost) {
-      const selectedComment = selectedPost.comments?.find(
-        (comment) => comment.id === commentId,
-      );
-
-      if (selectedComment) {
-        selectedComment.content = editedCommentContent.value;
-      }
-    }
-
-    editingCommentId.value = null;
-    editedCommentContent.value = "";
-  } catch (error) {
-    console.error("Error editing comment: ", error);
-  }
-}
+  // HELPER FUNCTIONS
+  toUtcDateTime,
+  isAuthorComment,
+} = usePosts();
 
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
@@ -275,8 +136,7 @@ watch(favSearchQuery, (newQuery) => {
 onMounted(async () => {
   await loadFavoriteUsers();
   await loadSuggestedUsers();
-  await loadFavoriteUsersPosts();
-  await loadLatestPosts();
+  await loadPosts('dashboard/posts');
 });
 </script>
 
@@ -304,7 +164,7 @@ onMounted(async () => {
         <div
           class="fav-users"
           v-if="!favStateEdit"
-          v-for="post in favUsersPosts"
+          v-for="post in dashboardPosts?.favorites || []"
           :key="post.id"
         >
           <div class="fav-head-post">
@@ -349,7 +209,7 @@ onMounted(async () => {
               <button
                 type="button"
                 :class="{ 'fav-liked': post._count.likes > 0 }"
-                @click="likePost(post.id)"
+                @click="likePost(post.id, 'favorites/posts')"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -402,24 +262,104 @@ onMounted(async () => {
           >
             <div v-for="comment in post.comments" :key="comment.createdAt">
               <div class="dash-username-comment">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="18px"
-                  viewBox="0 -960 960 960"
-                  width="18px"
-                  fill="#000000"
+                <div class="dash-usercmt-info">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="18px"
+                    viewBox="0 -960 960 960"
+                    width="18px"
+                    fill="#000000"
+                  >
+                    <path
+                      d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+                    />
+                  </svg>
+                  <span>
+                    <RouterLink :to="`/profile/${comment.author.id}`">{{
+                      comment.author.name
+                    }}</RouterLink>
+                  </span>
+                </div>
+                <div
+                  class="dash-usercmt-actions"
+                  v-if="isAuthorComment(comment.author.id)"
                 >
-                  <path
-                    d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-                  />
-                </svg>
-                <span>
-                  <RouterLink :to="`/profile/${comment.author.id}`">{{
-                    comment.author.name
-                  }}</RouterLink>
-                </span>
+                  <button
+                    type="button"
+                    v-if="openCommentActions === comment.id"
+                    @click="startEditComment(comment.id, comment.content)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    v-if="openCommentActions === comment.id"
+                    @click="deleteComment(comment.id, post.id)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    @click="toggleCommentActions(comment.id)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="20px"
+                      viewBox="0 -960 960 960"
+                      width="20px"
+                      fill="#e3e3e3"
+                    >
+                      <path
+                        d="M479.79-192Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm0-216Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Z"
+                      />
+                    </svg>
+                  </button>
+                </div>                
               </div>
-              <p>{{ comment.content }}</p>
+              <div
+                v-if="editingCommentId === comment.id"
+                class="dash-edit-comment"
+              >
+                <input type="text" v-model="editedCommentContent" />
+                <div class="dash-edit-comment-actions">
+                  <button
+                    type="button"
+                    @click="editComment(comment.id, post.id)"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    @click="
+                      editingCommentId = null;
+                      editedCommentContent = '';
+                    "
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>              
+              <p v-else>{{ comment.content }}</p>
               <p>{{ toUtcDateTime(comment.createdAt) }}</p>
             </div>
           </div>
@@ -537,8 +477,7 @@ onMounted(async () => {
         <h2>Lastest Posts</h2>
         <div
           class="fav-users"
-          v-if="!favStateEdit"
-          v-for="post in latestPosts"
+          v-for="post in dashboardPosts?.following || []"
           :key="post.id"
         >
           <div class="fav-head-post">
@@ -583,7 +522,7 @@ onMounted(async () => {
               <button
                 type="button"
                 :class="{ 'fav-liked': post._count.likes > 0 }"
-                @click="likePost(post.id)"
+                @click="likePost(post.id, 'following')"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

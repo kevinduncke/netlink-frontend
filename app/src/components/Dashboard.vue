@@ -10,6 +10,7 @@ import { useAuthStore } from "../stores/auth";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
+import Post from "./Post.vue";
 
 // TYPES
 import type { FollowUser } from "../types/users";
@@ -18,12 +19,6 @@ import type { SearchFavoriteUser } from "../types/search";
 // POSTS COMPOSITION
 import {
   usePosts,
-  dashboardPosts,
-  postComment,
-  editedCommentContent,
-  openCommentPostId,
-  editingCommentId,
-  openCommentActions,
 } from "../shared/usePosts";
 
 const router = useRouter();
@@ -77,7 +72,6 @@ async function deleteFavoriteUser(userId: string | number) {
     await api.delete(`/favorites/${userId}`);
     await loadFavoriteUsers();
     await loadSuggestedUsers();
-    await loadPosts('dashboard/posts');
   } catch (error) {
     console.log("Error deleting favorite user: ", error);
   }
@@ -107,22 +101,17 @@ async function addFavoriteUser(userId: string | number) {
   }
 }
 
+// SELECTION FOR FOLLOWING / FOLLOWERS
+const selectedUserId = ref<string | number>("");
+function selectedUser(userId: string | number) {
+  selectedUserId.value = userId;
+  editingComment.openCommentPostId = null;
+}
+
 // POST FUNCTIONS
 const {
+  editingComment,
   loadPosts,
-  likePost,
-  newComment,
-  editComment,
-  deleteComment,
-
-  // OPTION MODALS
-  toggleCommentInput,
-  toggleCommentActions,
-  startEditComment,
-
-  // HELPER FUNCTIONS
-  toUtcDateTime,
-  isAuthorComment,
 } = usePosts();
 
 watch(favSearchQuery, (newQuery) => {
@@ -133,10 +122,17 @@ watch(favSearchQuery, (newQuery) => {
     searchFavoriteUsers(newQuery);
   }
 });
+
+watch(selectedUserId, async (newUserId) => {
+  if (newUserId) {
+    console.log(newUserId);
+    await loadPosts(`user/${newUserId}`);
+  }
+})
 onMounted(async () => {
   await loadFavoriteUsers();
   await loadSuggestedUsers();
-  await loadPosts('dashboard/posts');
+  await loadPosts('following');
 });
 </script>
 
@@ -161,221 +157,29 @@ onMounted(async () => {
             </svg>
           </button>
         </div>
+        <div class="fav-user-list" v-if="!favStateEdit">
         <div
-          class="fav-users"
-          v-if="!favStateEdit"
-          v-for="post in dashboardPosts?.favorites || []"
-          :key="post.id"
+          class="bar-user-box"
+          :class="{ selected: selectedUserId === user.id }"
+          v-for="user in favoriteUsers"
+          :key="user.id"
         >
-          <div class="fav-head-post">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#535353"
-            >
-              <path
-                d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
+          <button type="button" @click="selectedUser(user.id)">
+            <div class="bar-user-info">
+              <img
+                src="../assets/avatars/40x40.png"
+                alt="User Avatar"
+                class="bar-user-avatar"
+                height="40px"
+                width="40px"
               />
-            </svg>
-            <div>
-              <p>{{ post.author.name }}</p>
-              <p>@{{ post.author.username }}</p>
-            </div>
-          </div>
-          <p>{{ post.content }}</p>
-          <div class="fav-foot-post">
-            <div class="fav-foot-actions">
-              <button
-                type="button"
-                :class="{ 'fav-commented': post._count.comments > 0 }"
-                v-if="!post.disableComments"
-                @click="toggleCommentInput(post.id)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120v120ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
-                  />
-                </svg>
-                <span>{{ post._count.comments }}</span>
-              </button>
-              <button
-                type="button"
-                :class="{ 'fav-liked': post._count.likes > 0 }"
-                @click="likePost(post.id, 'favorites/posts')"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
-                  />
-                </svg>
-                <span v-if="!post.hideLikes">{{ post._count.likes }}</span>
-              </button>
-              <button
-                type="button"
-                :class="{ 'fav-shared': post._count.shares > 0 }"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z"
-                  />
-                </svg>
-                <span>{{ post._count.shares }}</span>
-              </button>
-            </div>
-            <button type="button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="16px"
-                viewBox="0 -960 960 960"
-                width="16px"
-                fill="#535353"
-              >
-                <path
-                  d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm508.5-291.5Q720-743 720-760t-11.5-28.5Q697-800 680-800t-28.5 11.5Q640-777 640-760t11.5 28.5Q663-720 680-720t28.5-11.5ZM680-200ZM200-480Zm480-280Z"
-                />
-              </svg>
-            </button>
-          </div>
-          <div
-            class="dash-comments-post"
-            v-if="openCommentPostId === post.id && post._count.comments > 0"
-          >
-            <div v-for="comment in post.comments" :key="comment.createdAt">
-              <div class="dash-username-comment">
-                <div class="dash-usercmt-info">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="18px"
-                    viewBox="0 -960 960 960"
-                    width="18px"
-                    fill="#000000"
-                  >
-                    <path
-                      d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-                    />
-                  </svg>
-                  <span>
-                    <RouterLink :to="`/profile/${comment.author.id}`">{{
-                      comment.author.name
-                    }}</RouterLink>
-                  </span>
-                </div>
-                <div
-                  class="dash-usercmt-actions"
-                  v-if="isAuthorComment(comment.author.id)"
-                >
-                  <button
-                    type="button"
-                    v-if="openCommentActions === comment.id"
-                    @click="startEditComment(comment.id, comment.content)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    v-if="openCommentActions === comment.id"
-                    @click="deleteComment(comment.id, post.id)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    @click="toggleCommentActions(comment.id)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M479.79-192Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm0-216Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Z"
-                      />
-                    </svg>
-                  </button>
-                </div>                
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ user.name }}</h2>
+                <p class="bar-user-username">@{{ user.username }}</p>
               </div>
-              <div
-                v-if="editingCommentId === comment.id"
-                class="dash-edit-comment"
-              >
-                <input type="text" v-model="editedCommentContent" />
-                <div class="dash-edit-comment-actions">
-                  <button
-                    type="button"
-                    @click="editComment(comment.id, post.id)"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    @click="
-                      editingCommentId = null;
-                      editedCommentContent = '';
-                    "
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>              
-              <p v-else>{{ comment.content }}</p>
-              <p>{{ toUtcDateTime(comment.createdAt) }}</p>
             </div>
-          </div>
-          <div
-            class="dash-new-comment-post"
-            v-if="openCommentPostId === post.id"
-          >
-            <input
-              type="text"
-              name="post-comment"
-              id="post-comment"
-              placeholder="Add a comment..."
-              v-model="postComment"
-            />
-            <button type="button" @click="newComment(post.id)">Post</button>
-          </div>
+          </button>
+        </div>
         </div>
         <div class="dash-fav-edit" v-else>
           <div class="fav-edit-search">
@@ -475,221 +279,7 @@ onMounted(async () => {
     <div class="dash-content">
       <div class="dash-lposts">
         <h2>Lastest Posts</h2>
-        <div
-          class="fav-users"
-          v-for="post in dashboardPosts?.following || []"
-          :key="post.id"
-        >
-          <div class="fav-head-post">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#535353"
-            >
-              <path
-                d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-              />
-            </svg>
-            <div>
-              <p>{{ post.author.name }}</p>
-              <p>@{{ post.author.username }}</p>
-            </div>
-          </div>
-          <p>{{ post.content }}</p>
-          <div class="fav-foot-post">
-            <div class="fav-foot-actions">
-              <button
-                type="button"
-                :class="{ 'fav-commented': post._count.comments > 0 }"
-                v-if="!post.disableComments"
-                @click="toggleCommentInput(post.id)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120v120ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
-                  />
-                </svg>
-                <span>{{ post._count.comments }}</span>
-              </button>
-              <button
-                type="button"
-                :class="{ 'fav-liked': post._count.likes > 0 }"
-                @click="likePost(post.id, 'following')"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
-                  />
-                </svg>
-                <span v-if="!post.hideLikes">{{ post._count.likes }}</span>
-              </button>
-              <button
-                type="button"
-                :class="{ 'fav-shared': post._count.shares > 0 }"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="16px"
-                  viewBox="0 -960 960 960"
-                  width="16px"
-                  fill="#535353"
-                >
-                  <path
-                    d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z"
-                  />
-                </svg>
-                <span>{{ post._count.shares }}</span>
-              </button>
-            </div>
-            <button type="button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="16px"
-                viewBox="0 -960 960 960"
-                width="16px"
-                fill="#535353"
-              >
-                <path
-                  d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm508.5-291.5Q720-743 720-760t-11.5-28.5Q697-800 680-800t-28.5 11.5Q640-777 640-760t11.5 28.5Q663-720 680-720t28.5-11.5ZM680-200ZM200-480Zm480-280Z"
-                />
-              </svg>
-            </button>
-          </div>
-          <div
-            class="dash-comments-post"
-            v-if="openCommentPostId === post.id && post._count.comments > 0"
-          >
-            <div v-for="comment in post.comments" :key="comment.createdAt">
-              <div class="dash-username-comment">
-                <div class="dash-usercmt-info">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="18px"
-                    viewBox="0 -960 960 960"
-                    width="18px"
-                    fill="#000000"
-                  >
-                    <path
-                      d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-                    />
-                  </svg>
-                  <span>
-                    <RouterLink :to="`/profile/${comment.author.id}`">{{
-                      comment.author.name
-                    }}</RouterLink>
-                  </span>
-                </div>
-                <div
-                  class="dash-usercmt-actions"
-                  v-if="isAuthorComment(comment.author.id)"
-                >
-                  <button
-                    type="button"
-                    v-if="openCommentActions === comment.id"
-                    @click="startEditComment(comment.id, comment.content)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    v-if="openCommentActions === comment.id"
-                    @click="deleteComment(comment.id, post.id)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    @click="toggleCommentActions(comment.id)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="20px"
-                      viewBox="0 -960 960 960"
-                      width="20px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M479.79-192Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm0-216Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div
-                v-if="editingCommentId === comment.id"
-                class="dash-edit-comment"
-              >
-                <input type="text" v-model="editedCommentContent" />
-                <div class="dash-edit-comment-actions">
-                  <button
-                    type="button"
-                    @click="editComment(comment.id, post.id)"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    @click="
-                      editingCommentId = null;
-                      editedCommentContent = '';
-                    "
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-              <p v-else>{{ comment.content }}</p>
-              <p>{{ toUtcDateTime(comment.createdAt) }}</p>
-            </div>
-          </div>
-          <div
-            class="dash-new-comment-post"
-            v-if="openCommentPostId === post.id"
-          >
-            <input
-              type="text"
-              name="post-comment"
-              id="post-comment"
-              placeholder="Add a comment..."
-              v-model="postComment"
-            />
-            <button type="button" @click="newComment(post.id)">Post</button>
-          </div>
-        </div>
+        <Post />
       </div>
     </div>
   </div>
@@ -1005,5 +595,48 @@ onMounted(async () => {
 }
 .dash-edit-comment button:nth-child(2) {
   color: #535353;
+}
+
+.bar-user-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  padding: 0 1rem;
+}
+.selected {
+  border-radius: 10px;
+  background-color: #efefef;
+  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
+  box-shadow: -1px 3px 26px -3px #e8e8e8;
+}
+.bar-user-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+.bar-userdata h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.bar-userdata p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.bar-user-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+}
+.bar-user-box button:first-child:hover {
+  color: #006145;
 }
 </style>

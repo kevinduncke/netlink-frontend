@@ -1,5 +1,5 @@
 // VUE
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 
 // SERVICES, STORES AND ROUTES
 import axios from "axios";
@@ -8,29 +8,85 @@ import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
 
 // TYPES
-import type { Post, Comment } from "../types/types.ts";
-
-type DashboardPosts = {
-  favorites: Post[];
-  following: Post[];
-};
+import type {
+  PostType,
+  Comment,
+  EditingComment,
+  CreatePost,
+} from "../types/types.ts";
 
 // POSTS
-export const userdata = ref<Post[]>([]);
-export const dashboardPosts = ref<DashboardPosts | null>(null);
-
-export const openOptionsFor = ref<number | string>("");
-export const openEditModalFor = ref<number | string>("");
-export const editingPost = ref<Post | null>(null);
-
-export const postComment = ref<string>("");
-export const editedCommentContent = ref<string>("");
-export const openCommentPostId = ref<number | string | null>(null);
-export const editingCommentId = ref<number | string | null>(null);
-export const openCommentActions = ref<number | string | null>(null);
+export const userdata = ref<PostType[]>([]);
 
 export function usePosts() {
   const authStore = useAuthStore();
+
+  // CREATE POST
+  const createPostData: CreatePost = reactive({
+    content: "What's on your mind today?",
+    mentions: [],
+    location: "",
+    imageUrl: "",
+    visibility: "PUBLIC",
+    specificFollowers: [],
+    hideLikes: false,
+    disableComments: false,
+    showMentionModal: false,
+    showSpecificModal: false,
+  });
+
+  // POST COMPONENT OPTIONS
+  const openOptionsFor = ref<number | string>("");
+  const openEditModalFor = ref<number | string>("");
+
+  // EDIT POST
+  const editingPost = ref<PostType | null>(null);
+
+  // EDIT COMMENT
+  const editingComment: EditingComment = reactive({
+    postComment: "",
+    editedCommentContent: "",
+    openCommentPostId: null as number | string | null,
+    editingCommentId: null as number | string | null,
+    openCommentActions: null as number | string | null,
+  });
+
+  // CREATE POST
+  async function createPost() {
+    try {
+      await api.post("/post/", {
+        content: createPostData.content,
+        visibility: createPostData.visibility,
+        specificTo: createPostData.specificFollowers,
+        location: createPostData.location,
+        imageUrl: createPostData.imageUrl,
+        hideLikes: createPostData.hideLikes,
+        disableComments: createPostData.disableComments,
+      });
+
+      createPostData.content = "";
+      createPostData.mentions = [];
+      createPostData.visibility = "PUBLIC";
+      createPostData.specificFollowers = [];
+      createPostData.location = "";
+      createPostData.imageUrl = "";
+      createPostData.hideLikes = false;
+      createPostData.disableComments = false;
+      // COMMENT, LIKE AND SHARE COUNT => 0
+      // AUTHOR INFO => CURRENT USER
+
+      // LOAD NEW POST LOCALLY
+      loadPosts("my-posts");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
+    }
+  }
 
   // LOAD POST
   async function loadPosts(route: string) {
@@ -41,11 +97,6 @@ export function usePosts() {
     }
     try {
       const response = await api.get(`/post/${route}`);
-
-      if (route === "dashboard/posts") {
-        dashboardPosts.value = response.data;
-        return;
-      }
 
       userdata.value = response.data || [];
     } catch (error) {
@@ -58,18 +109,21 @@ export function usePosts() {
       throw error;
     }
   }
-  // DELETE POST
-  async function deletePost(postId: number | string, route: string) {
+
+  // DELETE POST                                          [[ RE-LOAD LOCALLY ]]
+  async function deletePost(postId: number | string) {
     try {
       await api.delete(`/post/delete/${postId}`);
-      await loadPosts(route);
+
+      // REMOVE POST LOCALLY
       openOptionsFor.value = "";
     } catch (error) {
       console.error("Error deleting post: ", error);
     }
   }
-  // SAVE EDITED POST
-  async function saveEdit(route: string) {
+
+  // SAVE EDITED POST                                     [[ RE-LOAD LOCALLY ]]
+  async function saveEdit() {
     if (!editingPost.value) return;
 
     try {
@@ -77,66 +131,66 @@ export function usePosts() {
         content: editingPost.value.content,
       });
 
-      await loadPosts(route);
+      // LOAD EDITED POST LOCALLY
       closeEditModal();
     } catch (error) {
       console.error("Error saving and edit your post: ", error);
     }
   }
-  // LIKE POST
-  async function likePost(postId: number | string, route: string) {
+
+  // LIKE POST                                            [[ RE-LOAD LOCALLY ]]
+  async function likePost(postId: number) {
     try {
       await api.post(`/post/like/${postId}`);
-      await loadPosts(route);
+
+      // UPDATE LIKE COUNT LOCALLY
     } catch (error) {
       console.error("Error liking post: ", error);
     }
   }
+
   // LOAD COMMENTS
   async function loadComments(postId: number | string) {
     try {
       const response = await api.get(`/post/comments/all/${postId}`);
       const comments: Comment[] = response.data?.comments || [];
 
-      const post =
-        userdata.value.find((p) => p.id === postId) ||
-        dashboardPosts.value?.favorites.find((p) => p.id === postId) ||
-        dashboardPosts.value?.following.find((p) => p.id === postId);
+      const post = userdata.value.find((p) => p.id === postId);
 
       if (!post) return;
-    
+
       post.comments = comments;
     } catch (error) {
       console.error("Error loading comments: ", error);
     }
   }
+
   // NEW COMMENT
   async function newComment(postId: number | string) {
     try {
-      if (!postComment.value.trim()) return;
+      if (!editingComment.postComment.trim()) return;
 
       const response = await api.post(`/post/comment/${postId}`, {
-        content: postComment.value,
+        content: editingComment.postComment,
       });
 
       const newCommentData: Comment = response.data;
 
       // UPDATE COMMENT LOCALLY AND PUSH NEW COMMENT TO THE TOP
-      const selectedPost =
-        userdata.value.find((p) => p.id === postId) ||
-        dashboardPosts.value?.favorites.find((p) => p.id === postId) ||
-        dashboardPosts.value?.following.find((p) => p.id === postId);
-      
+      const selectedPost = userdata.value.find((p) => p.id === postId);
+
       if (selectedPost) {
         if (!selectedPost.comments) {
           selectedPost.comments = [newCommentData];
         } else {
           selectedPost.comments.unshift(newCommentData);
         }
-        selectedPost._count.comments = selectedPost._count.comments ? selectedPost._count.comments + 1 : 1;
+        selectedPost._count.comments = selectedPost._count.comments
+          ? selectedPost._count.comments + 1
+          : 1;
       }
 
-      postComment.value = "";
+      editingComment.postComment = "";
     } catch (error) {
       console.error("Error commenting on post: ", error);
     }
@@ -148,18 +202,15 @@ export function usePosts() {
     postId: number | string,
   ) {
     try {
-      if (!editedCommentContent.value.trim()) return;
+      if (!editingComment.editedCommentContent.trim()) return;
 
       await api.put(`/post/comment/${commentId}`, {
-        content: editedCommentContent.value,
+        content: editingComment.editedCommentContent,
         createdAt: new Date().toISOString(),
       });
 
       // UPDATE COMMENT LOCALLY
-      const selectedPost =
-        userdata.value.find((p) => p.id === postId) ||
-        dashboardPosts.value?.favorites.find((p) => p.id === postId) ||
-        dashboardPosts.value?.following.find((p) => p.id === postId);
+      const selectedPost = userdata.value.find((p) => p.id === postId);
 
       if (selectedPost) {
         const selectedComment = selectedPost.comments?.find(
@@ -167,16 +218,17 @@ export function usePosts() {
         );
 
         if (selectedComment) {
-          selectedComment.content = editedCommentContent.value;
+          selectedComment.content = editingComment.editedCommentContent;
         }
       }
 
-      editingCommentId.value = null;
-      editedCommentContent.value = "";
+      editingComment.editingCommentId = null;
+      editingComment.editedCommentContent = "";
     } catch (error) {
       console.error("Error editing comment: ", error);
     }
   }
+
   // DELETE COMMENT
   async function deleteComment(
     commentId: number | string,
@@ -186,10 +238,7 @@ export function usePosts() {
       await api.delete(`/post/comment/${commentId}`);
 
       // REMOVE COMMENT LOCALLY
-      const selectedPost =
-        userdata.value.find((p) => p.id === postId) ||
-        dashboardPosts.value?.favorites.find((p) => p.id === postId) ||
-        dashboardPosts.value?.following.find((p) => p.id === postId);
+      const selectedPost = userdata.value.find((p) => p.id === postId);
 
       if (selectedPost) {
         selectedPost.comments = selectedPost.comments?.filter(
@@ -208,7 +257,7 @@ export function usePosts() {
   function displayPostOptions(postId: number | string) {
     openOptionsFor.value = openOptionsFor.value === postId ? "" : postId;
   }
-  function openEditModal(post: Post) {
+  function openEditModal(post: PostType) {
     openEditModalFor.value = openEditModalFor.value === post.id ? "" : post.id;
     editingPost.value = { ...post };
   }
@@ -216,18 +265,18 @@ export function usePosts() {
     openEditModalFor.value = "";
   }
   function toggleCommentInput(postId: number | string) {
-    openCommentPostId.value =
-      openCommentPostId.value === postId ? null : postId;
+    editingComment.openCommentPostId =
+      editingComment.openCommentPostId === postId ? null : postId;
     loadComments(postId);
   }
   function toggleCommentActions(commentId: number | string) {
-    openCommentActions.value =
-      openCommentActions.value === commentId ? null : commentId;
+    editingComment.openCommentActions =
+      editingComment.openCommentActions === commentId ? null : commentId;
   }
   function startEditComment(commentId: number | string, content: string) {
-    editingCommentId.value = commentId;
-    editedCommentContent.value = content;
-    openCommentActions.value = null;
+    editingComment.editingCommentId = commentId;
+    editingComment.editedCommentContent = content;
+    editingComment.openCommentActions = null;
   }
 
   // HELPER FUNCTIONS
@@ -255,11 +304,82 @@ export function usePosts() {
     return String(commentAuthorId) === String(currentUserId);
   }
 
+  function addMention() {
+    createPostData.showMentionModal = true;
+  }
+  function selectMention(username: string) {
+    createPostData.content += " @" + username + " ";
+    createPostData.showMentionModal = false;
+  }
+  function addSpecificFollowers(selectedList: string[]) {
+    const set = new Set([...createPostData.specificFollowers, ...selectedList]);
+    createPostData.specificFollowers = Array.from(set);
+    createPostData.showSpecificModal = false;
+  }
+  function addLocation() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        createPostData.location = `${latitude}, ${longitude}`;
+      },
+      (error) => {
+        console.error("Error getting location: ", error);
+        alert("Unable to retrieve location.");
+      },
+    );
+  }
+  function changeVisibility(mode: CreatePost["visibility"]) {
+    createPostData.visibility = mode;
+    switch (mode) {
+      case "PUBLIC":
+        createPostData.visibility = "PUBLIC";
+        break;
+      case "FOLLOWERS":
+        createPostData.visibility = "FOLLOWERS";
+        break;
+      case "ONLY_ME":
+        createPostData.visibility = "ONLY_ME";
+        break;
+      case "SPECIFIC":
+        createPostData.visibility = "SPECIFIC";
+        break;
+      default:
+        createPostData.visibility = "PUBLIC";
+    }
+    if (mode === "SPECIFIC") {
+      createPostData.showSpecificModal = true;
+    }
+  }
+  function toggleHideLikes() {
+    createPostData.hideLikes = !createPostData.hideLikes;
+  }
+  function toggleDisableComments() {
+    createPostData.disableComments = !createPostData.disableComments;
+  }
+
   return {
+    // VARIABLES
+    userdata,
+    createPostData,
+    openOptionsFor,
+    openEditModalFor,
+    editingPost,
+    editingComment,
+
+    // CREATE POST FUNCTIONS
+    createPost,
+    addMention,
+    addLocation,
+    selectMention,
+    addSpecificFollowers,
+
+    // POST FUNCTIONS
     loadPosts,
     deletePost,
     saveEdit,
     likePost,
+
+    // COMMENTS FUNCTIONS
     loadComments,
     newComment,
     editComment,
@@ -269,6 +389,9 @@ export function usePosts() {
     displayPostOptions,
     openEditModal,
     closeEditModal,
+    changeVisibility,
+    toggleHideLikes,
+    toggleDisableComments,
     toggleCommentInput,
     toggleCommentActions,
     startEditComment,

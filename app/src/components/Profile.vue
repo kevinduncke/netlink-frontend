@@ -350,6 +350,9 @@ onBeforeRouteLeave(() => {
           </div>
         </div>
       </div>
+      <div class="profile-posts">
+        <h2>My Posts</h2>
+      </div>
       <Post />
     </div>
   </div>
@@ -482,7 +485,7 @@ onBeforeRouteLeave(() => {
   color: #000000;
   overflow-y: auto;
 }
-.profile-content h2 {
+.profile-content h2, .profile-posts h2 {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.05rem;

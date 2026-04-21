@@ -1,116 +1,27 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import api from "../services/api";
+// COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 import SearchModal from "./SearchModal.vue";
 
-const postRef = ref<InstanceType<typeof Post> | null>(null);
+// POSTS | USERDATA
+import { usePosts } from "../shared/usePosts";
 
-const content = ref("What's on your mind today?");
-const mentions = ref([]);
-const location = ref("");
-const imageUrl = ref("");
+// POSTS
+const {
+  // VARIABLES
+  createPostData,
 
-const emit = defineEmits(["postCreated"]);
-
-const showMentionModal = ref(false);
-const showSpecificModal = ref(false);
-
-const visibility = ref("PUBLIC");
-const specificFollowers = ref<string[]>([]);
-
-const hideLikes = ref(false);
-const disableComments = ref(false);
-
-async function createPost() {
-  try {
-    await api.post("/post/", {
-      content: content.value,
-      visibility: visibility.value,
-      specificTo: specificFollowers.value,
-      location: location.value,
-      imageUrl: imageUrl.value,
-      hideLikes: hideLikes.value,
-      disableComments: disableComments.value,
-    });
-
-    content.value = "";
-    mentions.value = [];
-    visibility.value = "PUBLIC";
-    specificFollowers.value = []
-    location.value = "";
-    imageUrl.value = "";
-    hideLikes.value = false;
-    disableComments.value = false;
-
-    await postRef.value?.loadPosts('my-posts');
-    emit("postCreated");
-  } catch (error) {
-    console.error("Error creating post:", error);
-  }
-}
-
-function refreshPosts() {
-  postRef.value?.loadPosts('my-posts');
-}
-
-function addMention() {
-  showMentionModal.value = true;
-}
-function selectMention(username: string) {
-  content.value += " @" + username + " ";
-  showMentionModal.value = false;
-}
-function addSpecificFollowers(selectedList: string[]) {
-  const set = new Set([...specificFollowers.value, ...selectedList]);
-  specificFollowers.value = Array.from(set);
-  showSpecificModal.value = false;
-}
-
-function addLocation() {
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const { latitude, longitude } = position.coords;
-      location.value = `${latitude}, ${longitude}`;
-    },
-    (error) => {
-      console.error("Error getting location: ", error);
-      alert("Unable to retrieve location.");
-    },
-  );
-}
-
-function changeVisibility(mode: string) {
-  visibility.value = mode;
-  switch (mode) {
-    case 'PUBLIC':
-      visibility.value = 'PUBLIC';
-      break;
-    case 'FOLLOWERS': 
-      visibility.value = 'FOLLOWERS';
-      break;
-    case 'ONLY_ME':
-      visibility.value = 'ONLY_ME';
-      break;
-    case 'SPECIFIC':
-      visibility.value = 'SPECIFIC';
-      break;
-    default:
-      visibility.value = 'PUBLIC';
-  }
-  if (mode === 'SPECIFIC') {
-    showSpecificModal.value = true;
-  }
-}
-
-function toggleHideLikes() {
-  hideLikes.value = !hideLikes.value;
-}
-
-function toggleDisableComments() {
-  disableComments.value = !disableComments.value;
-}
+  // FUNCTIONS
+  addMention,
+  addLocation,
+  createPost,
+  changeVisibility,
+  toggleHideLikes,
+  toggleDisableComments,
+  selectMention,
+  addSpecificFollowers,
+} = usePosts();
 </script>
 
 <template>
@@ -120,8 +31,8 @@ function toggleDisableComments() {
       <div class="createPost">
         <h2>Create Post</h2>
         <div class="post-text">
-          <textarea name="text" id="text" v-model="content"></textarea>
-          <p>Location: {{ location }}</p>
+          <textarea name="text" id="text" v-model="createPostData.content"></textarea>
+          <p>Location: {{ createPostData.location }}</p>
           <div class="post-adds">
             <p>Add to your post</p>
             <div>
@@ -164,7 +75,10 @@ function toggleDisableComments() {
           <p>Who can view your post?</p>
           <div class="modesOptions">
             <button type="button" @click="changeVisibility('PUBLIC')">
-              <div class="btnIcon" :class="{ selected: visibility === 'PUBLIC' }">
+              <div
+                class="btnIcon"
+                :class="{ selected: createPostData.visibility === 'PUBLIC' }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="18px"
@@ -183,7 +97,10 @@ function toggleDisableComments() {
               </div>
             </button>
             <button type="button" @click="changeVisibility('FOLLOWERS')">
-              <div class="btnIcon" :class="{ selected: visibility === 'FOLLOWERS' }">
+              <div
+                class="btnIcon"
+                :class="{ selected: createPostData.visibility === 'FOLLOWERS' }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="20px"
@@ -202,7 +119,10 @@ function toggleDisableComments() {
               </div>
             </button>
             <button type="button" @click="changeVisibility('ONLY_ME')">
-              <div class="btnIcon" :class="{ selected: visibility === 'ONLY_ME' }">
+              <div
+                class="btnIcon"
+                :class="{ selected: createPostData.visibility === 'ONLY_ME' }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="20px"
@@ -221,7 +141,10 @@ function toggleDisableComments() {
               </div>
             </button>
             <button type="button" @click="changeVisibility('SPECIFIC')">
-              <div class="btnIcon" :class="{ selected: visibility === 'SPECIFIC' }">
+              <div
+                class="btnIcon"
+                :class="{ selected: createPostData.visibility === 'SPECIFIC' }"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="20px"
@@ -244,8 +167,8 @@ function toggleDisableComments() {
         <div class="settingsPost">
           <p>Post Settings</p>
           <div class="modesOptions">
-            <button type="button" @click="toggleHideLikes">
-              <div class="btnIcon" :class="{ selected: hideLikes }">
+            <button type="button" @click="toggleHideLikes()">
+              <div class="btnIcon" :class="{ selected: createPostData.hideLikes }">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="20px"
@@ -262,8 +185,8 @@ function toggleDisableComments() {
                 <p>Hide like count</p>
               </div>
             </button>
-            <button type="button" @click="toggleDisableComments">
-              <div class="btnIcon" :class="{ selected: disableComments }">
+            <button type="button" @click="toggleDisableComments()">
+              <div class="btnIcon" :class="{ selected: createPostData.disableComments }">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="20px"
@@ -285,19 +208,22 @@ function toggleDisableComments() {
       </div>
     </div>
     <div class="dash-content">
-      <Post ref="postRef" @post-created="refreshPosts" />
+      <div class="dash-myPosts">
+        <h2>My Posts</h2>
+        <Post />
+      </div>
     </div>
   </div>
   <SearchModal
-    :show="showMentionModal"
+    :show="createPostData.showMentionModal"
     mode="mention"
-    @close="showMentionModal = false"
+    @close="createPostData.showMentionModal = false"
     @select="selectMention($event)"
   />
   <SearchModal
-    :show="showSpecificModal"
+    :show="createPostData.showSpecificModal"
     mode="specific"
-    @close="showSpecificModal = false"
+    @close="createPostData.showSpecificModal = false"
     @select-multiple="addSpecificFollowers($event)"
   />
 </template>
@@ -322,7 +248,8 @@ function toggleDisableComments() {
   overflow-y: auto;
 }
 .createPost h2,
-.optionsPost h2 {
+.optionsPost h2,
+.dash-myPosts h2 {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.05rem;
@@ -429,7 +356,7 @@ function toggleDisableComments() {
   border: 1px solid #006145;
 }
 .selected svg {
-  fill: #ffffff!important;
+  fill: #ffffff !important;
 }
 .infoIcon {
   padding: 0 1rem;

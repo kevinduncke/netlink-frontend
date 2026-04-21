@@ -1,5 +1,5 @@
-export type Post = {
-  id: string | number;
+export type PostType = {
+  id: number;
   authorId: string | number;
   content: string;
   location: string;
@@ -8,8 +8,6 @@ export type Post = {
   disableComments: boolean;
   createdAt: string;
   isShared: boolean;
-  favorites: Post[];
-  following: Post[];
   comments: Comment[];
   author: User;
   _count: {
@@ -18,6 +16,10 @@ export type Post = {
     shares: number;
   };
   postCount: number;
+  dashboardPosts: {
+    favorites: PostType[];
+    following: PostType[];
+  };
 };
 
 export type User = {
@@ -40,4 +42,25 @@ export interface Comment {
     username: string;
     avatarUrl: string;
   };
+}
+
+export interface CreatePost {
+  content: string;
+  mentions: string[];
+  location: string;
+  imageUrl: string;
+  visibility: 'PUBLIC' | 'FOLLOWERS' | 'ONLY_ME' | 'SPECIFIC';
+  specificFollowers: string[];
+  hideLikes: boolean;
+  disableComments: boolean;
+  showMentionModal: boolean;
+  showSpecificModal: boolean;
+}
+
+export interface EditingComment {
+  postComment: string;
+  editedCommentContent: string;
+  openCommentPostId: number | string | null;
+  editingCommentId: number | string | null;
+  openCommentActions: number | string | null;
 }

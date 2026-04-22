@@ -50,7 +50,13 @@ export function useUserData() {
       favoriteUsers.value = users.filter((u) => u.isFavorite);
       suggestedUsers.value = users.filter((u) => !u.isFavorite);
     } catch (error) {
-      console.error("Error searching favorite users: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -64,7 +70,13 @@ export function useUserData() {
       // LOAD NEW FAVORITE USERS LOCALLY
       // REMOVE OLD USER FROM SUGGESTED USERS LOCALLY
     } catch (error) {
-      console.error("Error adding favorite user: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -73,9 +85,14 @@ export function useUserData() {
     try {
       await api.delete(`/favorites/${userId}`);
       // REMOVE OLD FAVORITE USER FROM FAVORITE USERS LOCALLY
-      // LOAD OLD SUGGESTED USER LOCALLY
     } catch (error) {
-      console.log("Error deleting favorite user: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -83,10 +100,15 @@ export function useUserData() {
   async function removeAllFavoriteUsers() {
     try {
       await api.delete("/favorites/all");
-      // REMOVE OLD FAVORITE USER FROM FAVORITE USERS LOCALLY
-      // LOAD OLD SUGGESTED USER LOCALLY
+      await loadFavoriteUsers();
       await loadSuggestedUsers();
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
       console.log("Error removing all favorite users: ", error);
     }
   }
@@ -147,7 +169,13 @@ export function useUserData() {
         selectedUserId.value = firstFollowerUser.id;
       }
     } catch (error) {
-      console.error("Error loading followers users: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -169,7 +197,13 @@ export function useUserData() {
       const res = await api.get(`/users/${selectedUserId.value}`);
       userProfile.value = res.data;
     } catch (error) {
-      console.error("Error loading user profile: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -181,7 +215,13 @@ export function useUserData() {
       originalProfile.value = structuredClone(response.data);
       userProfile.value = response.data;
     } catch (error) {
-      console.error("Error loading profile: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -230,8 +270,13 @@ export function useUserData() {
       };
       hasUnsavedChanges.value = false;
     } catch (error) {
-      console.error("Error updating profile: ", error);
-      alert("Failed to update profile. Please try again.");
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -249,7 +294,13 @@ export function useUserData() {
       authStore.logout();
       router.push("/login");
     } catch (error) {
-      console.error("Error deleting profile: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 

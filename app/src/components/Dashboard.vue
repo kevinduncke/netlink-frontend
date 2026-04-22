@@ -1,118 +1,38 @@
 <script setup lang="ts">
 // VUE
-import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
-
-// SERVICES
-import axios from "axios";
-import api from "../services/api";
-import { useAuthStore } from "../stores/auth";
+import { onMounted, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 
-// TYPES
-import type { FollowUser } from "../types/users";
-import type { SearchFavoriteUser } from "../types/search";
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
 
 // POSTS COMPOSITION
-import {
-  usePosts,
-} from "../shared/usePosts";
+import { usePosts } from "../shared/usePosts";
 
-const router = useRouter();
-const authStore = useAuthStore();
+// USER DATA FUNCTIONS
+const {
+  // VARIABLES
+  favoriteUsers,
+  suggestedUsers,
+  favSearchQuery,
+  favStateEdit,
+  selectedUserId,
 
-// FAVORITES AND LASTEST POSTS
-const favSearchQuery = ref<string>("");
-const favStateEdit = ref<boolean>(false);
-
-const favoriteUsers = ref<FollowUser[]>([]);
-const suggestedUsers = ref<FollowUser[]>([]);
-
-async function searchFavoriteUsers(query: string) {
-  try {
-    const response = await api.get("/favorites/search", {
-      params: { q: query },
-    });
-
-    const users: SearchFavoriteUser[] = response.data.users || [];
-    favoriteUsers.value = users.filter((u) => u.isFavorite);
-    suggestedUsers.value = users.filter((u) => !u.isFavorite);
-  } catch (error) {
-    console.error("Error searching favorite users: ", error);
-  }
-}
-async function loadFavoriteUsers() {
-  try {
-    const response = await api.get("/favorites");
-    favoriteUsers.value = response.data.users;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-async function removeAllFavoriteUsers() {
-  try {
-    await api.delete("/favorites/all");
-    await loadFavoriteUsers();
-    await loadSuggestedUsers();
-  } catch (error) {
-    console.log("Error removing all favorite users: ", error);
-  }
-}
-async function deleteFavoriteUser(userId: string | number) {
-  try {
-    await api.delete(`/favorites/${userId}`);
-    await loadFavoriteUsers();
-    await loadSuggestedUsers();
-  } catch (error) {
-    console.log("Error deleting favorite user: ", error);
-  }
-}
-async function loadSuggestedUsers() {
-  try {
-    const response = await api.get("/favorites/suggested");
-    suggestedUsers.value = response.data.users;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-async function addFavoriteUser(userId: string | number) {
-  try {
-    await api.post(`/favorites/${userId}`);
-    await loadSuggestedUsers();
-    await loadFavoriteUsers();
-    await loadPosts('dashboard/posts');
-  } catch (error) {
-    console.error("Error adding favorite user: ", error);
-  }
-}
-
-// SELECTION FOR FOLLOWING / FOLLOWERS
-const selectedUserId = ref<string | number>("");
-function selectedUser(userId: string | number) {
-  selectedUserId.value = userId;
-  editingComment.openCommentPostId = null;
-}
+  // FUNCTIONS
+  loadFavoriteUsers,
+  searchFavoriteUsers,
+  addFavoriteUser,
+  deleteFavoriteUser,
+  removeAllFavoriteUsers,
+  loadSuggestedUsers,
+  selectedUser,
+} = useUserData();
 
 // POST FUNCTIONS
-const {
-  editingComment,
-  loadPosts,
-} = usePosts();
+const { loadPosts } = usePosts();
 
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
@@ -125,14 +45,14 @@ watch(favSearchQuery, (newQuery) => {
 
 watch(selectedUserId, async (newUserId) => {
   if (newUserId) {
-    console.log(newUserId);
     await loadPosts(`user/${newUserId}`);
   }
-})
+});
+
 onMounted(async () => {
   await loadFavoriteUsers();
   await loadSuggestedUsers();
-  await loadPosts('following');
+  await loadPosts("following");
 });
 </script>
 
@@ -158,28 +78,28 @@ onMounted(async () => {
           </button>
         </div>
         <div class="fav-user-list" v-if="!favStateEdit">
-        <div
-          class="bar-user-box"
-          :class="{ selected: selectedUserId === user.id }"
-          v-for="user in favoriteUsers"
-          :key="user.id"
-        >
-          <button type="button" @click="selectedUser(user.id)">
-            <div class="bar-user-info">
-              <img
-                src="../assets/avatars/40x40.png"
-                alt="User Avatar"
-                class="bar-user-avatar"
-                height="40px"
-                width="40px"
-              />
-              <div class="bar-userdata">
-                <h2 class="bar-user-name">{{ user.name }}</h2>
-                <p class="bar-user-username">@{{ user.username }}</p>
+          <div
+            class="bar-user-box"
+            :class="{ selected: selectedUserId === user.id }"
+            v-for="user in favoriteUsers"
+            :key="user.id"
+          >
+            <button type="button" @click="selectedUser(user.id)">
+              <div class="bar-user-info">
+                <img
+                  src="../assets/avatars/40x40.png"
+                  alt="User Avatar"
+                  class="bar-user-avatar"
+                  height="40px"
+                  width="40px"
+                />
+                <div class="bar-userdata">
+                  <h2 class="bar-user-name">{{ user.name }}</h2>
+                  <p class="bar-user-username">@{{ user.username }}</p>
+                </div>
               </div>
-            </div>
-          </button>
-        </div>
+            </button>
+          </div>
         </div>
         <div class="dash-fav-edit" v-else>
           <div class="fav-edit-search">

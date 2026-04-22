@@ -1,127 +1,61 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
-import { useAuthStore } from "../stores/auth";
-import { useRouter } from "vue-router";
-import api from "../services/api";
+// VUE
+import { onMounted, watch } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
+
+// COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
-import type { UserProfile } from "../types/users";
 
-const authStore = useAuthStore();
-const router = useRouter();
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
 
-const originalProfile = ref({} as UserProfile);
+// USER DATA FUNCTIONS
+const {
+  // VARIABLES
+  userProfile,
+  originalProfile,
+  editingProfile,
+  hasUnsavedChanges,
 
-const name = ref("");
-const username = ref("");
-const bio = ref("");
-const url = ref("");
-const avatarUrl = ref("");
+  // FUNCTIONS
+  loadMyProfile,
+  toggleEdit,
+  toggleCloseEdit,
+  saveProfile,
+  deleteAccount
+} = useUserData();
 
-const postsCount = ref(0);
-const followersCount = ref(0);
-const followingCount = ref(0);
-
-const editing = ref({
-  name: false,
-  username: false,
-  bio: false,
-  url: false,
-  avatarUrl: false,
+onMounted(async () => {
+  await loadMyProfile();
 });
-const hasUnsavedChanges = ref(false);
-function toggleEdit(field: keyof typeof editing.value) {
-  editing.value[field] = !editing.value[field];
-}
-function toggleCloseEdit(field: keyof typeof editing.value) {
-  editing.value[field] = false;
-}
-async function loadProfile() {
-  try {
-    const res = await api.get("/users/me");
-
-    originalProfile.value = structuredClone(res.data);
-
-    name.value = res.data.name ?? "";
-    username.value = res.data.username ?? "";
-    bio.value = res.data.bio ?? "";
-    url.value = res.data.url ?? "";
-    avatarUrl.value = res.data.avatarUrl ?? "";
-
-    postsCount.value = res.data.postsCount ?? 0;
-    followersCount.value = res.data.followersCount ?? 0;
-    followingCount.value = res.data.followingCount ?? 0;
-  } catch (error) {
-    console.error("Error loading profile: ", error);
-  }
-}
-async function saveProfile() {
-  try {
-    await api.patch("/users/me", {
-      name: name.value,
-      username: username.value,
-      bio: bio.value,
-      url: url.value,
-      avatarUrl: avatarUrl.value,
-    });
-
-    editing.value = {
-      name: false,
-      username: false,
-      bio: false,
-      url: false,
-      avatarUrl: false,
-    };
-    originalProfile.value = {
-      ...originalProfile.value,
-      name: name.value,
-      username: username.value,
-      bio: bio.value,
-      url: url.value,
-      avatarUrl: avatarUrl.value,
-    };
-    hasUnsavedChanges.value = false;
-  } catch (error) {
-    console.error("Error updating profile: ", error);
-    alert("Failed to update profile. Please try again.");
-  }
-}
-async function deleteProfile() {
-  if (
-    !confirm(
-      "Are you sure you want to delete your account? This action cannot be undone.",
-    )
-  ) {
-    return;
-  }
-  try {
-    await api.delete("users/me");
-    authStore.logout();
-    router.push("/login");
-  } catch (error) {
-    console.error("Error deleting profile: ", error);
-  }
-}
 watch(
-  [name, username, bio, url, avatarUrl],
+  () => [
+    userProfile.value.name,
+    userProfile.value.username,
+    userProfile.value.bio,
+    userProfile.value.url,
+    userProfile.value.avatarUrl,
+    originalProfile.value.name,
+    originalProfile.value.username,
+    originalProfile.value.bio,
+    originalProfile.value.url,
+    originalProfile.value.avatarUrl,
+  ],
   () => {
     hasUnsavedChanges.value =
-      name.value !== (originalProfile.value.name ?? "") ||
-      username.value !== (originalProfile.value.username ?? "") ||
-      bio.value !== (originalProfile.value.bio ?? "") ||
-      url.value !== (originalProfile.value.url ?? "") ||
-      avatarUrl.value !== (originalProfile.value.avatarUrl ?? "");
+      (userProfile.value.name ?? "") !== (originalProfile.value.name ?? "") ||
+      (userProfile.value.username ?? "") !==
+        (originalProfile.value.username ?? "") ||
+      (userProfile.value.bio ?? "") !== (originalProfile.value.bio ?? "") ||
+      (userProfile.value.url ?? "") !== (originalProfile.value.url ?? "") ||
+      (userProfile.value.avatarUrl ?? "") !==
+        (originalProfile.value.avatarUrl ?? "");
   },
+  { immediate: true },
 );
-onMounted(async () => {
-  await loadProfile();
-});
 onBeforeRouteLeave(() => {
-  const hasUnsavedChanges = Object.values(editing.value).some(
-    (isEditing) => isEditing,
-  );
-  if (!hasUnsavedChanges) {
+  if (!hasUnsavedChanges.value) {
     return true;
   }
   const confirmLeave = confirm(
@@ -143,15 +77,16 @@ onBeforeRouteLeave(() => {
             <input
               type="text"
               name="name"
-              v-model="name"
+              v-model="userProfile.name"
               id="profile-name"
-              :disabled="!editing.name"
+              placeholder="Edit your name."
+              :disabled="!editingProfile.name"
             />
           </div>
           <button
             type="button"
             @click="toggleEdit('name')"
-            v-if="!editing.name"
+            v-if="!editingProfile.name"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -183,15 +118,16 @@ onBeforeRouteLeave(() => {
             <input
               type="text"
               name="username"
-              v-model="username"
+              v-model="userProfile.username"
               id="profile-username"
-              :disabled="!editing.username"
+              placeholder="Edit your username."
+              :disabled="!editingProfile.username"
             />
           </div>
           <button
             type="button"
             @click="toggleEdit('username')"
-            v-if="!editing.username"
+            v-if="!editingProfile.username"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -223,12 +159,13 @@ onBeforeRouteLeave(() => {
             <input
               type="text"
               name="bio"
-              v-model="bio"
+              v-model="userProfile.bio"
               id="profile-bio"
-              :disabled="!editing.bio"
+              placeholder="Edit your bio."
+              :disabled="!editingProfile.bio"
             />
           </div>
-          <button type="button" @click="toggleEdit('bio')" v-if="!editing.bio">
+          <button type="button" @click="toggleEdit('bio')" v-if="!editingProfile.bio">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
@@ -263,13 +200,13 @@ onBeforeRouteLeave(() => {
             <input
               type="text"
               name="url"
-              v-model="url"
+              v-model="userProfile.url"
               id="profile-url"
               placeholder="https://"
-              :disabled="!editing.url"
+              :disabled="!editingProfile.url"
             />
           </div>
-          <button type="button" @click="toggleEdit('url')" v-if="!editing.url">
+          <button type="button" @click="toggleEdit('url')" v-if="!editingProfile.url">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
@@ -310,7 +247,7 @@ onBeforeRouteLeave(() => {
       <button
         type="button"
         class="save-btn"
-        @click="saveProfile"
+        @click="saveProfile()"
         :disabled="!hasUnsavedChanges"
         v-if="hasUnsavedChanges"
       >
@@ -318,7 +255,7 @@ onBeforeRouteLeave(() => {
       </button>
       <div class="profile-delete">
         <h2>Delete Account</h2>
-        <button type="button" class="delete-btn" @click="deleteProfile">
+        <button type="button" class="delete-btn" @click="deleteAccount()">
           Delete
         </button>
       </div>
@@ -326,27 +263,27 @@ onBeforeRouteLeave(() => {
     <div class="dash-content">
       <div class="profile-content">
         <h2>Profile</h2>
-        <div class="profile-head">
+        <div class="profile-head" v-if="userProfile">
           <div class="profile-info">
-            <h1>{{ name || "Unknown User" }}</h1>
-            <h2>@{{ username || "Unknown Username" }}</h2>
+            <h1>{{ userProfile.name }}</h1>
+            <h2>@{{ userProfile.username || "Unknown Username" }}</h2>
             <div class="profile-stats">
               <div>
-                <p>{{ postsCount || 0 }} Posts</p>
+                <p>{{ userProfile.postsCount || 0 }} Posts</p>
               </div>
               <div>
-                <p>{{ followersCount || 0 }} Followers</p>
+                <p>{{ userProfile.followersCount || 0 }} Followers</p>
               </div>
               <div>
-                <p>{{ followingCount || 0 }} Following</p>
+                <p>{{ userProfile.followingCount || 0 }} Following</p>
               </div>
             </div>
             <div class="profile-titles">
-              <p>{{ bio || "No bio available." }}</p>
+              <p>{{ userProfile.bio }}</p>
             </div>
           </div>
           <div class="profile-avatar">
-            <img :src="avatarUrl" />
+            <img :src="userProfile.avatarUrl" />
           </div>
         </div>
       </div>
@@ -441,6 +378,10 @@ onBeforeRouteLeave(() => {
   background-color: transparent;
   color: #535353;
 }
+.profile-boxinput span {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
 .save-btn {
   width: 100%;
   padding: 0.8rem 0;
@@ -485,7 +426,8 @@ onBeforeRouteLeave(() => {
   color: #000000;
   overflow-y: auto;
 }
-.profile-content h2, .profile-posts h2 {
+.profile-content h2,
+.profile-posts h2 {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.05rem;

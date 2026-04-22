@@ -1,103 +1,35 @@
 <script setup lang="ts">
 // VUE
-import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
-
-// SERVICES AND STORES
-import axios from "axios";
-import api from "../services/api";
-import { useAuthStore } from "../stores/auth";
+import { onMounted, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 
-// TYPES
-import type { FollowUser } from "../types/users";
-import type { UserProfile } from "../types/users";
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
 
 // POSTS COMPOSITION
-import {
-  usePosts,
-} from "../shared/usePosts";
+import { usePosts } from "../shared/usePosts";
 
-const router = useRouter();
-const authStore = useAuthStore();
+// USER DATA FUNCTIONS
+const {
+  // VARIABLES
+  selectedUserId,
+  followsFilter,
+  followingUsers,
+  followersUsers,
+  userProfile,
 
-// FILTER FOLLOW PANEL
-const followsFilter = ref<string>("following");
-
-// LOAD FOLLOWING USERS
-const followingUsers = ref<FollowUser[]>([]);
-async function loadFollowingUsers() {
-  try {
-    const response = await api.get("/follow/following");
-    followingUsers.value = response.data;
-    const firstFollowingUser = followingUsers.value[0];
-    if (firstFollowingUser) {
-      selectedUserId.value = firstFollowingUser.id;
-    }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-
-// LOAD FOLLOWERS USERS
-const followersUsers = ref<FollowUser[]>([]);
-async function loadFollowersUsers() {
-  try {
-    followsFilter.value = "followers";
-    const response = await api.get("/follow/followers");
-    followersUsers.value = response.data;
-
-    const firstFollowerUser = followersUsers.value[0];
-    if (firstFollowerUser) {
-      selectedUserId.value = firstFollowerUser.id;
-    }
-  } catch (error) {
-    console.error("Error loading followers users: ", error);
-  }
-}
-
-// LOAD USER PROFILE INFO
-const userProfile = ref<UserProfile>({
-  name: "",
-  username: "",
-  bio: "",
-  url: "",
-  avatarUrl: "",
-  postsCount: 0,
-  followersCount: 0,
-  followingCount: 0,
-});
-
-async function loadUserProfile() {
-  try {
-    const res = await api.get(`/users/${selectedUserId.value}`);
-    userProfile.value = res.data;
-  } catch (error) {
-    console.error("Error loading user profile: ", error);
-  }
-}
-
-// SELECTION FOR FOLLOWING / FOLLOWERS
-const selectedUserId = ref<string | number>("");
-function selectedUser(userId: string | number) {
-  selectedUserId.value = userId;
-  editingComment.openCommentPostId = null;
-}
+  // FUNCTIONS
+  selectedUser,
+  loadFollowingUsers,
+  loadFollowersUsers,
+  loadUserProfile,
+} = useUserData();
 
 // POST FUNCTIONS
-const {
-  editingComment,
-  loadPosts,
-} = usePosts();
+const { loadPosts } = usePosts();
 
 watch(selectedUserId, (newUserId) => {
   if (newUserId) {

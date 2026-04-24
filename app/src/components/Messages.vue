@@ -1,228 +1,44 @@
 <script setup lang="ts">
-import axios from "axios";
-import { ref, onMounted, watch, computed } from "vue";
-import { useRouter } from "vue-router";
-import api from "../services/api";
-import { useAuthStore } from "../stores/auth";
+// VUE
+import { onMounted, watch } from "vue";
 
-import type { SearchUser } from "../types/search";
-import type { FollowUser } from "../types/users";
-import type { UserChat } from "../types/users";
-import type { ChatMessage, ChatUser } from "../types/chat";
-
+// COMPONENTS
 import Navigation from "./Navigation.vue";
 
-const router = useRouter();
-const authStore = useAuthStore();
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
 
-// SEARCH USERS | SEARCH FILTERS
-const query = ref("");
-const results = ref<SearchUser[]>([]);
-async function searchUsers() {
-  try {
-    const response = await api.get(`/users/search?query=${query.value}`);
-    results.value = response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
+const {
+  // VARIABLES
+  queryUsers,
+  searchUsersResults,
+  userChats,
+  selectedChat,
+  chatUserInfo,
+  userChatId,
+  displayUserInfo,
+  message,
 
-    throw error;
-  }
-}
-function verifyNewChatSearch(userId: string | number) {
-  const existingChat = userChats.value.find(
-    (chat) => chat.receiver.id === userId,
-  );
-  if (existingChat) {
-    selectChat(existingChat.chatId);
-    query.value = "";
-    results.value = [];
-  } else {
-    createChat(userId);
-  }
-}
-function clearQuery() {
-  query.value = "";
-  results.value = [];
-}
-watch(query, searchUsers);
+  // FUNCTIONS
+  searchUsers,
+  loadSuggestedUsers,
+  loadUserChats,
+  filteredSuggestedUsers,
+  selectChat,
+  getUserInfo,
+  groupMessagesByDate,
+  dateJoinedUser,
+  verifyNewChatSearch,
+  clearQuery,
+  sendMessage,
+  createChat,
+  deleteChat,
+} = useUserData();
 
-// LOAD USER CHATS
-const userChats = ref<UserChat[]>([]);
-async function loadUserChats() {
-  try {
-    const response = await api.get("/chats");
-    userChats.value = response.data || [];
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-
-// LOAD OF SUGGESTED USERS
-const suggestedUsers = ref<FollowUser[]>([]);
-async function loadSuggestedUsers() {
-  try {
-    const response = await api.get("/follow/following");
-    suggestedUsers.value = response.data || [];
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-const filteredSuggestedUsers = computed(() =>
-  suggestedUsers.value.filter(
-    (user) => !userChats.value.some((chat) => chat.receiver.id === user.id),
-  ),
-);
-
-// LOAD CHAT BASED ON SELECTED USER
-const selectedChat = ref<string | number>("");
-const chatUserInfo = ref<ChatUser>({
-  id: "",
-  name: "",
-  username: "",
-  avatarUrl: "",
-  createdAt: "",
-});
-const chatMessages = ref<ChatMessage[]>([]);
-const userChatId = ref<string | number>("");
-async function selectChat(chatId: string | number) {
-  try {
-    selectedChat.value = chatId;
-    if (!chatId) {
-      console.error("No chat ID provided");
-      return;
-    }
-    const response = await api.get(`/chats/${chatId}/messages`);
-    chatMessages.value = response.data.message || [];
-    chatUserInfo.value = response.data.receiver;
-    userChatId.value = chatId;
-    displayUserInfo.value = false;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-const groupMessagesByDate = computed(() => {
-  const groups: Record<string, ChatMessage[]> = {};
-
-  for (const message of chatMessages.value) {
-    const date = new Date(message.createdAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-
-    groups[date].push(message);
-  }
-
-  return groups;
-});
-
-// SEND MESSAGE ON SELECTED USER
-const message = ref<string>("");
-async function sendMessage(chatId: string | number) {
-  try {
-    // PREVENT SENDING EMPTY MESSAGES
-    if (!message.value.trim()) return;
-
-    await api.post(`/chats/${chatId}/new`, {
-      content: message.value.trim(),
-    });
-    message.value = "";
-
-    // RELOAD MESSAGES AFTER SENDING
-    await selectChat(chatId);
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-
-// CREATE A NEW CHAT WITH SELECTED USER
-async function createChat(userId: string | number) {
-  try {
-    const response = await api.post("/chats/new", { userId: userId });
-    const newChatId = response.data.chatId;
-    console.log("New chat created with ID: ", newChatId);
-    await selectChat(newChatId);
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-
-// DELETE CHAT WITH SELECTED USER
-async function deleteChat(chatId: string | number) {
-  try {
-    await api.delete(`/chats/${chatId}`);
-    selectedChat.value = "";
-    chatMessages.value = [];
-    userChatId.value = "";
-    await loadUserChats();
-    await loadSuggestedUsers();
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      authStore.logout();
-      router.push("/login");
-      return;
-    }
-
-    throw error;
-  }
-}
-
-// INFORMATION ABOUT THE USER ACCOUNT
-const displayUserInfo = ref<boolean>(false);
-const dateJoinedUser = computed(
-  // FORMAT THE MONTH NUMBER TO TEXT AND SHOW ONLY THE MONTH AND YEAR
-  () => {
-    const date = new Date(chatUserInfo.value.createdAt);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-    });
-  },
-);
-function getUserInfo() {
-  displayUserInfo.value = !displayUserInfo.value;
-}
+watch(queryUsers, searchUsers);
 
 onMounted(async () => {
-  await loadSuggestedUsers();
+  await loadSuggestedUsers("following");
   await loadUserChats();
 });
 </script>
@@ -240,9 +56,9 @@ onMounted(async () => {
             name="search"
             id="search-users"
             placeholder="Search..."
-            v-model="query"
+            v-model="queryUsers"
           />
-          <div type="button" v-if="query.length <= 0">
+          <div type="button" v-if="queryUsers.length <= 0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="18px"
@@ -269,10 +85,10 @@ onMounted(async () => {
             </svg>
           </button>
         </div>
-        <div class="dash-users-modal" v-if="results.length > 0">
+        <div class="dash-users-modal" v-if="searchUsersResults.length > 0">
           <div
             class="dash-user-item dash-search-item"
-            v-for="user in results"
+            v-for="user in searchUsersResults"
             :key="user.id"
           >
             <button type="button" @click="verifyNewChatSearch(user.id)">
@@ -496,7 +312,7 @@ onMounted(async () => {
               <p>Block</p>
             </button>
           </div>
-          <div class="dash-data-box"> 
+          <div class="dash-data-box">
             <h2>About this Account</h2>
             <div class="dash-about-user">
               <svg

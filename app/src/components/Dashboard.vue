@@ -37,7 +37,7 @@ const { loadPosts } = usePosts();
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
     loadFavoriteUsers();
-    loadSuggestedUsers();
+    loadSuggestedUsers('favorites');
   } else {
     searchFavoriteUsers(newQuery);
   }
@@ -51,7 +51,7 @@ watch(selectedUserId, async (newUserId) => {
 
 onMounted(async () => {
   await loadFavoriteUsers();
-  await loadSuggestedUsers();
+  await loadSuggestedUsers('favorites');
   await loadPosts("following");
 });
 </script>

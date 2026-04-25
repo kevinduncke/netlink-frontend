@@ -2,9 +2,11 @@
 import { onMounted } from "vue";
 
 // POSTS COMPOSITION
-import {
-  usePosts,
-} from "../shared/usePosts";
+import { usePosts } from "../shared/usePosts";
+
+// ICONS
+import AvatarIcon from "../assets/icons/avatar-icon.vue";
+import SpriteIcon from "./SpriteIcon.vue";
 
 // POST FUNCTIONS
 const {
@@ -52,17 +54,7 @@ defineExpose({
   <div v-for="post in userdata" :key="post.id" class="dash-post">
     <div class="dash-user-post">
       <div class="dash-username">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#000000"
-        >
-          <path
-            d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-          />
-        </svg>
+        <AvatarIcon />
         <span>
           <RouterLink :to="`/profile/${post.author.username}`">{{
             post.author.name || "Unknown User"
@@ -71,22 +63,10 @@ defineExpose({
       </div>
       <div class="dash-post-opts">
         <button type="button" @click="displayPostOptions(post.id)">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#C5C5C5"
-          >
-            <path
-              d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"
-            />
-          </svg>
+          <SpriteIcon name="dots" size="18" title="Post options" />
         </button>
         <div class="dash-pop-delete" v-if="openOptionsFor === post.id">
-          <button type="button" @click="deletePost(post.id)">
-            Delete
-          </button>
+          <button type="button" @click="deletePost(post.id)">Delete</button>
           <button type="button" @click="openEditModal(post)">Edit</button>
         </div>
       </div>
@@ -101,17 +81,7 @@ defineExpose({
         v-if="!post.disableComments"
         @click="toggleCommentInput(post.id)"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#000000"
-        >
-          <path
-            d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120v120ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
-          />
-        </svg>
+        <SpriteIcon name="comment" size="16" title="Comments" />
         <span>{{ post._count.comments || 0 }}</span>
       </button>
       <button
@@ -119,52 +89,25 @@ defineExpose({
         @click="likePost(post.id)"
         :class="{ 'dash-liked': post._count.likes }"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#000000"
-        >
-          <path
-            d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
-          />
-        </svg>
+        <SpriteIcon name="heart" size="16" title="Likes" />
         <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
       </button>
       <button type="button" :class="{ 'dash-shared': post._count.shares }">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#000000"
-        >
-          <path
-            d="M280-80 120-240l160-160 56 58-62 62h406v-160h80v240H274l62 62-56 58Zm-80-440v-240h486l-62-62 56-58 160 160-160 160-56-58 62-62H280v160h-80Z"
-          />
-        </svg>
+        <SpriteIcon name="share" size="16" title="Shares" />
         <span>{{ post._count.shares || 0 }}</span>
       </button>
     </div>
     <div
       class="dash-comments-post"
-      v-if="editingComment.openCommentPostId === post.id && (post._count.comments ?? 0) > 0"
+      v-if="
+        editingComment.openCommentPostId === post.id &&
+        (post._count.comments ?? 0) > 0
+      "
     >
       <div v-for="comment in post.comments" :key="comment.createdAt">
         <div class="dash-username-comment">
           <div class="dash-usercmt-info">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#000000"
-            >
-              <path
-                d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"
-              />
-            </svg>
+            <AvatarIcon height="32px" width="32px" />
             <span>
               <RouterLink :to="`/profile/${comment.author.id}`">{{
                 comment.author.name
@@ -180,51 +123,24 @@ defineExpose({
               v-if="editingComment.openCommentActions === comment.id"
               @click="startEditComment(comment.id, comment.content)"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="20px"
-                viewBox="0 -960 960 960"
-                width="20px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"
-                />
-              </svg>
+              <SpriteIcon name="edit" size="20" title="Edit comment" />
             </button>
             <button
               type="button"
               v-if="editingComment.openCommentActions === comment.id"
               @click="deleteComment(comment.id, post.id)"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="20px"
-                viewBox="0 -960 960 960"
-                width="20px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="m400-325 80-80 80 80 51-51-80-80 80-80-51-51-80 80-80-80-51 51 80 80-80 80 51 51Zm-88 181q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480Zm-336 0v480-480Z"
-                />
-              </svg>
+              <SpriteIcon name="trash" size="20" title="Delete comment" />
             </button>
             <button type="button" @click="toggleCommentActions(comment.id)">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="20px"
-                viewBox="0 -960 960 960"
-                width="20px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M479.79-192Q450-192 429-213.21t-21-51Q408-294 429.21-315t51-21Q510-336 531-314.79t21 51Q552-234 530.79-213t-51 21Zm0-216Q450-408 429-429.21t-21-51Q408-510 429.21-531t51-21Q510-552 531-530.79t21 51Q552-450 530.79-429t-51 21Zm0-216Q450-624 429-645.21t-21-51Q408-726 429.21-747t51-21Q510-768 531-746.79t21 51Q552-666 530.79-645t-51 21Z"
-                />
-              </svg>
+              <SpriteIcon name="dots" size="18" title="Comment options" />
             </button>
           </div>
         </div>
-        <div v-if="editingComment.editingCommentId === comment.id" class="dash-edit-comment">
+        <div
+          v-if="editingComment.editingCommentId === comment.id"
+          class="dash-edit-comment"
+        >
           <input type="text" v-model="editingComment.editedCommentContent" />
           <div class="dash-edit-comment-actions">
             <button type="button" @click="editComment(comment.id, post.id)">
@@ -245,7 +161,10 @@ defineExpose({
         <p>{{ toUtcDateTime(comment.createdAt) }}</p>
       </div>
     </div>
-    <div class="dash-new-comment-post" v-if="editingComment.openCommentPostId === post.id">
+    <div
+      class="dash-new-comment-post"
+      v-if="editingComment.openCommentPostId === post.id"
+    >
       <input
         type="text"
         name="post-comment"

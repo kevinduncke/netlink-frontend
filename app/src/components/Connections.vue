@@ -5,6 +5,7 @@ import { onMounted, watch } from "vue";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
+import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -72,13 +73,7 @@ onMounted(() => {
         >
           <button type="button" @click="selectedUser(user.id)">
             <div class="bar-user-info">
-              <img
-                src="../assets/avatars/40x40.png"
-                alt="User Avatar"
-                class="bar-user-avatar"
-                height="40px"
-                width="40px"
-              />
+              <AvatarIcon />
               <div class="bar-userdata">
                 <h2 class="bar-user-name">{{ user.name }}</h2>
                 <p class="bar-user-username">@{{ user.username }}</p>
@@ -96,13 +91,7 @@ onMounted(() => {
         >
           <button type="button" @click="selectedUser(user.id)">
             <div class="bar-user-info">
-              <img
-                src="../assets/avatars/40x40.png"
-                alt="User Avatar"
-                class="bar-user-avatar"
-                height="40px"
-                width="40px"
-              />
+              <AvatarIcon />
               <div class="bar-userdata">
                 <h2 class="bar-user-name">{{ user.name }}</h2>
                 <p class="bar-user-username">@{{ user.username }}</p>
@@ -135,7 +124,6 @@ onMounted(() => {
             </div>
           </div>
           <div class="profile-avatar">
-            <img :src="userProfile.avatarUrl" />
           </div>
         </div>
       </div>

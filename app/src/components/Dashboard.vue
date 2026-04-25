@@ -5,6 +5,10 @@ import { onMounted, watch } from "vue";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
+import SpriteIcon from "./SpriteIcon.vue";
+
+// ICONS
+import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -37,7 +41,7 @@ const { loadPosts } = usePosts();
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
     loadFavoriteUsers();
-    loadSuggestedUsers('favorites');
+    loadSuggestedUsers("favorites");
   } else {
     searchFavoriteUsers(newQuery);
   }
@@ -51,7 +55,7 @@ watch(selectedUserId, async (newUserId) => {
 
 onMounted(async () => {
   await loadFavoriteUsers();
-  await loadSuggestedUsers('favorites');
+  await loadSuggestedUsers("favorites");
   await loadPosts("following");
 });
 </script>
@@ -64,17 +68,7 @@ onMounted(async () => {
         <div class="fav-head">
           <h2>Favorites</h2>
           <button type="button" @click="favStateEdit = !favStateEdit">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#e3e3e3"
-            >
-              <path
-                d="M288-600v-72h528v72H288Zm0 156v-72h528v72H288Zm0 156v-72h528v72H288ZM180-600q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-636q0 14-10.35 25T180-600Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-480q0 14-10.35 25T180-444Zm0 156q-14 0-25-11t-11-25.5q0-14.5 11-25t25.5-10.5q14.5 0 25 10.35T216-324q0 14-10.35 25T180-288Z"
-              />
-            </svg>
+            <SpriteIcon name="list" size="22" title="Toggle favorites" />
           </button>
         </div>
         <div class="fav-user-list" v-if="!favStateEdit">
@@ -86,13 +80,7 @@ onMounted(async () => {
           >
             <button type="button" @click="selectedUser(user.id)">
               <div class="bar-user-info">
-                <img
-                  src="../assets/avatars/40x40.png"
-                  alt="User Avatar"
-                  class="bar-user-avatar"
-                  height="40px"
-                  width="40px"
-                />
+                <AvatarIcon />
                 <div class="bar-userdata">
                   <h2 class="bar-user-name">{{ user.name }}</h2>
                   <p class="bar-user-username">@{{ user.username }}</p>
@@ -110,17 +98,7 @@ onMounted(async () => {
               placeholder="Search"
               v-model="favSearchQuery"
             />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="22px"
-              viewBox="0 -960 960 960"
-              width="22px"
-              fill="#e3e3e3"
-            >
-              <path
-                d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
-              />
-            </svg>
+            <SpriteIcon name="search" size="22" color="#e3e3e3" title="Search" />
           </div>
           <div class="fav-edit-favorites" v-if="favoriteUsers.length > 0">
             <div class="fav-edit-listhead">
@@ -137,17 +115,7 @@ onMounted(async () => {
               >
                 <div class="fav-user-data">
                   <div class="fav-user-icon">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="28px"
-                      viewBox="0 -960 960 960"
-                      width="28px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"
-                      />
-                    </svg>
+                    <AvatarIcon />
                   </div>
                   <div class="fav-user-names">
                     <p>{{ user.name }}</p>
@@ -170,17 +138,7 @@ onMounted(async () => {
               >
                 <div class="fav-user-data">
                   <div class="fav-user-icon">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="28px"
-                      viewBox="0 -960 960 960"
-                      width="28px"
-                      fill="#e3e3e3"
-                    >
-                      <path
-                        d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"
-                      />
-                    </svg>
+                    <AvatarIcon />
                   </div>
                   <div class="fav-user-names">
                     <p>{{ user.name }}</p>
@@ -239,9 +197,10 @@ onMounted(async () => {
   border: none;
   outline: none;
   cursor: pointer;
+  color: #e3e3e3;
 }
-.fav-head button:hover svg {
-  fill: #006145;
+.fav-head button:hover {
+  color: #006145;
 }
 
 .fav-head-post {

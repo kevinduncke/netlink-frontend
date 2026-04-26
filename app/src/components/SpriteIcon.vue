@@ -3,14 +3,30 @@ import { computed } from "vue";
 
 type IconName =
   | "at"
+  | "bell"
+  | "block"
+  | "circle"
+  | "checked-circle"
   | "comment"
+  | "date"
   | "dots"
   | "edit"
+  | "emoji"
+  | "email"
   | "heart"
+  | "info"
+  | "link-url"
   | "list"
   | "location"
+  | "microphone"
+  | "messages"
+  | "photo"
+  | "public"
+  | "followers"
+  | "lock"
   | "search"
   | "share"
+  | "send"
   | "trash";
 
 const props = withDefaults(
@@ -33,7 +49,7 @@ const normalizedSize = computed(() =>
 <template>
   <svg
     class="sprite-icon"
-    :style="{ width: normalizedSize, height: normalizedSize, color }"
+    :style="{ width: normalizedSize, height: normalizedSize, color: props.color }"
     :role="title ? 'img' : 'presentation'"
     :aria-hidden="title ? 'false' : 'true'"
   >

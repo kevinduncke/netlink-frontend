@@ -1,7 +1,15 @@
 <script setup lang="ts">
+// VUE
 import { ref, watch } from "vue";
+
+// SERVICES
 import api from "../services/api";
+
+// TYPES
 import type { SearchUser } from "../types/search";
+
+// COMPONENTS
+import SpriteIcon from "./SpriteIcon.vue";
 
 const props = defineProps({
   mode: { type: String, required: true },
@@ -28,16 +36,13 @@ function handleSelect(user: SearchUser) {
     // multi-select mode
     const index = selectedUsers.value.indexOf(user.id);
 
-    if(index === -1) {
-        // ADD USER
-        selectedUsers.value.push(user.id);
+    if (index === -1) {
+      // ADD USER
+      selectedUsers.value.push(user.id);
     } else {
-        // REMOVE USER
-        selectedUsers.value.splice(index, 1);
+      // REMOVE USER
+      selectedUsers.value.splice(index, 1);
     }
-    // if (!selectedUsers.value.includes(user.id)) {
-    //   selectedUsers.value.push(user.id);
-    // }
   }
 }
 </script>
@@ -46,34 +51,19 @@ function handleSelect(user: SearchUser) {
   <div v-if="props.show" class="post-mnt-popup">
     <div class="btn-mnt-exit">
       <button type="button" @click="emit('close')">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#C5C5C5"
-        >
-          <path
-            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-          />
-        </svg>
+        <img src="/icons/close.svg" alt="Close" width="24" height="24" />
       </button>
     </div>
     <div class="input-mnt-search">
       <h2>Search in Netlink</h2>
       <div class="input-search">
         <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="18px"
-            viewBox="0 -960 960 960"
-            width="18px"
-            fill="#C5C5C5"
-          >
-            <path
-              d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
-            />
-          </svg>
+          <SpriteIcon
+            name="search"
+            size="24"
+            color="#006145"
+            title="Search User"
+          />
         </div>
         <input
           type="text"
@@ -89,32 +79,9 @@ function handleSelect(user: SearchUser) {
           :key="user.id"
           @click="handleSelect(user)"
         >
-          <svg
-            v-if="selectedUsers.includes(user.id)"
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#006145"
-          >
-            <path
-              d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"
-            />
-          </svg>        
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#f4f4f4"
-          >
-            <path
-              d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Z"
-            />
-          </svg>
           {{ user.username }}
         </button>
+        {{ selectedUsers }}
       </div>
       <div v-if="props.mode === 'specific'" class="input-results btn-add">
         <button type="button" @click="emit('select-multiple', selectedUsers)">

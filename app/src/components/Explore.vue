@@ -2,9 +2,13 @@
 // VUE
 import { onMounted, watch } from "vue";
 
-// NAVIGATION
+// COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
+import SpriteIcon from "./SpriteIcon.vue";
+
+// ICONS
+import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -21,7 +25,7 @@ const {
   loadSuggestedUsers,
   searchPost,
   resetFilters,
-  followUser
+  followUser,
 } = useUserData();
 
 // POSTS
@@ -33,9 +37,8 @@ const {
 // SEARCH USERS | SEARCH FILTERS
 watch(searchFilters, searchPost, { deep: true });
 
-
 onMounted(async () => {
-  await loadSuggestedUsers('users');
+  await loadSuggestedUsers("users");
   await loadPosts("all");
 });
 </script>
@@ -54,17 +57,7 @@ onMounted(async () => {
             placeholder="Find somethening new..."
             v-model="searchFilters.query"
           />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="20px"
-            viewBox="0 -960 960 960"
-            width="20px"
-            fill="#C5C5C5"
-          >
-            <path
-              d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
-            />
-          </svg>
+          <SpriteIcon name="search" size="20" color="#006145" title="Add mention" />
         </div>
       </div>
       <div class="filters-box">
@@ -77,30 +70,12 @@ onMounted(async () => {
           >
             <p>From anyone</p>
             <button type="button" @click="searchFilters.people = 'anyone'">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-if="searchFilters.people !== 'anyone'"
-              >
-                <path
-                  d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-else
-              >
-                <path
-                  d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
+              <SpriteIcon
+                :name="searchFilters.people !== 'anyone' ? 'circle' : 'checked-circle'"
+                size="24"
+                :color="searchFilters.people !== 'anyone' ? '#C5C5C5' : '#006145'"
+                title="From anyone"
+              />
             </button>
           </div>
           <div
@@ -109,30 +84,12 @@ onMounted(async () => {
           >
             <p>People you follow</p>
             <button type="button" @click="searchFilters.people = 'following'">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-if="searchFilters.people !== 'following'"
-              >
-                <path
-                  d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-else
-              >
-                <path
-                  d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
+              <SpriteIcon
+                :name="searchFilters.people !== 'following' ? 'circle' : 'checked-circle'"
+                size="24"
+                :color="searchFilters.people !== 'following' ? '#C5C5C5' : '#006145'"
+                title="People you follow"
+              />
             </button>
           </div>
         </div>
@@ -144,62 +101,26 @@ onMounted(async () => {
           >
             <p>Shares and Posts</p>
             <button type="button" @click="searchFilters.shared = 'all'">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-if="searchFilters.shared !== 'all'"
-              >
-                <path
-                  d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-else
-              >
-                <path
-                  d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
+              <SpriteIcon
+                :name="searchFilters.shared !== 'all' ? 'circle' : 'checked-circle'"
+                size="24"
+                :color="searchFilters.shared !== 'all' ? '#C5C5C5' : '#006145'"
+                title="Shares and posts"
+              />
             </button>
           </div>
           <div
             class="filter-check"
             :class="{ 'filter-selected': searchFilters.shared === 'posts' }"
           >
-            <p style="color: #770500;">Only show Posts</p>
+            <p style="color: #770500">Only show Posts</p>
             <button type="button" @click="searchFilters.shared = 'posts'">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#770500"
-                v-if="searchFilters.shared !== 'posts'"
-              >
-                <path
-                  d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-                v-else
-              >
-                <path
-                  d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
+              <SpriteIcon
+                :name="searchFilters.shared !== 'posts' ? 'circle' : 'checked-circle'"
+                size="24"
+                :color="searchFilters.shared !== 'posts' ? '#770500' : '#006145'"
+                title="Only show posts"
+              />
             </button>
           </div>
         </div>
@@ -237,13 +158,7 @@ onMounted(async () => {
           :key="user.id || 'ID_NOT_FOUND'"
         >
           <div class="bar-user-info">
-            <img
-              src="../assets/avatars/40x40.png"
-              alt="User Avatar"
-              class="bar-user-avatar"
-              height="40px"
-              width="40px"
-            />
+            <AvatarIcon />
             <div class="bar-userdata">
               <h2 class="bar-user-name">
                 {{ user.name }}

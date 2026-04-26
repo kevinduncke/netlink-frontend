@@ -23,7 +23,7 @@ const {
   toggleEdit,
   toggleCloseEdit,
   saveProfile,
-  deleteAccount
+  deleteAccount,
 } = useUserData();
 
 onMounted(async () => {
@@ -88,28 +88,10 @@ onBeforeRouteLeave(() => {
             @click="toggleEdit('name')"
             v-if="!editingProfile.name"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#535353"
-            >
-              <path
-                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
-              />
-            </svg>
+            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
           <button type="button" @click="toggleCloseEdit('name')" v-else>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="20px"
-              viewBox="0 -960 960 960"
-              width="20px"
-              fill="#535353"
-            >
-              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
+            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
         <div class="profile-box">
@@ -129,28 +111,10 @@ onBeforeRouteLeave(() => {
             @click="toggleEdit('username')"
             v-if="!editingProfile.username"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#535353"
-            >
-              <path
-                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
-              />
-            </svg>
+            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
           <button type="button" @click="toggleCloseEdit('username')" v-else>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="20px"
-              viewBox="0 -960 960 960"
-              width="20px"
-              fill="#535353"
-            >
-              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
+            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
         <div class="profile-box">
@@ -165,29 +129,15 @@ onBeforeRouteLeave(() => {
               :disabled="!editingProfile.bio"
             />
           </div>
-          <button type="button" @click="toggleEdit('bio')" v-if="!editingProfile.bio">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#535353"
-            >
-              <path
-                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
-              />
-            </svg>
+          <button
+            type="button"
+            @click="toggleEdit('bio')"
+            v-if="!editingProfile.bio"
+          >
+            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
           <button type="button" @click="toggleCloseEdit('bio')" v-else>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="20px"
-              viewBox="0 -960 960 960"
-              width="20px"
-              fill="#535353"
-            >
-              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
+            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
       </div>
@@ -206,29 +156,15 @@ onBeforeRouteLeave(() => {
               :disabled="!editingProfile.url"
             />
           </div>
-          <button type="button" @click="toggleEdit('url')" v-if="!editingProfile.url">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#535353"
-            >
-              <path
-                d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
-              />
-            </svg>
+          <button
+            type="button"
+            @click="toggleEdit('url')"
+            v-if="!editingProfile.url"
+          >
+            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
           <button type="button" @click="toggleCloseEdit('url')" v-else>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="20px"
-              viewBox="0 -960 960 960"
-              width="20px"
-              fill="#535353"
-            >
-              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-            </svg>
+            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
       </div>

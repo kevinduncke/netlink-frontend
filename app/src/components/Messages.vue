@@ -4,6 +4,7 @@ import { onMounted, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
+import SpriteIcon from "./SpriteIcon.vue";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -59,30 +60,15 @@ onMounted(async () => {
             v-model="queryUsers"
           />
           <div type="button" v-if="queryUsers.length <= 0">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#777777"
-            >
-              <path
-                d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
-              />
-            </svg>
+            <SpriteIcon
+              name="search"
+              size="20"
+              color="#006145"
+              title="Add mention"
+            />
           </div>
           <button type="button" v-else @click="clearQuery()">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="18px"
-              viewBox="0 -960 960 960"
-              width="18px"
-              fill="#777777"
-            >
-              <path
-                d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-              />
-            </svg>
+            <img src="/icons/close.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
         <div class="dash-users-modal" v-if="searchUsersResults.length > 0">
@@ -104,18 +90,8 @@ onMounted(async () => {
                 <p class="bar-user-username">{{ user.username }}</p>
               </div>
             </button>
-            <button type="button" @click="verifyNewChatSearch(user.id)">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-              >
-                <path
-                  d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
-                />
-              </svg>
+            <button type="button" @click="selectChat(user.id)">
+              <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
             </button>
           </div>
         </div>
@@ -142,6 +118,9 @@ onMounted(async () => {
                 <p class="bar-user-username">@{{ chat.receiver.username }}</p>
               </div>
             </div>
+          </button>
+          <button type="button" @click="selectChat(chat.chatId)">
+            <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
           </button>
         </div>
       </div>
@@ -190,43 +169,23 @@ onMounted(async () => {
           </button>
           <div class="bar-useractions">
             <button type="button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-              >
-                <path
-                  d="M160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="bell"
+                size="24"
+                color="#C5C5C5"
+                title="Notifications"
+              />
             </button>
             <button type="button" @click="deleteChat(userChatId)">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-              >
-                <path
-                  d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="trash"
+                size="24"
+                color="#C5C5C5"
+                title="Delete Chat"
+              />
             </button>
             <button type="button" @click="getUserInfo()">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#C5C5C5"
-              >
-                <path
-                  d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-                />
-              </svg>
+              <SpriteIcon name="info" size="24" color="#C5C5C5" title="Info" />
             </button>
           </div>
         </div>
@@ -281,68 +240,48 @@ onMounted(async () => {
           <div class="dash-data-box">
             <h2>Share Profile</h2>
             <button type="button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="email"
+                size="24"
+                color="#e3e3e3"
+                title="Share via Email"
+              />
               <p>Share via Email</p>
             </button>
           </div>
           <div class="dash-data-box">
             <h2>Block User</h2>
             <button type="button">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-160q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448ZM480-480Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="block"
+                size="24"
+                color="#e3e3e3"
+                title="Block"
+              />
               <p>Block</p>
             </button>
           </div>
           <div class="dash-data-box">
             <h2>About this Account</h2>
             <div class="dash-about-user">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-160q54 0 104-17.5t92-50.5L228-676q-33 42-50.5 92T160-480q0 134 93 227t227 93Zm252-124q33-42 50.5-92T800-480q0-134-93-227t-227-93q-54 0-104 17.5T284-732l448 448ZM480-480Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="date"
+                size="24"
+                color="#e3e3e3"
+                title="Date Joined"
+              />
               <div>
                 <p>Date Joined</p>
                 <p>{{ dateJoinedUser }}</p>
               </div>
             </div>
             <div class="dash-about-user">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#e3e3e3"
-              >
-                <path
-                  d="M318-120q-82 0-140-58t-58-140q0-40 15-76t43-64l134-133 56 56-134 134q-17 17-25.5 38.5T200-318q0 49 34.5 83.5T318-200q23 0 45-8.5t39-25.5l133-134 57 57-134 133q-28 28-64 43t-76 15Zm79-220-57-57 223-223 57 57-223 223Zm251-28-56-57 134-133q17-17 25-38t8-44q0-50-34-85t-84-35q-23 0-44.5 8.5T558-726L425-592l-57-56 134-134q28-28 64-43t76-15q82 0 139.5 58T839-641q0 39-14.5 75T782-502L648-368Z"
-                />
-              </svg>
+              <SpriteIcon
+                name="link-url"
+                size="24"
+                color="#e3e3e3"
+                title="URL"
+              />
               <div>
                 <p>URL</p>
                 <p>https://netlink.local/{{ chatUserInfo.username }}</p>
@@ -353,17 +292,7 @@ onMounted(async () => {
       </div>
       <div class="dash-footer-user" v-if="selectedChat">
         <button type="button">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#C5C5C5"
-          >
-            <path
-              d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520Zm263.5 221.5Q659-337 684-400h-66q-22 37-58.5 58.5T480-320q-43 0-79.5-21.5T342-400h-66q25 63 80.5 101.5T480-260q68 0 123.5-38.5ZM324-111.5Q251-143 197-197t-85.5-127Q80-397 80-480t31.5-156Q143-709 197-763t127-85.5Q397-880 480-880t156 31.5Q709-817 763-763t85.5 127Q880-563 880-480t-31.5 156Q817-251 763-197t-127 85.5Q563-80 480-80t-156-31.5ZM480-480Zm227 227q93-93 93-227t-93-227q-93-93-227-93t-227 93q-93 93-93 227t93 227q93 93 227 93t227-93Z"
-            />
-          </svg>
+          <SpriteIcon name="emoji" size="24" color="#C5C5C5" title="Emoji" />
         </button>
         <input
           type="text"
@@ -374,58 +303,23 @@ onMounted(async () => {
         />
         <div class="dash-msg-media">
           <button type="button" @click="sendMessage(userChatId)">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#C5C5C5"
-            >
-              <path
-                d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
-              />
-            </svg>
+            <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
           </button>
           <button type="button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#C5C5C5"
-            >
-              <path
-                d="M395-435q-35-35-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35q-50 0-85-35Zm85-205Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm68.5-371.5Q520-503 520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480q17 0 28.5-11.5Z"
-              />
-            </svg>
+            <SpriteIcon
+              name="microphone"
+              size="24"
+              color="#C5C5C5"
+              title="Microphone"
+            />
           </button>
           <button type="button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#C5C5C5"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"
-              />
-            </svg>
+            <SpriteIcon name="photo" size="24" color="#C5C5C5" title="Photo" />
           </button>
         </div>
       </div>
       <div class="dash-empty-chats" v-else>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="64px"
-          viewBox="0 -960 960 960"
-          width="64px"
-          fill="#006145"
-        >
-          <path
-            d="M880-80 720-240H320q-33 0-56.5-23.5T240-320v-40h440q33 0 56.5-23.5T760-440v-280h40q33 0 56.5 23.5T880-640v560ZM160-473l47-47h393v-280H160v327ZM80-280v-520q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v280q0 33-23.5 56.5T600-440H240L80-280Zm80-240v-280 280Z"
-          />
-        </svg>
+        <SpriteIcon name="messages" size="64" color="#006145" title="Messages" />
         <h2>Start a conversation</h2>
       </div>
     </div>
@@ -515,6 +409,15 @@ input:-webkit-autofill:active {
   align-items: center;
   margin: 0.5rem 0;
   padding: 0 1rem;
+}
+.bar-user-box button:first-child {
+  width: 100%;
+}
+.bar-user-box button:last-child {
+  width: auto;
+}
+.bar-user-box button:last-child svg:hover {
+  fill: #006145;
 }
 .selected {
   border-radius: 10px;

@@ -13,6 +13,7 @@ type IconName =
   | "edit"
   | "emoji"
   | "email"
+  | "explore"
   | "heart"
   | "info"
   | "link-url"
@@ -27,7 +28,15 @@ type IconName =
   | "search"
   | "share"
   | "send"
-  | "trash";
+  | "trash"
+  | "dashboard"
+  | "create"
+  | "explore"
+  | "connections"
+  | "profile"
+  | "settings"
+  | "more"
+  | "logout";
 
 const props = withDefaults(
   defineProps<{

@@ -184,6 +184,8 @@ const {
 </template>
 
 <style scoped>
+
+/* REPEATED */
 .dash-wrapper {
   display: grid;
   grid-template-columns: 1fr 2fr 3fr;
@@ -195,10 +197,13 @@ const {
 .dash-content {
   padding: 10px 20px;
 }
-
-/* PROFILE SIDEPANEL */
 .dash-sidepanel {
   background-color: #ffffff;
+  color: #000000;
+  overflow-y: auto;
+}
+.dash-content {
+  background-color: #f4f4f4;
   color: #000000;
   overflow-y: auto;
 }
@@ -210,6 +215,8 @@ const {
   letter-spacing: 0.05rem;
   margin-bottom: 1rem;
 }
+
+/* COMPONENT STYLES */
 .post-text,
 .mediaPost button {
   background-color: rgb(255, 255, 255);
@@ -260,7 +267,6 @@ const {
   font-size: 0.8rem;
   cursor: pointer;
 }
-
 .visibilityPost p,
 .settingsPost p {
   font-family: "Montserrat Light", sans-serif;
@@ -284,7 +290,6 @@ const {
   outline: none;
   cursor: pointer;
 }
-
 .btnIcon {
   background-color: #ffffff;
   padding: 0.3rem;
@@ -325,12 +330,5 @@ const {
 .infoIcon p:last-child {
   font-family: "Montserrat Light", sans-serif;
   margin-bottom: 0;
-}
-
-/* PROFILE CONTENT */
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
 }
 </style>

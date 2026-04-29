@@ -7,6 +7,10 @@ import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
+// STYLES
+import "../styles/profile.css"
+import "../styles/userbutton.css"
+
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
@@ -136,6 +140,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
+/* REPEATED */
 .dash-wrapper {
   display: grid;
   grid-template-columns: 1fr 2fr 3fr;
@@ -147,13 +153,24 @@ onMounted(() => {
 .dash-content {
   padding: 10px 20px;
 }
-
-/* PROFILE SIDEPANEL */
 .dash-sidepanel {
   background-color: #ffffff;
   color: #000000;
   overflow-y: auto;
 }
+.dash-content {
+  background-color: #f4f4f4;
+  color: #000000;
+  overflow-y: auto;
+}
+.dash-profile h2, .dash-posts h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.05rem;
+  margin-bottom: 1rem;
+}
+
+/* COMPONENT STYLES */
 .dash-follows-box {
   display: flex;
   flex-direction: row;
@@ -187,311 +204,5 @@ onMounted(() => {
 .following-panel,
 .followers-panel {
   margin-top: 1rem;
-}
-.bar-user-box {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.5rem 0;
-  padding: 0 1rem;
-}
-.selected {
-  border-radius: 10px;
-  background-color: #efefef;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-}
-.bar-user-info {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
-}
-.bar-userdata h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-}
-.bar-userdata p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-}
-.bar-user-box button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  width: auto;
-}
-.bar-user-box button:first-child:hover {
-  color: #006145;
-}
-
-/* PROFILE CONTENT */
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-
-.dash-profile h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 0.5rem;
-}
-.profile-head {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 0 2rem 2rem 2rem;
-}
-.profile-info h1 {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 1.5rem;
-}
-.profile-stats {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
-  gap: 1rem;
-}
-.profile-titles p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-  line-height: 1rem;
-}
-.profile-avatar {
-  background-color: #e8e8e8;
-  height: 125px;
-  width: 125px;
-  border-radius: 100px;
-}
-
-.dash-posts h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin-bottom: 2rem;
-}
-.dash-post {
-  background-color: #ffffff;
-  padding: 0.8rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-.dash-user-post {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.dash-username {
-  display: inherit;
-  justify-content: start;
-  align-items: center;
-}
-.dash-post-opts {
-  position: relative;
-  display: inherit;
-  justify-content: end;
-  align-items: center;
-}
-.dash-post-opts button {
-  background: transparent;
-  border: none;
-  display: inherit;
-  padding: 0;
-  cursor: pointer;
-}
-.dash-post-opts button svg {
-  margin: 0;
-}
-.dash-pop-delete {
-  position: absolute;
-  top: -15px;
-  width: 100px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #d6d6d6;
-  margin: 2rem 0 0 0;
-}
-.dash-pop-delete button {
-  width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 0.3rem;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-}
-.dash-pop-delete button:hover {
-  background-color: #eeeeee;
-}
-.dash-user-post svg {
-  height: 18px;
-  width: 18px;
-  margin-right: 0.5rem;
-  fill: #006145;
-}
-.dash-user-post span {
-  font-family: "Montserrat SemiBold", sans-serif;
-  letter-spacing: 0.02rem;
-  font-size: 0.8rem;
-}
-.dash-user-post span a {
-  text-decoration: none;
-  color: #006145;
-}
-.dash-content-post {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  padding: 0.5rem;
-}
-.dash-options-post {
-  display: flex;
-  flex-direction: row;
-}
-.dash-options-post button {
-  background-color: transparent;
-  border: none;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-right: 0.5rem;
-  cursor: pointer;
-}
-.dash-options-post svg {
-  height: 14px;
-  width: 14px;
-  margin-right: 0.3rem;
-  fill: #535353;
-}
-.dash-options-post span {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
-}
-.dash-liked svg {
-  fill: #c31010;
-}
-.dash-liked span {
-  color: #c31010;
-  font-family: "Montserrat Medium", sans-serif;
-}
-.dash-shared svg {
-  fill: #005261;
-}
-.dash-commented svg {
-  fill: #006145;
-}
-
-.dash-username-comment {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.5rem;
-}
-.dash-username-comment svg {
-  margin-right: 0.5rem;
-  fill: #006145;
-}
-.dash-username-comment span a {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 0.75rem;
-  color: #006145;
-  text-decoration: none;
-}
-
-.dash-usercmt-info {
-  display: flex;
-  align-items: center;
-}
-.dash-username-comment button {
-  background: none;
-  display: flex;
-  border: none;
-  outline: none;
-  padding: 0;
-  cursor: pointer;
-}
-.dash-username-comment button > svg {
-  margin: 0;
-}
-
-.dash-comments-post,
-.dash-new-comment-post {
-  margin: 1.5rem 2rem 1rem 2rem;
-  border-top: 2px solid #f9f9f9;
-}
-.dash-new-comment-post {
-  padding-top: 0.5rem;
-  display: flex;
-  align-items: center;
-}
-.dash-comments-post,
-.dash-new-comment-post {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-new-comment-post input {
-  box-sizing: border-box;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: none;
-}
-.dash-new-comment-post button {
-  background: none;
-  border: none;
-  outline: none;
-  color: #006145;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-.dash-usercmt-actions svg {
-  fill: #535353;
-}
-.dash-usercmt-actions button:hover > svg {
-  fill: #006145;
-}
-.dash-comments-post div > p:nth-child(3) {
-  font-size: 0.65rem;
-}
-
-.dash-usercmt-actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-.dash-edit-comment input {
-  width: 100%;
-  box-sizing: border-box;
-  margin: 1rem 0;
-  border: none;
-  outline: none;
-  background: none;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-edit-comment button {
-  background: none;
-  border: none;
-  outline: none;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.75rem;
-  color: #006145;
-  padding: 0;
-  padding-right: 1rem;
-  cursor: pointer;
-}
-.dash-edit-comment button:nth-child(2) {
-  color: #535353;
 }
 </style>

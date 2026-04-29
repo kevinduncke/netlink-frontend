@@ -1,0 +1,42 @@
+.bar-user-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  padding: 0 1rem;
+}
+.selected {
+  border-radius: 10px;
+  background-color: #efefef;
+  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
+  box-shadow: -1px 3px 26px -3px #e8e8e8;
+}
+.bar-user-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+.bar-userdata h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.bar-userdata p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.bar-user-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+}
+.bar-user-box button:first-child:hover {
+  color: #006145;
+}

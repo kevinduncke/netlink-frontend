@@ -10,6 +10,9 @@ import SpriteIcon from "./SpriteIcon.vue";
 // ICONS
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
+// STYLES
+import "../styles/userbutton.css"
+
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
@@ -164,6 +167,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+
+/* REPEATED */
 .dash-wrapper {
   display: grid;
   grid-template-columns: 1fr 2fr 3fr;
@@ -174,23 +179,28 @@ onMounted(async () => {
 .dash-content {
   padding: 10px 20px;
 }
-
 .dash-sidepanel {
   background-color: #ffffff;
   color: #000000;
   overflow-y: auto;
 }
+.dash-content {
+  background-color: #f4f4f4;
+  color: #000000;
+  overflow-y: auto;
+}
+.dash-lposts h2, .fav-head h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
 
+/* COMPONENT STYLES */
 .fav-head {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-}
-.fav-head h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
 }
 .fav-head button {
   background: none;
@@ -202,83 +212,6 @@ onMounted(async () => {
 .fav-head button:hover {
   color: #006145;
 }
-
-.fav-head-post {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.5rem;
-}
-.fav-head-post p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-  margin: 0.2rem !important;
-}
-
-.fav-users {
-  background-color: #fbfbfb;
-  padding: 0.8rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-.fav-users p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-  margin: 1rem 0;
-}
-
-.fav-foot-post {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-.fav-foot-post button {
-  background-color: transparent;
-  border: none;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  cursor: pointer;
-}
-.fav-foot-actions {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-.fav-foot-actions button {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.3rem;
-}
-.fav-foot-actions span {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
-}
-.fav-foot-actions button:nth-child(1):hover svg {
-  fill: #006145;
-}
-.fav-foot-actions button:nth-child(2):hover svg {
-  fill: #c31010;
-}
-.fav-foot-actions button:nth-child(3):hover svg {
-  fill: #005261;
-}
-
-.fav-liked svg {
-  fill: #c31010;
-}
-.fav-shared svg {
-  fill: #005261;
-}
-.fav-commented svg {
-  fill: #006145;
-}
-
 .fav-edit-search {
   display: flex;
   flex-direction: row;
@@ -298,7 +231,6 @@ onMounted(async () => {
   font-size: 0.7rem;
   color: #535353;
 }
-
 .fav-edit-listhead {
   display: flex;
   flex-direction: row;
@@ -320,7 +252,6 @@ onMounted(async () => {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
 }
-
 .fav-edit-users,
 .fav-add-users {
   display: flex;
@@ -355,167 +286,8 @@ onMounted(async () => {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
 }
-
 .fav-add-suggestions {
   margin-top: 2rem;
   overflow-y: auto;
-}
-
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-lposts h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-
-.dash-username-comment {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.5rem;
-}
-.dash-username-comment svg {
-  margin-right: 0.5rem;
-  fill: #006145;
-}
-.dash-username-comment span a {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 0.75rem;
-  color: #006145;
-  text-decoration: none;
-}
-.dash-usercmt-info {
-  display: flex;
-  align-items: center;
-}
-.dash-username-comment button {
-  background: none;
-  display: flex;
-  border: none;
-  outline: none;
-  padding: 0;
-  cursor: pointer;
-}
-.dash-username-comment button > svg {
-  margin: 0;
-}
-
-.dash-comments-post,
-.dash-new-comment-post {
-  margin: 1.5rem 2rem 1rem 1rem;
-  border-top: 2px solid #f9f9f9;
-}
-.dash-new-comment-post {
-  padding-top: 0.5rem;
-  display: flex;
-  align-items: center;
-}
-.dash-comments-post,
-.dash-new-comment-post {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-new-comment-post input {
-  box-sizing: border-box;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: none;
-}
-.dash-new-comment-post button {
-  background: none;
-  border: none;
-  outline: none;
-  color: #006145;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-.dash-usercmt-actions svg {
-  fill: #535353;
-}
-.dash-usercmt-actions button:hover > svg {
-  fill: #006145;
-}
-.dash-comments-post div > p:nth-child(3) {
-  font-size: 0.65rem;
-}
-
-.dash-usercmt-actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-.dash-edit-comment input {
-  width: 100%;
-  box-sizing: border-box;
-  margin: 1rem 0;
-  border: none;
-  outline: none;
-  background: none;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-edit-comment button {
-  background: none;
-  border: none;
-  outline: none;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.75rem;
-  color: #006145;
-  padding: 0;
-  padding-right: 1rem;
-  cursor: pointer;
-}
-.dash-edit-comment button:nth-child(2) {
-  color: #535353;
-}
-
-.bar-user-box {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.5rem 0;
-  padding: 0 1rem;
-}
-.selected {
-  border-radius: 10px;
-  background-color: #efefef;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-}
-.bar-user-info {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
-}
-.bar-userdata h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-}
-.bar-userdata p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-}
-.bar-user-box button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  width: auto;
-}
-.bar-user-box button:first-child:hover {
-  color: #006145;
 }
 </style>

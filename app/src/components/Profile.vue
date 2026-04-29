@@ -7,6 +7,9 @@ import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 
+// STYLES
+import "../styles/profile.css"
+
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
@@ -362,40 +365,12 @@ onBeforeRouteLeave(() => {
   color: #000000;
   overflow-y: auto;
 }
+
 .profile-content h2,
 .profile-posts h2 {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.05rem;
   margin-bottom: 0.5rem;
-}
-.profile-head {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 0 2rem 2rem 2rem;
-}
-.profile-info h1 {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 1.5rem;
-}
-.profile-stats {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
-  gap: 1rem;
-}
-.profile-titles p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-  line-height: 1rem;
-}
-.profile-avatar {
-  background-color: #e8e8e8;
-  height: 125px;
-  width: 125px;
-  border-radius: 100px;
 }
 </style>

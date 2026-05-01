@@ -3,6 +3,11 @@ import { reactive, watch } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 
+// STYLES
+import "../styles/entry.css";
+import "../styles/input.css";
+import "../styles/validation.css";
+
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -154,7 +159,7 @@ async function onSubmit() {
 
             <button
               type="submit"
-              class="submit-btn"
+              class="submit-btn button"
               :class="{
                 disabled:
                   !formData.email.length ||
@@ -177,7 +182,7 @@ async function onSubmit() {
           <router-link :to="{ name: 'login' }">
             <button
               type="button"
-              class="submit-btn opt-btn"
+              class="submit-btn opt-btn button"
               id="regAccount"
             >
               Already have an account?
@@ -194,44 +199,5 @@ async function onSubmit() {
   margin-top: 1rem !important;
   font-family: "Montserrat Regular", sans-serif;
   border: 1px solid #ffffff;
-}
-/* Remove autocomplete background color */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0px 1000px #f4f4f4 inset !important; /* Set to your background */
-  box-shadow: 0 0 0px 1000px #f4f4f4 inset !important;
-  -webkit-text-fill-color: #000 !important; /* Set to your text color */
-  transition: background-color 5000s ease-in-out 0s;
-}
-.formValidation {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-.form-error {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem !important;
-  padding: 0;
-  margin: 0;
-}
-.disabled {
-  border: 2px solid #006a4c !important;
-  color: #00b582;
-  cursor: auto;
-}
-.animated-btn:hover {
-  border: 2px solid #ffffff;
-  background-color: #ffffff;
-  color: #006145;
-}
-.opt-btn:hover {
-  border: 1px solid #ffffff;
-  background-color: #ffffff;
-  color: #006145;
 }
 </style>

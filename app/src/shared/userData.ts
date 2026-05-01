@@ -16,6 +16,8 @@ import type { UserProfile } from "../types/users";
 import { usePosts } from "../shared/usePosts";
 import type { ChatMessage, ChatUser } from "../types/chat";
 
+export const selectedUserId = ref<string | number>("");
+
 export function useUserData() {
   const authStore = useAuthStore();
   const { editingComment } = usePosts();
@@ -557,7 +559,6 @@ export function useUserData() {
   //================================================
 
   // HELPER FUNCTIONS
-  const selectedUserId = ref<string | number>("");
   function selectedUser(userId: string | number) {
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;

@@ -6,6 +6,10 @@ import { onMounted, watch } from "vue";
 import Navigation from "./Navigation.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
+// STYLES
+import "../styles/body.css";
+import "../styles/input.css";
+
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
@@ -63,11 +67,11 @@ onMounted(async () => {
             <SpriteIcon
               name="search"
               size="20"
-              color="#006145"
+              color="#535353"
               title="Add mention"
             />
           </div>
-          <button type="button" v-else @click="clearQuery()">
+          <button class="button" type="button" v-else @click="clearQuery()">
             <img src="/icons/close.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -77,7 +81,7 @@ onMounted(async () => {
             v-for="user in searchUsersResults"
             :key="user.id"
           >
-            <button type="button" @click="verifyNewChatSearch(user.id)">
+            <button class="button" type="button" @click="verifyNewChatSearch(user.id)">
               <img
                 src="../assets/avatars/40x40.png"
                 alt="User Avatar"
@@ -90,7 +94,7 @@ onMounted(async () => {
                 <p class="bar-user-username">{{ user.username }}</p>
               </div>
             </button>
-            <button type="button" @click="selectChat(user.id)">
+            <button class="button" type="button" @click="selectChat(user.id)">
               <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
             </button>
           </div>
@@ -99,12 +103,12 @@ onMounted(async () => {
       <div class="dash-chats" v-if="userChats.length > 0">
         <h2>Chats</h2>
         <div
-          class="bar-user-box"
+          class="bar-user-box shadow-light"
           :class="{ selected: chat.chatId === userChatId }"
           v-for="chat in userChats"
           :key="chat.chatId"
         >
-          <button type="button" @click="selectChat(chat.chatId)">
+          <button class="button" type="button" @click="selectChat(chat.chatId)">
             <div class="bar-user-info">
               <img
                 src="../assets/avatars/40x40.png"
@@ -119,7 +123,7 @@ onMounted(async () => {
               </div>
             </div>
           </button>
-          <button type="button" @click="selectChat(chat.chatId)">
+          <button class="button" type="button" @click="selectChat(chat.chatId)">
             <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
           </button>
         </div>
@@ -127,11 +131,11 @@ onMounted(async () => {
       <div class="dash-suggestions">
         <h2>Suggestions</h2>
         <div
-          class="bar-user-box"
+          class="bar-user-box shadow-light"
           v-for="user in filteredSuggestedUsers"
           :key="user.id"
         >
-          <button type="button" @click="createChat(user.id)">
+          <button class="button" type="button" @click="createChat(user.id)">
             <div class="bar-user-info">
               <img
                 src="../assets/avatars/40x40.png"
@@ -152,7 +156,7 @@ onMounted(async () => {
     <div class="dash-content">
       <div class="dash-header-user" v-if="selectedChat">
         <div class="bar-user-box">
-          <button type="button">
+          <button class="button" type="button">
             <div class="bar-user-info">
               <img
                 src="../assets/avatars/40x40.png"
@@ -168,24 +172,24 @@ onMounted(async () => {
             </div>
           </button>
           <div class="bar-useractions">
-            <button type="button">
+            <button class="button" type="button">
               <SpriteIcon
                 name="bell"
                 size="24"
-                color="#C5C5C5"
+                color="#535353"
                 title="Notifications"
               />
             </button>
-            <button type="button" @click="deleteChat(userChatId)">
+            <button class="button" type="button" @click="deleteChat(userChatId)">
               <SpriteIcon
                 name="trash"
                 size="24"
-                color="#C5C5C5"
+                color="#535353"
                 title="Delete Chat"
               />
             </button>
-            <button type="button" @click="getUserInfo()">
-              <SpriteIcon name="info" size="24" color="#C5C5C5" title="Info" />
+            <button class="button" type="button" @click="getUserInfo()">
+              <SpriteIcon name="info" size="24" color="#535353" title="Info" />
             </button>
           </div>
         </div>
@@ -239,11 +243,11 @@ onMounted(async () => {
         <div v-else>
           <div class="dash-data-box">
             <h2>Share Profile</h2>
-            <button type="button">
+            <button class="button shadow-light" type="button">
               <SpriteIcon
                 name="email"
                 size="24"
-                color="#e3e3e3"
+                color="#535353"
                 title="Share via Email"
               />
               <p>Share via Email</p>
@@ -251,11 +255,11 @@ onMounted(async () => {
           </div>
           <div class="dash-data-box">
             <h2>Block User</h2>
-            <button type="button">
+            <button class="button" type="button">
               <SpriteIcon
                 name="block"
                 size="24"
-                color="#e3e3e3"
+                color="#535353"
                 title="Block"
               />
               <p>Block</p>
@@ -267,7 +271,7 @@ onMounted(async () => {
               <SpriteIcon
                 name="date"
                 size="24"
-                color="#e3e3e3"
+                color="#535353"
                 title="Date Joined"
               />
               <div>
@@ -279,7 +283,7 @@ onMounted(async () => {
               <SpriteIcon
                 name="link-url"
                 size="24"
-                color="#e3e3e3"
+                color="#535353"
                 title="URL"
               />
               <div>
@@ -290,9 +294,9 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="dash-footer-user" v-if="selectedChat">
-        <button type="button">
-          <SpriteIcon name="emoji" size="24" color="#C5C5C5" title="Emoji" />
+      <div class="dash-footer-user shadow-light" v-if="selectedChat">
+        <button class="button" type="button">
+          <SpriteIcon name="emoji" size="24" color="#535353" title="Emoji" />
         </button>
         <input
           type="text"
@@ -302,24 +306,24 @@ onMounted(async () => {
           v-model="message"
         />
         <div class="dash-msg-media">
-          <button type="button" @click="sendMessage(userChatId)">
-            <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
+          <button class="button" type="button" @click="sendMessage(userChatId)">
+            <SpriteIcon name="send" size="24" color="#535353" title="Send" />
           </button>
-          <button type="button">
-            <SpriteIcon
-              name="microphone"
-              size="24"
-              color="#C5C5C5"
-              title="Microphone"
-            />
+          <button class="button" type="button">
+              <SpriteIcon
+                name="microphone"
+                size="24"
+                color="#535353"
+                title="Microphone"
+              />
           </button>
-          <button type="button">
-            <SpriteIcon name="photo" size="24" color="#C5C5C5" title="Photo" />
+          <button class="button" type="button">
+            <SpriteIcon name="photo" size="24" color="#535353" title="Photo" />
           </button>
         </div>
       </div>
       <div class="dash-empty-chats" v-else>
-        <SpriteIcon name="messages" size="64" color="#006145" title="Messages" />
+        <SpriteIcon name="messages" size="64" color="#535353" title="Messages" />
         <h2>Start a conversation</h2>
       </div>
     </div>
@@ -327,41 +331,16 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-  overflow-y: hidden;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-
-/* PROFILE SIDEPANEL */
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-messages h2,
-.dash-chats h2,
-.dash-suggestions h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-
 .dash-message-form {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin: 1rem 0;
-  background-color: #f4f4f4;
-  padding: 0.5rem 1rem;
+  margin: var(--spacing-md) 0;
+  background-color: var(--color-gray-100);
+  padding: var(--spacing-sm) var(--spacing-md);
   box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 .dash-message-form span {
   font-family: "Montserrat Medium", sans-serif;
@@ -378,37 +357,15 @@ onMounted(async () => {
   font-size: 0.8rem;
 }
 .dash-message-form button {
-  background: transparent;
-  border: none;
   padding: 0;
-  cursor: pointer;
 }
 .dash-message-form button:hover > svg {
-  fill: #006145;
+  fill: var(--color-primary);
 }
-/* Remove autocomplete background color */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0px 1000px #f4f4f4 inset !important; /* Set to your background */
-  box-shadow: 0 0 0px 1000px #f4f4f4 inset !important;
-  -webkit-text-fill-color: #000 !important; /* Set to your text color */
-  transition: background-color 5000s ease-in-out 0s;
-}
-
 .dash-chats,
 .dash-suggestions {
   box-sizing: border-box;
   margin: 1.5rem 0;
-}
-.bar-user-box {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.5rem 0;
-  padding: 0 1rem;
 }
 .bar-user-box button:first-child {
   width: 100%;
@@ -419,77 +376,33 @@ input:-webkit-autofill:active {
 .bar-user-box button:last-child svg:hover {
   fill: #006145;
 }
-.selected {
-  border-radius: 10px;
-  background-color: #efefef;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-}
-.bar-user-info {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
-}
-.bar-userdata h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-  text-align: left;
-}
-.bar-userdata p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-  text-align: left;
-}
-.bar-user-box button {
-  background: transparent;
-  border: none;
-  padding: 0;
-  width: 100%;
-  cursor: pointer;
-}
 .bar-user-box:hover {
-  border-radius: 10px;
-  background-color: #efefef;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-}
-.bar-user-box button:first-child:hover {
-  color: #006145;
+  border-radius: var(--radius-md);
+  background-color: var(--color-gray-200);
 }
 .bar-useractions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
-.bar-useractions button {
-  cursor: pointer;
-}
 .bar-useractions button > svg:hover {
-  fill: #006145;
+  fill: var(--color-primary);
 }
 .dash-user-item {
   padding: 0 1rem;
 }
 .dash-user-item button {
-  background: transparent;
-  border: none;
   outline: none;
   width: 100%;
   display: flex;
   gap: 1rem;
   align-items: center;
-  cursor: pointer;
 }
 .dash-user-item:hover {
-  background-color: #f4f4f4;
-  border-radius: 10px;
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
 }
 .dash-search-item {
   display: flex;
@@ -505,18 +418,12 @@ input:-webkit-autofill:active {
 
 /* PROFILE CONTENT */
 .dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
 .dash-header-user {
-  background-color: #ffffff;
-  border-radius: 10px;
-  -webkit-box-shadow: -1px 3px 26px -3px #d3d3d3;
-  box-shadow: -1px 3px 26px -3px #d3d3d3;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
 }
 .dash-header-user .bar-user-box:hover {
   background-color: transparent;
@@ -524,21 +431,16 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: none;
 }
 .dash-footer-user {
-  background-color: #ffffff;
-  border-radius: 10px;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 1rem;
-  -webkit-box-shadow: -1px 3px 26px -3px #b9b9b9;
-  box-shadow: -1px 3px 26px -3px #b9b9b9;
-  margin-bottom: 1rem;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 .dash-footer-user button {
-  background: transparent;
-  border: none;
   padding: 0;
-  cursor: pointer;
 }
 .dash-footer-user input {
   width: 100%;
@@ -550,17 +452,17 @@ input:-webkit-autofill:active {
   outline: none;
 }
 .dash-footer-user button > svg:hover {
-  fill: #006145;
+  fill: var(--color-primary);
 }
 .dash-msg-media {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 .dash-msg-media button:first-child > svg {
-  fill: #006145;
+  fill: var(--color-primary);
 }
 .dash-body-msg {
   height: 100%;
@@ -575,10 +477,10 @@ input:-webkit-autofill:active {
 .dash-date-group span {
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
-  background-color: #c5c5c5;
-  color: #ffffff;
-  padding: 0.5rem;
-  border-radius: 10px;
+  background-color: var(--color-gray-500);
+  color: var(--color-white);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
 }
 .dash-message-boxuser {
   width: 100%;
@@ -604,11 +506,11 @@ input:-webkit-autofill:active {
 .dash-my-msg {
   box-sizing: border-box;
   width: fit-content;
-  background-color: #006145;
-  color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
-  margin: 1rem 0;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-md) 0;
 }
 .dash-user-msg p,
 .dash-my-msg p {
@@ -637,11 +539,9 @@ input:-webkit-autofill:active {
 }
 
 .dash-modal-info {
-  background-color: #ffffff;
-  border-radius: 10px;
-  -webkit-box-shadow: -1px 3px 26px -3px #d3d3d3;
-  box-shadow: -1px 3px 26px -3px #d3d3d3;
-  margin: 1rem 0;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-md) 0;
 }
 .dash-data-box h2 {
   font-family: "Montserrat Regular", sans-serif;
@@ -655,20 +555,16 @@ input:-webkit-autofill:active {
   flex-direction: row;
   align-items: center;
   justify-content: start;
-  gap: 1rem;
-  padding: 0.5rem 0;
-  background-color: #ffffff;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 0 1rem;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+  background-color: var(--color-white);
 }
 .dash-data-box button:hover {
-  background-color: #f3f3f3;
+  background-color: var(--color-gray-100);
 }
 .dash-data-box button:hover > svg,
 .dash-about-user:hover > svg {
-  fill: #006145;
+  fill: var(--color-primary);
 }
 .dash-data-box button > p {
   font-family: "Montserrat Regular", sans-serif;
@@ -679,8 +575,8 @@ input:-webkit-autofill:active {
   flex-direction: row;
   align-items: center;
   justify-content: start;
-  gap: 1rem;
-  padding: 0 1rem;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
 }
 .dash-about-user p:first-child {
   font-family: "Montserrat Medium", sans-serif;

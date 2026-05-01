@@ -1,0 +1,29 @@
+.formValidation {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.form-error {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.7rem !important;
+  padding: 0;
+  margin: 0;
+}
+.disabled {
+  border: 2px solid #006a4c !important;
+  color: #00b582;
+  cursor: auto;
+}
+.animated-btn:hover {
+  border: 2px solid #ffffff;
+  background-color: #ffffff;
+  color: #006145;
+}
+.opt-btn:hover {
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+  color: #006145;
+}

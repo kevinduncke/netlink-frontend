@@ -12,6 +12,7 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
 import "../styles/userbutton.css"
+import "../styles/body.css"
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -52,7 +53,7 @@ onMounted(async () => {
     <div class="dash-sidepanel">
       <div class="search-box">
         <h2>Search</h2>
-        <div class="search-box-input">
+        <div class="search-box-input shadow-light">
           <input
             type="text"
             name="search"
@@ -60,7 +61,7 @@ onMounted(async () => {
             placeholder="Find somethening new..."
             v-model="searchFilters.query"
           />
-          <SpriteIcon name="search" size="20" color="#006145" title="Add mention" />
+          <SpriteIcon name="search" size="20" color="#535353" title="Add mention" />
         </div>
       </div>
       <div class="filters-box">
@@ -72,11 +73,11 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.people === 'anyone' }"
           >
             <p>From anyone</p>
-            <button type="button" @click="searchFilters.people = 'anyone'">
+            <button class="button" type="button" @click="searchFilters.people = 'anyone'">
               <SpriteIcon
                 :name="searchFilters.people !== 'anyone' ? 'circle' : 'checked-circle'"
                 size="24"
-                :color="searchFilters.people !== 'anyone' ? '#C5C5C5' : '#006145'"
+                color="#535353"
                 title="From anyone"
               />
             </button>
@@ -86,11 +87,11 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.people === 'following' }"
           >
             <p>People you follow</p>
-            <button type="button" @click="searchFilters.people = 'following'">
+            <button class="button" type="button" @click="searchFilters.people = 'following'">
               <SpriteIcon
                 :name="searchFilters.people !== 'following' ? 'circle' : 'checked-circle'"
                 size="24"
-                :color="searchFilters.people !== 'following' ? '#C5C5C5' : '#006145'"
+                color="#535353"
                 title="People you follow"
               />
             </button>
@@ -103,11 +104,11 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.shared === 'all' }"
           >
             <p>Shares and Posts</p>
-            <button type="button" @click="searchFilters.shared = 'all'">
+            <button class="button" type="button" @click="searchFilters.shared = 'all'">
               <SpriteIcon
                 :name="searchFilters.shared !== 'all' ? 'circle' : 'checked-circle'"
                 size="24"
-                :color="searchFilters.shared !== 'all' ? '#C5C5C5' : '#006145'"
+                color="#535353"
                 title="Shares and posts"
               />
             </button>
@@ -117,11 +118,11 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.shared === 'posts' }"
           >
             <p style="color: #770500">Only show Posts</p>
-            <button type="button" @click="searchFilters.shared = 'posts'">
+            <button class="button" type="button" @click="searchFilters.shared = 'posts'">
               <SpriteIcon
                 :name="searchFilters.shared !== 'posts' ? 'circle' : 'checked-circle'"
                 size="24"
-                :color="searchFilters.shared !== 'posts' ? '#770500' : '#006145'"
+                color="#535353"
                 title="Only show posts"
               />
             </button>
@@ -149,7 +150,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="filter-reset">
-          <button type="button" @click="resetFilters()">Reset Filters</button>
+          <button class="shadow-light button" type="button" @click="resetFilters()">Reset Filters</button>
         </div>
       </div>
       <div class="bar-new-follows">
@@ -169,7 +170,7 @@ onMounted(async () => {
               <p class="bar-user-username">@{{ user.username }}</p>
             </div>
           </div>
-          <button class="follow-btn" @click="followUser(user.id)">
+          <button class="follow-btn button" @click="followUser(user.id)">
             Follow
           </button>
         </div>
@@ -188,38 +189,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
-/* REPEATED */
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-  overflow-y: hidden;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-.bar-new-follows h2,
-.search-box h2,
-.filters-box h2,
-.explore-content h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-
-
 /* COMPONENT STYLES */
 .search-box {
   margin-bottom: 2rem;
@@ -249,11 +218,8 @@ onMounted(async () => {
   margin: 0;
 }
 .filter-check button {
-  background: transparent;
-  border: none;
   outline: none;
   padding: 0;
-  cursor: pointer;
 }
 .filter-check input {
   border: none;
@@ -269,13 +235,13 @@ onMounted(async () => {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-  border-radius: 10px;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  -webkit-box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-light);
 }
 .search-box-input svg:hover {
-  fill: #006145;
+  fill: var(--color-primary);
   cursor: pointer;
 }
 .search-input {
@@ -290,42 +256,37 @@ onMounted(async () => {
   margin: 2rem 0;
 }
 .filter-reset button {
-  background: transparent;
-  border: 2px solid #c5c5c5;
+  border: 2px solid var(--color-gray-500);
   width: 100%;
-  padding: 1rem 0;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
+  padding: var(--spacing-md) 0;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
-  color: #616161;
+  color: var(--color-gray-700);
   letter-spacing: 0.03rem;
-  cursor: pointer;
 }
 .filter-reset button:hover {
-  border: 2px solid #006145;
-  color: #006145;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
 }
 
 .bar-user-box button {
-  background-color: #006145;
-  color: #ffffff;
-  border: 2px solid #006145;
-  padding: 0.5rem 2rem;
-  border-radius: 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: 2px solid var(--color-primary);
+  padding: var(--spacing-sm) 2rem;
+  border-radius: var(--radius-lg);
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
-  cursor: pointer;
 }
 .bar-user-box button:hover {
   background-color: transparent;
-  color: #006145;
-  border: 2px solid #006145;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
 }
 .bar-no-users {
   text-align: center;
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
-  padding: 1rem 0;
+  padding: var(--spacing-md) 0;
 }
 </style>

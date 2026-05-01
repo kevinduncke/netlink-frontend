@@ -5,6 +5,7 @@
   align-items: center;
   margin: 0.5rem 0;
   padding: 0 1rem;
+  text-align: left;
 }
 .selected {
   border-radius: 10px;
@@ -24,11 +25,13 @@
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   margin: 0.5rem 0;
+  text-align: left;
 }
 .bar-userdata p {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.8rem;
   margin: 0.5rem 0;
+  text-align: left;
 }
 .bar-user-box button {
   background: transparent;

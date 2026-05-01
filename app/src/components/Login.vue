@@ -3,6 +3,11 @@ import { ref, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 
+// STYLES
+import "../styles/entry.css";
+import "../styles/input.css";
+import "../styles/validation.css";
+
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -102,7 +107,7 @@ onMounted(() => {
             </div>
             <button
               type="submit"
-              class="submit-btn"
+              class="submit-btn button"
               :class="{
                 disabled: !formData.email.length || !formData.password.length,
                 'animated-btn':
@@ -116,12 +121,12 @@ onMounted(() => {
           <div class="options-btns">
             <div>
               <router-link :to="{ name: 'forgot-password' }">
-                <button class="opt-btn">Forgot Password?</button>
+                <button class="opt-btn button">Forgot Password?</button>
               </router-link>
             </div>
             <div>
               <router-link :to="{ name: 'register' }">
-                <button class="opt-btn">Create Account</button>
+                <button class="opt-btn button">Create Account</button>
               </router-link>
             </div>
           </div>
@@ -132,42 +137,4 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Remove autocomplete background color */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0px 1000px #f4f4f4 inset !important; /* Set to your background */
-  box-shadow: 0 0 0px 1000px #f4f4f4 inset !important;
-  -webkit-text-fill-color: #000 !important; /* Set to your text color */
-  transition: background-color 5000s ease-in-out 0s;
-}
-.formValidation {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-.form-error {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.9rem;
-  padding: 0;
-}
-.disabled {
-  border: 2px solid #027f5c !important;
-  color: #01956b;
-  cursor: auto;
-}
-.animated-btn:hover {
-  border: 2px solid #ffffff;
-  background-color: #ffffff;
-  color: #006145;
-}
-.opt-btn:hover {
-  border: 1px solid #ffffff;
-  background-color: #ffffff;
-  color: #006145;  
-}
 </style>

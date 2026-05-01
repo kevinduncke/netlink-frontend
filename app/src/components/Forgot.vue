@@ -1,4 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+
+// STYLES
+import "../styles/entry.css";
+
+</script>
 
 <template>
   <div class="ntl-wrapper">
@@ -22,11 +27,11 @@
                 placeholder="Email or Username"
               />
             </div>
-            <button type="submit" class="submit-btn">Send</button>
+            <button type="submit" class="submit-btn button">Send</button>
           </form>
           <div>
             <router-link to="/login">
-              <button type="submit" class="submit-btn" id="backLogin">Back to login</button>
+              <button type="submit" class="submit-btn button" id="backLogin">Back to login</button>
             </router-link>
           </div>
         </div>
@@ -46,7 +51,7 @@
                 placeholder="New Password"
               />
             </div>
-            <button type="submit" class="submit-btn">Confirm</button>
+            <button type="submit" class="submit-btn button">Confirm</button>
           </form>
         </div>
       </div>
@@ -59,8 +64,8 @@
   display: none;
 }
 #backLogin {
-  margin-top: 1rem;
+  margin-top: var(--spacing-md);
   font-family: "Montserrat Regular", sans-serif;
-  border: 1px solid #ffffff;
+  border: 1px solid var(--color-white);
 }
 </style>

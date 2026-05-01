@@ -48,20 +48,20 @@ function handleSelect(user: SearchUser) {
 </script>
 
 <template>
-  <div v-if="props.show" class="post-mnt-popup">
+  <div v-if="props.show" class="post-mnt-popup shadow-light">
     <div class="btn-mnt-exit">
-      <button type="button" @click="emit('close')">
+      <button class="button" type="button" @click="emit('close')">
         <img src="/icons/close.svg" alt="Close" width="24" height="24" />
       </button>
     </div>
     <div class="input-mnt-search">
       <h2>Search in Netlink</h2>
-      <div class="input-search">
+      <div class="input-search shadow-light">
         <div>
           <SpriteIcon
             name="search"
             size="24"
-            color="#006145"
+            color="#535353"
             title="Search User"
           />
         </div>
@@ -73,19 +73,14 @@ function handleSelect(user: SearchUser) {
           v-model="query"
         />
       </div>
-      <div class="input-results">
+      <div class="input-results" v-if="results.length > 0">
         <button
+          class="button"
           v-for="user in results"
           :key="user.id"
           @click="handleSelect(user)"
         >
           {{ user.username }}
-        </button>
-        {{ selectedUsers }}
-      </div>
-      <div v-if="props.mode === 'specific'" class="input-results btn-add">
-        <button type="button" @click="emit('select-multiple', selectedUsers)">
-          Add Selected
         </button>
       </div>
     </div>
@@ -100,8 +95,6 @@ function handleSelect(user: SearchUser) {
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: rgba(255, 255, 255);
-  -webkit-box-shadow: -1px 3px 26px -3px #646464;
-  box-shadow: -1px 3px 56px -3px #646464;
   border-radius: 10px;
   box-sizing: border-box;
   padding: 3rem;
@@ -113,10 +106,7 @@ function handleSelect(user: SearchUser) {
   justify-content: flex-end;
 }
 .btn-mnt-exit button {
-  background: transparent;
-  border: none;
   outline: none;
-  cursor: pointer;
 }
 .input-mnt-search {
   text-align: center;
@@ -124,19 +114,12 @@ function handleSelect(user: SearchUser) {
   flex-direction: column;
   width: 100%;
 }
-.input-mnt-search h2 {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-  color: #000000;
-}
 .input-search {
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #ffffff;
   margin: 1rem 0 0 0;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 56px -3px #c5c5c5;
   padding: 1rem 0.5rem;
 }
 .input-search input {
@@ -150,17 +133,14 @@ function handleSelect(user: SearchUser) {
   color: #000000;
 }
 .input-results {
-  background-color: #ffffff;
+  background-color: var(--color-white);
 }
 .input-results button {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #f9f9f9;
+  border-bottom: 1px solid var(--color-gray-50);
   outline: none;
-  padding: 1rem 2.5rem;
+  padding: var(--spacing-md) 2.5rem;
   text-align: left;
-  cursor: pointer;
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
   display: flex;
@@ -168,7 +148,7 @@ function handleSelect(user: SearchUser) {
   justify-content: left;
 }
 .input-results button:hover {
-  background-color: #f4f4f4;
+  background-color: var(--color-gray-100);
 }
 .input-results svg {
   padding-right: 1rem;

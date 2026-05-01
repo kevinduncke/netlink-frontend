@@ -1,13 +1,3 @@
-:root {
-  background: #0f0f0f;
-  color: #ffffff;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
 @font-face {
   font-family: "Montserrat Bold";
   src: url("./assets/fonts/Montserrat-Bold.ttf") format("truetype");
@@ -29,118 +19,14 @@ body {
   src: url("./assets/fonts/Montserrat-Light.ttf") format("truetype");
 }
 
-/* SIGN IN. SING UP. FORGOT PASSWORD */
-.ntl-wrapper {
-  display: grid;
-  grid-template-columns: 50% 50%;
-}
-.ntl-group {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  color: #000000;
-}
-.ntl-group p {
-  text-align: center;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 18px;
-}
-.ntl-form-container {
-  display: flex;
-  flex-direction: column;
-  align-items: normal;
-  background-color: #006145;
-  color: #ffffff;
-}
-.ntl-form-container h2 {
-  font-size: 1rem;
-  text-align: left;
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 18px;
-  letter-spacing: 0.02rem;
-  margin-bottom: 2rem;
-}
-.form-wrapper {
-  margin: 0 5rem;
-}
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  row-gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.formGroup input {
-  padding: 1.2rem 1rem;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 14px;
-  color: #3f3f3f;
-  border: none;
-  border-radius: 5px;
-  outline: none;
-}
-.submit-btn {
-  width: 100%;
-  padding: 1.1rem;
-  border: 2px solid #ffffff;
-  border-radius: 5px;
-  background-color: transparent;
-  color: #ffffff;
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 15px;
-  cursor: pointer;
-}
-.options-btns {
-  display: grid;
-  grid-template-columns: auto auto;
-  margin-top: 0.5rem;
-  gap: 0.5rem;
-}
-.opt-btn {
-  width: 100%;
-  padding: 1.2rem 0;
-  background-color: transparent;
-  color: #ffffff;
-  border: 1px solid #ffffff;
-  font-family: "Montserrat Regular", sans-serif;
-  border-radius: 5px;
-  cursor: pointer;
+body {
+  margin: 0;
+  padding: 0;
 }
 
-@media screen and (max-width: 768px) {
-  .ntl-wrapper {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    height: 100vh;
-  }
-  .ntl-group {
-    height: auto;
-  }
-  .ntl-group:nth-child(1){
-    flex-direction: row;
-  }
-  .ntl-group img {
-    height: 75px;
-    margin-right: 1rem;
-  }
-  .ntl-group p {
-    font-size: 0.8rem;
-  }
-  .ntl-form-container h2 {
-    font-size: 0.9rem;
-  }
-  .form-wrapper {
-    margin: 0 2rem;
-  }
-  .formGroup input {
-    font-size: 12px;
-  }
-  .submit-btn {
-    font-size: 0.9rem;
-  }
+h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
+  letter-spacing: 0.05rem;
+  margin-bottom: 1rem;
 }

@@ -9,6 +9,7 @@ import Post from "./Post.vue";
 
 // STYLES
 import "../styles/profile.css"
+import "../styles/body.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -74,7 +75,7 @@ onBeforeRouteLeave(() => {
     <div class="dash-sidepanel">
       <div class="profile-edit">
         <h2>Edit Profile</h2>
-        <div class="profile-box">
+        <div class="profile-box body-box shadow-light">
           <div class="profile-boxinput">
             <label>Name</label>
             <input
@@ -87,17 +88,18 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <button
+            class="button"
             type="button"
             @click="toggleEdit('name')"
             v-if="!editingProfile.name"
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button type="button" @click="toggleCloseEdit('name')" v-else>
+          <button class="button" type="button" @click="toggleCloseEdit('name')" v-else>
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
-        <div class="profile-box">
+        <div class="profile-box body-box shadow-light">
           <div class="profile-boxinput">
             <label>Username</label>
             <input
@@ -110,17 +112,18 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <button
+            class="button"  
             type="button"
             @click="toggleEdit('username')"
             v-if="!editingProfile.username"
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button type="button" @click="toggleCloseEdit('username')" v-else>
+          <button class="button" type="button" @click="toggleCloseEdit('username')" v-else>
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
-        <div class="profile-box">
+        <div class="profile-box body-box shadow-light">
           <div class="profile-boxinput">
             <label>Bio</label>
             <input
@@ -133,13 +136,14 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <button
+            class="button"
             type="button"
             @click="toggleEdit('bio')"
             v-if="!editingProfile.bio"
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button type="button" @click="toggleCloseEdit('bio')" v-else>
+          <button class="button" type="button" @click="toggleCloseEdit('bio')" v-else>
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -147,7 +151,7 @@ onBeforeRouteLeave(() => {
       <div class="profile-links">
         <h2>Links</h2>
         <p>Your links are visible to everyone on Netlink.</p>
-        <div class="profile-box">
+        <div class="profile-box body-box shadow-light">
           <div class="profile-boxinput">
             <label>URL</label>
             <input
@@ -160,13 +164,14 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <button
+            class="button"
             type="button"
             @click="toggleEdit('url')"
             v-if="!editingProfile.url"
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button type="button" @click="toggleCloseEdit('url')" v-else>
+          <button class="button" type="button" @click="toggleCloseEdit('url')" v-else>
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -185,7 +190,7 @@ onBeforeRouteLeave(() => {
       </div>
       <button
         type="button"
-        class="save-btn"
+        class="save-btn button"
         @click="saveProfile()"
         :disabled="!hasUnsavedChanges"
         v-if="hasUnsavedChanges"
@@ -194,7 +199,7 @@ onBeforeRouteLeave(() => {
       </button>
       <div class="profile-delete">
         <h2>Delete Account</h2>
-        <button type="button" class="delete-btn" @click="deleteAccount()">
+        <button type="button" class="delete-btn button" @click="deleteAccount()">
           Delete
         </button>
       </div>
@@ -235,37 +240,12 @@ onBeforeRouteLeave(() => {
 </template>
 
 <style scoped>
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-  overflow-y: hidden;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-
 /* PROFILE SIDEPANEL */
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
 .profile-edit,
 .profile-links,
 .profile-privacy,
 .profile-delete {
   margin-bottom: 1.5rem;
-}
-.profile-edit h2,
-.profile-links h2,
-.profile-privacy h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 1rem;
 }
 .profile-links p,
 .profile-privacy p {
@@ -277,21 +257,12 @@ onBeforeRouteLeave(() => {
   font-family: "Montserrat Medium", sans-serif;
 }
 .profile-box {
-  background-color: rgb(255, 255, 255);
-  padding: 0.5rem;
-  margin-bottom: 0.8rem;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-  border-radius: 10px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 .profile-box button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -325,52 +296,30 @@ onBeforeRouteLeave(() => {
   width: 100%;
   padding: 0.8rem 0;
   margin-bottom: 1.5rem;
-  border: 2px solid #006145;
-  border-radius: 10px;
-  background-color: #ffffff;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
   font-family: "Montserrat SemiBold", sans-serif;
-  color: #006145;
-  cursor: pointer;
+  color: var(--color-primary);
 }
 .save-btn:hover {
-  background-color: #006145;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-}
-
-.profile-delete h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-white);
+  color: var(--color-white);
 }
 .delete-btn {
   width: 100%;
   padding: 0.8rem 0;
-  border: 2px solid #a90000;
-  border-radius: 10px;
-  background-color: #ffffff;
+  border: 2px solid var(--color-error);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
   font-family: "Montserrat SemiBold", sans-serif;
-  color: #a90000;
-  cursor: pointer;
-  margin-top: 0.5rem;
+  color: var(--color-error);
+  margin-top: var(--spacing-sm);
 }
 .delete-btn:hover {
-  background-color: #a90000;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-}
-
-/* PROFILE CONTENT */
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-
-.profile-content h2,
-.profile-posts h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 0.5rem;
+  background-color: var(--color-error);
+  border: 2px solid var(--color-white);
+  color: var(--color-white);
 }
 </style>

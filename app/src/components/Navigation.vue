@@ -35,7 +35,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'dashboard' }"
         >
           <router-link to="/dashboard">
-            <button>
+            <button class="button">
               <SpriteIcon name="dashboard" size="22" title="Dashboard" />
               <span>Dashboard</span>
             </button>
@@ -46,7 +46,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'create-post' }"
         >
           <router-link to="/create">
-            <button>
+            <button class="button">
               <SpriteIcon name="create" size="22" title="Create" />
               <span>Create & Post</span>
             </button>
@@ -57,7 +57,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'explore' }"
         >
           <router-link to="/explore">
-            <button>
+            <button class="button">
               <SpriteIcon name="explore" size="22" title="Explore" />
               <span>Explore</span>
             </button>
@@ -68,7 +68,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'connections' }"
         >
           <router-link to="/connections">
-            <button>
+            <button class="button">
               <SpriteIcon name="connections" size="22" title="Connections" />
               <span>Connections</span>
             </button>
@@ -81,7 +81,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'profile' }"
         >
           <router-link to="/profile">
-            <button>
+            <button class="button">
               <SpriteIcon name="profile" size="22" title="Profile" />
               <span>Profile</span>
             </button>
@@ -92,7 +92,7 @@ function signOut() {
           :class="{ 'dash-navactive': route.name === 'messages' }"
         >
           <router-link to="/messages">
-            <button>
+            <button class="button">
               <SpriteIcon
                 name="messages"
                 size="24"
@@ -104,7 +104,7 @@ function signOut() {
           </router-link>
         </div>
         <div class="dash-navbtns">
-          <button>
+          <button class="button">
             <SpriteIcon
               name="settings"
               size="24"
@@ -115,7 +115,7 @@ function signOut() {
           </button>
         </div>
         <div class="dash-navbtns">
-          <button>
+          <button class="button">
             <SpriteIcon
               name="more"
               size="24"
@@ -126,7 +126,7 @@ function signOut() {
           </button>
         </div>
         <div class="dash-navbtns">
-          <button @click="signOut">
+          <button class="button" @click="signOut">
             <SpriteIcon
               name="logout"
               size="24"
@@ -143,7 +143,7 @@ function signOut() {
 
 <style lang="css" scoped>
 .dash-navside {
-  background-color: #006145;
+  background-color: var(--color-primary);
 }
 .dash-baselogo {
   display: flex;
@@ -170,17 +170,14 @@ function signOut() {
   align-items: center;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
-  color: #ffffff;
+  color: var(--color-white);
   width: 100%;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
 }
 .dash-navbtns svg {
   margin-right: 1rem;
 }
 .dash-navactive {
-  background-color: #004f38;
+  background-color: var(--color-primary-dark);
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: 0.9rem;
   border: 1px solid transparent !important;

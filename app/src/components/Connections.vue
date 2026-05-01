@@ -10,6 +10,7 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 // STYLES
 import "../styles/profile.css"
 import "../styles/userbutton.css"
+import "../styles/body.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -45,6 +46,7 @@ watch(selectedUserId, (newUserId) => {
 
 onMounted(() => {
   loadFollowingUsers();
+  loadUserProfile();
 });
 </script>
 
@@ -54,6 +56,7 @@ onMounted(() => {
     <div class="dash-sidepanel">
       <div class="dash-follows-box">
         <button
+          class="button"
           type="button"
           @click="followsFilter = 'following'"
           :class="{ 'selected-follow': followsFilter === 'following' }"
@@ -61,6 +64,7 @@ onMounted(() => {
           Following
         </button>
         <button
+          class="button"
           type="button"
           @click="loadFollowersUsers()"
           :class="{ 'selected-follow': followsFilter === 'followers' }"
@@ -75,7 +79,7 @@ onMounted(() => {
           v-for="user in followingUsers"
           :key="user.id"
         >
-          <button type="button" @click="selectedUser(user.id)">
+          <button class="button" type="button" @click="selectedUser(user.id)">
             <div class="bar-user-info">
               <AvatarIcon />
               <div class="bar-userdata">
@@ -93,7 +97,7 @@ onMounted(() => {
           v-for="user in followersUsers"
           :key="user.id"
         >
-          <button type="button" @click="selectedUser(user.id)">
+          <button class="button" type="button" @click="selectedUser(user.id)">
             <div class="bar-user-info">
               <AvatarIcon />
               <div class="bar-userdata">
@@ -140,54 +144,21 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
-/* REPEATED */
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-  overflow-y: hidden;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-profile h2, .dash-posts h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 1rem;
-}
-
 /* COMPONENT STYLES */
 .dash-follows-box {
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: #f4f4f4;
-  border-radius: 10px;
-  margin: 0.5rem 0;
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) 0;
 }
 .dash-follows-box button {
   width: 100%;
   box-sizing: border-box;
   padding: 1rem 0;
-  border: none;
-  background-color: transparent;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.8rem;
-  cursor: pointer;
 }
 .dash-follows-box button:first-child {
   border-top-left-radius: 10px;
@@ -198,8 +169,8 @@ onMounted(() => {
   border-bottom-right-radius: 10px;
 }
 .selected-follow {
-  background-color: #006145 !important;
-  color: #ffffff;
+  background-color: var(--color-primary) !important;
+  color: var(--color-white);
 }
 .following-panel,
 .followers-panel {

@@ -62,12 +62,12 @@ defineExpose({
         </span>
       </div>
       <div class="dash-post-opts">
-        <button type="button" @click="displayPostOptions(post.id)">
-          <SpriteIcon name="dots" size="18" title="Post options" />
+        <button class="button" type="button" @click="displayPostOptions(post.id)">
+          <SpriteIcon name="dots" size="18" color="#535353" title="Post options" />
         </button>
-        <div class="dash-pop-delete" v-if="openOptionsFor === post.id">
-          <button type="button" @click="deletePost(post.id)">Delete</button>
-          <button type="button" @click="openEditModal(post)">Edit</button>
+        <div class="dash-pop-delete shadow-light" v-if="openOptionsFor === post.id">
+          <button class="button" type="button" @click="deletePost(post.id)">Delete</button>
+          <button class="button" type="button" @click="openEditModal(post)">Edit</button>
         </div>
       </div>
     </div>
@@ -76,24 +76,26 @@ defineExpose({
     </div>
     <div class="dash-options-post">
       <button
+       class="button"
         type="button"
         :class="{ 'dash-commented': post._count.comments }"
         v-if="!post.disableComments"
         @click="toggleCommentInput(post.id)"
       >
-        <SpriteIcon name="comment" size="16" title="Comments" />
+        <SpriteIcon name="comment" size="16" color="#535353" title="Comments" />
         <span>{{ post._count.comments || 0 }}</span>
       </button>
       <button
+       class="button"
         type="button"
         @click="likePost(post.id)"
         :class="{ 'dash-liked': post._count.likes }"
       >
-        <SpriteIcon name="heart" size="16" title="Likes" />
+        <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
         <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
       </button>
-      <button type="button" :class="{ 'dash-shared': post._count.shares }">
-        <SpriteIcon name="share" size="16" title="Shares" />
+      <button class="button" type="button" :class="{ 'dash-shared': post._count.shares }">
+        <SpriteIcon name="share" size="16" color="#535353" title="Shares" />
         <span>{{ post._count.shares || 0 }}</span>
       </button>
     </div>
@@ -119,21 +121,23 @@ defineExpose({
             v-if="isAuthorComment(comment.author.id)"
           >
             <button
+              class="button"
               type="button"
               v-if="editingComment.openCommentActions === comment.id"
               @click="startEditComment(comment.id, comment.content)"
             >
-              <SpriteIcon name="edit" size="20" title="Edit comment" />
+              <SpriteIcon name="edit" size="20" color="#535353" title="Edit comment" />
             </button>
             <button
+              class="button"
               type="button"
               v-if="editingComment.openCommentActions === comment.id"
               @click="deleteComment(comment.id, post.id)"
             >
-              <SpriteIcon name="trash" size="20" title="Delete comment" />
+              <SpriteIcon name="trash" size="20" color="#535353" title="Delete comment" />
             </button>
-            <button type="button" @click="toggleCommentActions(comment.id)">
-              <SpriteIcon name="dots" size="18" title="Comment options" />
+            <button class="button" type="button" @click="toggleCommentActions(comment.id)">
+              <SpriteIcon name="dots" size="18" color="#535353" title="Comment options" />
             </button>
           </div>
         </div>
@@ -143,10 +147,11 @@ defineExpose({
         >
           <input type="text" v-model="editingComment.editedCommentContent" />
           <div class="dash-edit-comment-actions">
-            <button type="button" @click="editComment(comment.id, post.id)">
+            <button class="button" type="button" @click="editComment(comment.id, post.id)">
               Save
             </button>
             <button
+              class="button"
               type="button"
               @click="
                 editingComment.editingCommentId = null;
@@ -172,7 +177,7 @@ defineExpose({
         placeholder="Add a comment..."
         v-model="editingComment.postComment"
       />
-      <button type="button" @click="newComment(post.id)">Post</button>
+      <button class="button" type="button" @click="newComment(post.id)">Post</button>
     </div>
     <div
       class="edit-post-modal"
@@ -186,8 +191,8 @@ defineExpose({
           v-model="editingPost.content"
         ></textarea>
         <div class="edit-actions">
-          <button type="button" @click="closeEditModal()">Cancel</button>
-          <button type="button" @click="saveEdit()">Save</button>
+          <button class="button" type="button" @click="closeEditModal()">Cancel</button>
+          <button class="button" type="button" @click="saveEdit()">Save</button>
         </div>
       </div>
     </div>
@@ -210,6 +215,7 @@ defineExpose({
   display: inherit;
   justify-content: start;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .dash-post-opts {
@@ -219,11 +225,8 @@ defineExpose({
   align-items: center;
 }
 .dash-post-opts button {
-  background: transparent;
-  border: none;
   display: inherit;
   padding: 0;
-  cursor: pointer;
 }
 .dash-post-opts button svg {
   margin: 0;
@@ -234,20 +237,17 @@ defineExpose({
   width: 100px;
   border-radius: 10px;
   background-color: #ffffff;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #d6d6d6;
   margin: 2rem 0 0 0;
 }
 .dash-pop-delete button {
   width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 0.3rem;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
 }
 .dash-pop-delete button:hover {
-  background-color: #eeeeee;
+  background-color: var(--color-gray-100);
 }
 
 .dash-user-post svg {
@@ -263,7 +263,7 @@ defineExpose({
 }
 .dash-user-post span a {
   text-decoration: none;
-  color: #006145;
+  color: var(--color-primary);
 }
 .dash-content-post {
   font-family: "Montserrat Regular", sans-serif;
@@ -276,19 +276,16 @@ defineExpose({
   flex-direction: row;
 }
 .dash-options-post button {
-  background-color: transparent;
-  border: none;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin-right: 0.5rem;
-  cursor: pointer;
+  margin-right: var(--spacing-sm);
 }
 .dash-options-post svg {
   height: 14px;
   width: 14px;
-  margin-right: 0.3rem;
-  fill: #535353;
+  margin-right: var(--spacing-xs);
+  fill: var(--color-gray-800);
 }
 .dash-options-post span {
   font-family: "Montserrat Light", sans-serif;
@@ -310,12 +307,6 @@ defineExpose({
   padding: 1.5rem;
   margin-top: 1rem;
 }
-.edit-post-modal h2 {
-  padding: 0;
-  margin: 0;
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-}
 .edit-post textarea {
   width: 100%;
   box-sizing: border-box;
@@ -336,12 +327,10 @@ defineExpose({
 .edit-actions button {
   border: 1px solid #006145;
   color: #006145;
-  background: transparent;
   padding: 0.2rem;
   width: 4rem;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.7rem;
-  cursor: pointer;
 }
 .edit-actions button:first-child {
   color: #626262;
@@ -355,13 +344,13 @@ defineExpose({
   padding-top: 0.5rem;
 }
 .dash-username-comment svg {
-  margin-right: 0.5rem;
-  fill: #006145;
+  margin-right: var(--spacing-sm);
+  fill: var(--color-primary);
 }
 .dash-username-comment span a {
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: 0.75rem;
-  color: #006145;
+  color: var(--color-primary);
   text-decoration: none;
 }
 .dash-usercmt-info {
@@ -371,10 +360,8 @@ defineExpose({
 .dash-username-comment button {
   background: none;
   display: flex;
-  border: none;
   outline: none;
   padding: 0;
-  cursor: pointer;
 }
 .dash-username-comment button > svg {
   margin: 0;
@@ -404,12 +391,10 @@ defineExpose({
 }
 .dash-new-comment-post button {
   background: none;
-  border: none;
   outline: none;
   color: #006145;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.75rem;
-  cursor: pointer;
 }
 .dash-usercmt-actions svg {
   fill: #535353;
@@ -440,14 +425,12 @@ defineExpose({
 }
 .dash-edit-comment button {
   background: none;
-  border: none;
   outline: none;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.75rem;
   color: #006145;
   padding: 0;
   padding-right: 1rem;
-  cursor: pointer;
 }
 .dash-edit-comment button:nth-child(2) {
   color: #535353;

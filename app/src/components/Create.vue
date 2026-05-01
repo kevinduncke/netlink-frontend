@@ -5,6 +5,9 @@ import Post from "./Post.vue";
 import SearchModal from "./SearchModal.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
+// STYLES
+import "../styles/body.css"
+
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
 
@@ -31,7 +34,7 @@ const {
     <div class="dash-sidepanel">
       <div class="createPost">
         <h2>Create Post</h2>
-        <div class="post-text">
+        <div class="post-text body-box shadow-light">
           <textarea
             name="text"
             id="text"
@@ -41,19 +44,19 @@ const {
           <div class="post-adds">
             <p>Add to your post</p>
             <div>
-              <button type="button" @click="addMention()">
+              <button class="button" type="button" @click="addMention()">
                 <SpriteIcon
                   name="at"
                   size="24"
-                  color="#006145"
+                  color="#535353"
                   title="Add mention"
                 />
               </button>
-              <button type="button" @click="addLocation()">
+              <button class="button" type="button" @click="addLocation()">
                 <SpriteIcon
                   name="location"
                   size="24"
-                  color="#006145"
+                  color="#535353"
                   title="Add location"
                 />
               </button>
@@ -62,50 +65,50 @@ const {
         </div>
       </div>
       <div class="mediaPost">
-        <button type="button" @click="createPost()">Post</button>
+        <button class="body-box shadow-light button" type="button" @click="createPost()">Post</button>
       </div>
       <div class="optionsPost">
         <h2>Options</h2>
         <div class="visibilityPost">
           <p>Who can view your post?</p>
           <div class="modesOptions">
-            <button type="button" @click="changeVisibility('PUBLIC')">
+            <button class="button" type="button" @click="changeVisibility('PUBLIC')">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'PUBLIC' }"
               >
-                <SpriteIcon name="public" size="18" title="Public" />
+                <SpriteIcon name="public" size="18" color="#535353" title="Public" />
               </div>
               <div class="infoIcon">
                 <p>Public</p>
                 <p>Anyone on/off Netlink</p>
               </div>
             </button>
-            <button type="button" @click="changeVisibility('FOLLOWERS')">
+            <button class="button" type="button" @click="changeVisibility('FOLLOWERS')">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'FOLLOWERS' }"
               >
-                <SpriteIcon name="followers" size="20" title="Followers" />
+                <SpriteIcon name="followers" size="20" color="#535353" title="Followers" />
               </div>
               <div class="infoIcon">
                 <p>Followers</p>
                 <p>Your followers only</p>
               </div>
             </button>
-            <button type="button" @click="changeVisibility('ONLY_ME')">
+            <button class="button" type="button" @click="changeVisibility('ONLY_ME')">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'ONLY_ME' }"
               >
-                <SpriteIcon name="lock" size="20" title="Only me" />
+                <SpriteIcon name="lock" size="20" color="#535353" title="Only me" />
               </div>
               <div class="infoIcon">
                 <p>Only Me</p>
                 <p>Only you can see this</p>
               </div>
             </button>
-            <button type="button" @click="changeVisibility('SPECIFIC')">
+            <button class="button" type="button" @click="changeVisibility('SPECIFIC')">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'SPECIFIC' }"
@@ -113,6 +116,7 @@ const {
                 <SpriteIcon
                   name="followers"
                   size="20"
+                  color="#535353"
                   title="Specific followers"
                 />
               </div>
@@ -126,7 +130,7 @@ const {
         <div class="settingsPost">
           <p>Post Settings</p>
           <div class="modesOptions">
-            <button type="button" @click="toggleHideLikes()">
+            <button class="button" type="button" @click="toggleHideLikes()">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.hideLikes }"
@@ -134,7 +138,7 @@ const {
                 <SpriteIcon
                   name="heart"
                   size="18"
-                  color="#006145"
+                  color="#535353"
                   title="Hide Likes"
                 />
               </div>
@@ -142,7 +146,7 @@ const {
                 <p>Hide like count</p>
               </div>
             </button>
-            <button type="button" @click="toggleDisableComments()">
+            <button class="button" type="button" @click="toggleDisableComments()">
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.disableComments }"
@@ -150,7 +154,7 @@ const {
                 <SpriteIcon
                   name="comment"
                   size="18"
-                  color="#006145"
+                  color="#535353"
                   title="Hide Comments"
                 />
               </div>
@@ -184,48 +188,7 @@ const {
 </template>
 
 <style scoped>
-
-/* REPEATED */
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-  overflow-y: hidden;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-.createPost h2,
-.optionsPost h2,
-.dash-myPosts h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 1rem;
-}
-
 /* COMPONENT STYLES */
-.post-text,
-.mediaPost button {
-  background-color: rgb(255, 255, 255);
-  padding: 0.5rem;
-  margin-bottom: 0.8rem;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
-  border-radius: 10px;
-}
 .post-text textarea {
   width: 100%;
   height: 100px;
@@ -252,20 +215,13 @@ const {
   font-family: "Montserrat Light", sans-serif;
   font-size: 0.8rem;
 }
-.post-adds button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
 .mediaPost button {
   width: 100%;
-  padding: 1rem 0;
-  border: none;
-  background-color: #006145;
-  color: #ffffff;
+  padding: var(--spacing-md) 0;
+  background-color: var(--color-primary);
+  color: var(--color-white);
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: 0.8rem;
-  cursor: pointer;
 }
 .visibilityPost p,
 .settingsPost p {
@@ -285,16 +241,11 @@ const {
   flex-direction: row;
   align-items: center;
   text-align: left;
-  background-color: transparent;
-  border: none;
   outline: none;
-  cursor: pointer;
 }
 .btnIcon {
   background-color: #ffffff;
   padding: 0.3rem;
-  -webkit-box-shadow: -1px 3px 26px -3px #e8e8e8;
-  box-shadow: -1px 3px 26px -3px #e8e8e8;
   border-radius: 50px;
   color: white;
   display: flex;
@@ -303,20 +254,20 @@ const {
   border: 1px solid #e8e8e8;
 }
 .modesOptions button:hover > .btnIcon {
-  border: 1px solid #006145;
+  border: 1px solid var(--color-primary);
 }
 .modesOptions button:hover > .btnIcon svg {
-  fill: #006145;
+  fill: var(--color-primary);
 }
 .btnIcon svg {
-  fill: #868686;
+  fill: var(--color-gray-600);
 }
 .selected {
-  background-color: #006145;
-  border: 1px solid #006145;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }
 .selected svg {
-  fill: #ffffff !important;
+  fill: var(--color-white) !important;
 }
 .infoIcon {
   padding: 0 1rem;

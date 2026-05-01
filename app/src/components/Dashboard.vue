@@ -12,6 +12,7 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
 import "../styles/userbutton.css"
+import "../styles/body.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -70,8 +71,8 @@ onMounted(async () => {
       <div class="dash-fav-base">
         <div class="fav-head">
           <h2>Favorites</h2>
-          <button type="button" @click="favStateEdit = !favStateEdit">
-            <SpriteIcon name="list" size="22" title="Toggle favorites" />
+          <button class="button" type="button" @click="favStateEdit = !favStateEdit">
+            <SpriteIcon name="list" size="22" color="#535353" title="Toggle favorites" />
           </button>
         </div>
         <div class="fav-user-list" v-if="!favStateEdit">
@@ -81,7 +82,7 @@ onMounted(async () => {
             v-for="user in favoriteUsers"
             :key="user.id"
           >
-            <button type="button" @click="selectedUser(user.id)">
+            <button class="button" type="button" @click="selectedUser(user.id)">
               <div class="bar-user-info">
                 <AvatarIcon />
                 <div class="bar-userdata">
@@ -101,12 +102,12 @@ onMounted(async () => {
               placeholder="Search"
               v-model="favSearchQuery"
             />
-            <SpriteIcon name="search" size="22" color="#e3e3e3" title="Search" />
+            <SpriteIcon name="search" size="22" color="#535353" title="Search" />
           </div>
           <div class="fav-edit-favorites" v-if="favoriteUsers.length > 0">
             <div class="fav-edit-listhead">
               <p>Users</p>
-              <button type="button" @click="removeAllFavoriteUsers()">
+              <button class="button" type="button" @click="removeAllFavoriteUsers()">
                 Remove all
               </button>
             </div>
@@ -125,7 +126,7 @@ onMounted(async () => {
                     <p>@{{ user.username }}</p>
                   </div>
                 </div>
-                <button type="button" @click="deleteFavoriteUser(user.id)">
+                <button class="button" type="button" @click="deleteFavoriteUser(user.id)">
                   Remove
                 </button>
               </div>
@@ -148,7 +149,7 @@ onMounted(async () => {
                     <p>@{{ user.username }}</p>
                   </div>
                 </div>
-                <button type="button" @click="addFavoriteUser(user.id)">
+                <button class="button" type="button" @click="addFavoriteUser(user.id)">
                   Add
                 </button>
               </div>
@@ -167,33 +168,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
-/* REPEATED */
-.dash-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 2fr 3fr;
-  grid-template-rows: 100vh;
-}
-.dash-navside,
-.dash-sidepanel,
-.dash-content {
-  padding: 10px 20px;
-}
-.dash-sidepanel {
-  background-color: #ffffff;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-content {
-  background-color: #f4f4f4;
-  color: #000000;
-  overflow-y: auto;
-}
-.dash-lposts h2, .fav-head h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-
 /* COMPONENT STYLES */
 .fav-head {
   display: flex;
@@ -204,23 +178,21 @@ onMounted(async () => {
 }
 .fav-head button {
   background: none;
-  border: none;
   outline: none;
-  cursor: pointer;
   color: #e3e3e3;
 }
 .fav-head button:hover {
-  color: #006145;
+  color: var(--color-primary);
 }
 .fav-edit-search {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background-color: #fbfbfb;
-  padding: 0.5rem 1rem;
-  gap: 0.5rem;
-  border-radius: 10px;
+  background-color: var(--color-gray-50);
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-sm);
+  border-radius: var(--radius-md);
 }
 .fav-edit-search input {
   width: 100%;
@@ -245,9 +217,7 @@ onMounted(async () => {
 }
 .fav-edit-listhead button {
   background: none;
-  border: none;
   outline: none;
-  cursor: pointer;
   color: #005261;
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
@@ -265,16 +235,14 @@ onMounted(async () => {
   align-items: center;
 }
 .fav-user button {
-  background: #f1f1f1;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
+  background: var(--color-gray-100);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.7rem;
-  cursor: pointer;
 }
 .fav-user button:hover {
-  background: #e9e9e9;
+  background: var(--color-gray-200);
 }
 .fav-user-data {
   display: inherit;

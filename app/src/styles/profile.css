@@ -6,19 +6,19 @@
 }
 .profile-info h1 {
   font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 1.5rem;
+  font-size: var(--font-size-display-sm);
 }
 .profile-stats {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
+  font-size: var(--font-size-caption);
   gap: 1rem;
 }
 .profile-titles p {
   font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
+  font-size: var(--font-size-caption);
   line-height: 1rem;
 }
 .profile-avatar {

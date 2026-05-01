@@ -1,0 +1,209 @@
+/* ===== UTILITIES ===== */
+
+/* COLOR VARIABLES */
+:root {
+  /* Primary Colors */
+  --color-primary: #006145;
+  --color-primary-dark: #004f38;
+  --color-primary-light: #01956b;
+
+  /* Neutral Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Gray Scale */
+  --color-gray-50: #fbfbfb;
+  --color-gray-100: #f4f4f4;
+  --color-gray-200: #efefef;
+  --color-gray-300: #e8e8e8;
+  --color-gray-400: #e3e3e3;
+  --color-gray-500: #c5c5c5;
+  --color-gray-600: #868686;
+  --color-gray-700: #616161;
+  --color-gray-800: #535353;
+
+  /* Status Colors */
+  --color-error: #a90000;
+  --color-warning: #770500;
+  --color-info: #005261;
+  --color-success: #c31010;
+
+  /* Spacing */
+  --spacing-xs: 0.3rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 5px;
+  --radius-md: 10px;
+  --radius-lg: 1rem;
+  --radius-full: 50px;
+
+  /* Shadows */
+  --shadow-light: -1px 3px 26px -3px #e8e8e8;
+
+  /* Font Sizes */
+  --font-size-caption: 0.7rem;
+  --font-size-label: 0.75rem;
+  --font-size-body: 0.8rem;
+  --font-size-body-lg: 0.9rem;
+  --font-size-title-sm: 1rem;
+  --font-size-title-md: 1.125rem;
+  --font-size-title-lg: 1.25rem;
+  --font-size-display-sm: 1.5rem;
+  --font-size-input: 14px;
+  --font-size-button: 15px;
+}
+
+/* ===== FLEX UTILITIES ===== */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-row-between {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-row-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== CARD UTILITIES ===== */
+.card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  -webkit-box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-light);
+}
+
+.card-light {
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
+}
+
+.shadow-light {
+  -webkit-box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-light);
+}
+
+/* ===== SPACING UTILITIES ===== */
+.pad-v {
+  padding: var(--spacing-md) 0;
+}
+
+.pad-h {
+  padding: 0 var(--spacing-md);
+}
+
+.pad-md {
+  padding: var(--spacing-md);
+}
+
+.pad-sm {
+  padding: var(--spacing-sm);
+}
+
+.margin-bottom {
+  margin-bottom: var(--spacing-md);
+}
+
+.margin-top {
+  margin-top: var(--spacing-md);
+}
+
+/* ===== COLOR TEXT UTILITIES ===== */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-gray-light {
+  color: var(--color-gray-700);
+}
+
+.text-gray-medium {
+  color: var(--color-gray-800);
+}
+
+.text-gray-dark {
+  color: var(--color-gray-800);
+}
+
+/* ===== BACKGROUND COLOR UTILITIES ===== */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-white {
+  background-color: var(--color-white);
+}
+
+.bg-gray-light {
+  background-color: var(--color-gray-100);
+}
+
+.bg-gray-lighter {
+  background-color: var(--color-gray-50);
+}
+
+/* ===== BORDER UTILITIES ===== */
+.border-radius-md {
+  border-radius: var(--radius-md);
+}
+
+.border-radius-full {
+  border-radius: var(--radius-full);
+}
+
+/* ===== FONT SIZE UTILITIES ===== */
+.text-caption {
+  font-size: var(--font-size-caption);
+}
+
+.text-label {
+  font-size: var(--font-size-label);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+}
+
+.text-body-lg {
+  font-size: var(--font-size-body-lg);
+}
+
+.text-title-sm {
+  font-size: var(--font-size-title-sm);
+}
+
+.text-title-md {
+  font-size: var(--font-size-title-md);
+}
+
+.text-title-lg {
+  font-size: var(--font-size-title-lg);
+}
+
+.text-display-sm {
+  font-size: var(--font-size-display-sm);
+}
+
+.text-input {
+  font-size: var(--font-size-input);
+}
+
+.text-button {
+  font-size: var(--font-size-button);
+}

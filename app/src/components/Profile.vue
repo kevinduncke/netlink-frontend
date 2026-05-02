@@ -14,6 +14,9 @@ import "../styles/body.css"
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
+// POSTS COMPOSITION
+import { usePosts } from "../shared/usePosts";
+
 // USER DATA FUNCTIONS
 const {
   // VARIABLES
@@ -30,8 +33,11 @@ const {
   deleteAccount,
 } = useUserData();
 
+const { loadPosts } = usePosts();
+
 onMounted(async () => {
   await loadMyProfile();
+  await loadPosts("my-posts");
 });
 watch(
   () => [
@@ -210,16 +216,16 @@ onBeforeRouteLeave(() => {
         <div class="profile-head" v-if="userProfile">
           <div class="profile-info">
             <h1>{{ userProfile.name }}</h1>
-            <h2>@{{ userProfile.username || "Unknown Username" }}</h2>
+            <h2>@{{ userProfile.username }}</h2>
             <div class="profile-stats">
               <div>
-                <p>{{ userProfile.postsCount || 0 }} Posts</p>
+                <p>{{ userProfile.postsCount }} Posts</p>
               </div>
               <div>
-                <p>{{ userProfile.followersCount || 0 }} Followers</p>
+                <p>{{ userProfile.followersCount }} Followers</p>
               </div>
               <div>
-                <p>{{ userProfile.followingCount || 0 }} Following</p>
+                <p>{{ userProfile.followingCount }} Following</p>
               </div>
             </div>
             <div class="profile-titles">

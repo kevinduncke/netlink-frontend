@@ -10,6 +10,7 @@ import "../styles/body.css"
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
+import { onMounted } from "vue";
 
 // POSTS
 const {
@@ -17,6 +18,7 @@ const {
   createPostData,
 
   // FUNCTIONS
+  loadPosts,
   addMention,
   addLocation,
   createPost,
@@ -26,6 +28,10 @@ const {
   selectMention,
   addSpecificFollowers,
 } = usePosts();
+
+onMounted(() => {
+  loadPosts("my-posts");
+})
 </script>
 
 <template>

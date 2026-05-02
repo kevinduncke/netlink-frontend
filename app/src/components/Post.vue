@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
 
 // POSTS COMPOSITION
 import { usePosts } from "../shared/usePosts";
@@ -18,7 +17,6 @@ const {
   editingComment,
 
   // POST FUNCTIONS
-  loadPosts,
   deletePost,
   saveEdit,
   likePost,
@@ -38,16 +36,6 @@ const {
   toUtcDateTime,
   isAuthorComment,
 } = usePosts();
-
-onMounted(() => {
-  loadPosts("my-posts");
-});
-
-// EXPOSE LOAD POST FN TO PARENT COMPONENT
-defineExpose({
-  loadPosts,
-  saveEdit,
-});
 </script>
 
 <template>
@@ -88,8 +76,8 @@ defineExpose({
       <button
        class="button"
         type="button"
-        @click="likePost(post.id)"
-        :class="{ 'dash-liked': post._count.likes }"
+        @click="likePost(post.id, post.author.liked)"
+        :class="{ 'dash-liked': post.author.liked }"
       >
         <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
         <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
@@ -192,7 +180,7 @@ defineExpose({
         ></textarea>
         <div class="edit-actions">
           <button class="button" type="button" @click="closeEditModal()">Cancel</button>
-          <button class="button" type="button" @click="saveEdit()">Save</button>
+          <button class="button" type="button" @click="saveEdit(post.id)">Save</button>
         </div>
       </div>
     </div>

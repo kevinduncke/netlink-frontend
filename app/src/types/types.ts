@@ -29,6 +29,7 @@ export type User = {
   avatarUrl?: string;
   followers: string | number;
   isFollowedByMe: boolean;
+  liked: boolean;
 };
 
 export interface Comment {

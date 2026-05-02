@@ -58,6 +58,7 @@ watch(selectedUserId, async (newUserId) => {
 });
 
 onMounted(async () => {
+  selectedUserId.value = "";
   await loadFavoriteUsers();
   await loadSuggestedUsers("favorites");
   await loadPosts("following");

@@ -39,14 +39,16 @@ const { loadPosts } = usePosts();
 
 watch(selectedUserId, (newUserId) => {
   if (newUserId) {
-    loadUserProfile();
+    loadUserProfile(selectedUserId.value);
     loadPosts(`user/${newUserId}`);
   }
 });
 
 onMounted(() => {
+  selectedUserId.value = "";
   loadFollowingUsers();
-  loadUserProfile();
+  loadUserProfile(selectedUserId.value);
+  loadPosts(`user/${selectedUserId.value}`);
 });
 </script>
 
@@ -58,7 +60,7 @@ onMounted(() => {
         <button
           class="button"
           type="button"
-          @click="followsFilter = 'following'"
+          @click="followsFilter = 'following', loadFollowingUsers()"
           :class="{ 'selected-follow': followsFilter === 'following' }"
         >
           Following
@@ -66,7 +68,7 @@ onMounted(() => {
         <button
           class="button"
           type="button"
-          @click="loadFollowersUsers()"
+          @click="followsFilter = 'followers', loadFollowersUsers()"
           :class="{ 'selected-follow': followsFilter === 'followers' }"
         >
           Followers

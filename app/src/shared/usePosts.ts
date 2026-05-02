@@ -72,10 +72,7 @@ export function usePosts() {
       createPostData.imageUrl = "";
       createPostData.hideLikes = false;
       createPostData.disableComments = false;
-      // COMMENT, LIKE AND SHARE COUNT => 0
-      // AUTHOR INFO => CURRENT USER
 
-      // LOAD NEW POST LOCALLY
       loadPosts("my-posts");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -96,9 +93,11 @@ export function usePosts() {
       return;
     }
     try {
+      // CLEAN PREVIOUS DATA
+      userdata.value = [];
       const response = await api.get(`/post/${route}`);
-
       userdata.value = response.data || [];
+      console.log(userdata.value);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -110,20 +109,27 @@ export function usePosts() {
     }
   }
 
-  // DELETE POST                                          [[ RE-LOAD LOCALLY ]]
+  // DELETE POST
   async function deletePost(postId: number | string) {
     try {
       await api.delete(`/post/delete/${postId}`);
 
       // REMOVE POST LOCALLY
+      userdata.value = userdata.value.filter((post) => post.id !== postId);
       openOptionsFor.value = "";
     } catch (error) {
-      console.error("Error deleting post: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
-  // SAVE EDITED POST                                     [[ RE-LOAD LOCALLY ]]
-  async function saveEdit() {
+  // SAVE EDITED POST
+  async function saveEdit(postId: number | string) {
     if (!editingPost.value) return;
 
     try {
@@ -132,20 +138,57 @@ export function usePosts() {
       });
 
       // LOAD EDITED POST LOCALLY
+      const selectedPost = userdata.value.find((p) => p.id === postId);
+
+      if (selectedPost) {
+        selectedPost.content = editingPost.value.content;
+      }
+
       closeEditModal();
+      openOptionsFor.value = "";
     } catch (error) {
-      console.error("Error saving and edit your post: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
-  // LIKE POST                                            [[ RE-LOAD LOCALLY ]]
-  async function likePost(postId: number) {
+  // LIKE / UNLIKE POST
+  async function likePost(postId: number, state: boolean) {
     try {
-      await api.post(`/post/like/${postId}`);
+      if (state === true) {
+        await api.post(`/post/unlike/${postId}`);
+      } else if (state === false) {
+        await api.post(`/post/like/${postId}`);
+      }
 
       // UPDATE LIKE COUNT LOCALLY
+      const selectedPost = userdata.value.find((p) => p.id === postId);
+      if (selectedPost) {
+        if (state === false) {
+          selectedPost._count.likes = selectedPost._count.likes
+            ? selectedPost._count.likes + 1
+            : 1;
+          selectedPost.author.liked = true;
+        } else if (state === true) {
+          selectedPost._count.likes = selectedPost._count.likes
+            ? selectedPost._count.likes - 1
+            : 0;
+          selectedPost.author.liked = false;
+        }
+      }
     } catch (error) {
-      console.error("Error liking post: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -161,7 +204,13 @@ export function usePosts() {
 
       post.comments = comments;
     } catch (error) {
-      console.error("Error loading comments: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -192,7 +241,13 @@ export function usePosts() {
 
       editingComment.postComment = "";
     } catch (error) {
-      console.error("Error commenting on post: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -225,7 +280,13 @@ export function usePosts() {
       editingComment.editingCommentId = null;
       editingComment.editedCommentContent = "";
     } catch (error) {
-      console.error("Error editing comment: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -249,7 +310,13 @@ export function usePosts() {
           : 0;
       }
     } catch (error) {
-      console.error("Error deleting comment: ", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
     }
   }
 

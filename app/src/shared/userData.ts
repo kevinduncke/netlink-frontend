@@ -161,6 +161,7 @@ export function useUserData() {
       followingUsers.value = response.data;
       const firstFollowingUser = followingUsers.value[0];
       if (firstFollowingUser) {
+        selectedUserId.value = '';
         selectedUserId.value = firstFollowingUser.id;
       }
     } catch (error) {
@@ -184,6 +185,7 @@ export function useUserData() {
 
       const firstFollowerUser = followersUsers.value[0];
       if (firstFollowerUser) {
+        selectedUserId.value = '';
         selectedUserId.value = firstFollowerUser.id;
       }
     } catch (error) {
@@ -210,9 +212,9 @@ export function useUserData() {
     followersCount: 0,
     followingCount: 0,
   });
-  async function loadUserProfile() {
+  async function loadUserProfile(userId: string | number) {
     try {
-      const res = await api.get(`/users/${selectedUserId.value}`);
+      const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -560,8 +562,10 @@ export function useUserData() {
 
   // HELPER FUNCTIONS
   function selectedUser(userId: string | number) {
+    selectedUserId.value = '';
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;
+    console.log(selectedUserId.value);
   }
   function toUtcStartOfDay(date: string): string {
     return date ? `${date}T00:00:00.000Z` : "";

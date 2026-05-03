@@ -11,8 +11,9 @@ import SpriteIcon from "./SpriteIcon.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
-import "../styles/userbutton.css"
-import "../styles/body.css"
+import "../styles/userbutton.css";
+import "../styles/buttons.css";
+import "../styles/body.css";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -61,7 +62,12 @@ onMounted(async () => {
             placeholder="Find somethening new..."
             v-model="searchFilters.query"
           />
-          <SpriteIcon name="search" size="20" color="#535353" title="Add mention" />
+          <SpriteIcon
+            name="search"
+            size="20"
+            color="#535353"
+            title="Add mention"
+          />
         </div>
       </div>
       <div class="filters-box">
@@ -73,9 +79,17 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.people === 'anyone' }"
           >
             <p>From anyone</p>
-            <button class="button" type="button" @click="searchFilters.people = 'anyone'">
+            <button
+              class="button"
+              type="button"
+              @click="searchFilters.people = 'anyone'"
+            >
               <SpriteIcon
-                :name="searchFilters.people !== 'anyone' ? 'circle' : 'checked-circle'"
+                :name="
+                  searchFilters.people !== 'anyone'
+                    ? 'circle'
+                    : 'checked-circle'
+                "
                 size="24"
                 color="#535353"
                 title="From anyone"
@@ -87,9 +101,17 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.people === 'following' }"
           >
             <p>People you follow</p>
-            <button class="button" type="button" @click="searchFilters.people = 'following'">
+            <button
+              class="button"
+              type="button"
+              @click="searchFilters.people = 'following'"
+            >
               <SpriteIcon
-                :name="searchFilters.people !== 'following' ? 'circle' : 'checked-circle'"
+                :name="
+                  searchFilters.people !== 'following'
+                    ? 'circle'
+                    : 'checked-circle'
+                "
                 size="24"
                 color="#535353"
                 title="People you follow"
@@ -104,9 +126,15 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.shared === 'all' }"
           >
             <p>Shares and Posts</p>
-            <button class="button" type="button" @click="searchFilters.shared = 'all'">
+            <button
+              class="button"
+              type="button"
+              @click="searchFilters.shared = 'all'"
+            >
               <SpriteIcon
-                :name="searchFilters.shared !== 'all' ? 'circle' : 'checked-circle'"
+                :name="
+                  searchFilters.shared !== 'all' ? 'circle' : 'checked-circle'
+                "
                 size="24"
                 color="#535353"
                 title="Shares and posts"
@@ -118,9 +146,15 @@ onMounted(async () => {
             :class="{ 'filter-selected': searchFilters.shared === 'posts' }"
           >
             <p style="color: #770500">Only show Posts</p>
-            <button class="button" type="button" @click="searchFilters.shared = 'posts'">
+            <button
+              class="button"
+              type="button"
+              @click="searchFilters.shared = 'posts'"
+            >
               <SpriteIcon
-                :name="searchFilters.shared !== 'posts' ? 'circle' : 'checked-circle'"
+                :name="
+                  searchFilters.shared !== 'posts' ? 'circle' : 'checked-circle'
+                "
                 size="24"
                 color="#535353"
                 title="Only show posts"
@@ -150,29 +184,37 @@ onMounted(async () => {
           </div>
         </div>
         <div class="filter-reset">
-          <button class="shadow-light button" type="button" @click="resetFilters()">Reset Filters</button>
+          <button
+            class="shadow-light button"
+            type="button"
+            @click="resetFilters()"
+          >
+            Reset Filters
+          </button>
         </div>
       </div>
       <div class="bar-new-follows">
         <h2>Who to follow</h2>
         <div
-          class="bar-user-box"
+          class="main-follow-box"
           v-if="suggestedUsers.length > 0"
           v-for="user in suggestedUsers"
           :key="user.id || 'ID_NOT_FOUND'"
         >
-          <div class="bar-user-info">
-            <AvatarIcon />
-            <div class="bar-userdata">
-              <h2 class="bar-user-name">
-                {{ user.name }}
-              </h2>
-              <p class="bar-user-username">@{{ user.username }}</p>
+          <div class="box-user-info">
+            <div class="bar-user-avatardata">
+              <AvatarIcon />
+              <div class="bar-userdata">
+                <h2 class="bar-user-name">{{ user.name }}</h2>
+                <p class="bar-user-username">@{{ user.username }}</p>
+              </div>
+            </div>
+            <div>
+              <button class="follow-btn button" @click="followUser(user.id)">
+                Follow
+              </button>
             </div>
           </div>
-          <button class="follow-btn button" @click="followUser(user.id)">
-            Follow
-          </button>
         </div>
         <div v-else class="bar-no-users">
           <p>No user suggestions available.</p>
@@ -267,21 +309,6 @@ onMounted(async () => {
 .filter-reset button:hover {
   border: 2px solid var(--color-primary);
   color: var(--color-primary);
-}
-
-.bar-user-box button {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  border: 2px solid var(--color-primary);
-  padding: var(--spacing-sm) 2rem;
-  border-radius: var(--radius-lg);
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.8rem;
-}
-.bar-user-box button:hover {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
 }
 .bar-no-users {
   text-align: center;

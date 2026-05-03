@@ -5,6 +5,10 @@ export type FollowUser = {
   avatarUrl?: string;
 };
 
+export interface Followers extends FollowUser {
+  isFollowedByMe: boolean;
+};
+
 export type UserChat = {
   chatId: string | number;
   receiver: {

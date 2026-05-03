@@ -8,9 +8,11 @@ import Post from "./Post.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
-import "../styles/profile.css"
-import "../styles/userbutton.css"
-import "../styles/body.css"
+import "../styles/profile.css";
+import "../styles/userbutton.css";
+import "../styles/buttons.css";
+import "../styles/utilities.css";
+import "../styles/body.css";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -32,23 +34,21 @@ const {
   loadFollowingUsers,
   loadFollowersUsers,
   loadUserProfile,
+  unfollowUser,
 } = useUserData();
 
 // POST FUNCTIONS
 const { loadPosts } = usePosts();
-
-watch(selectedUserId, (newUserId) => {
-  if (newUserId) {
-    loadUserProfile(selectedUserId.value);
-    loadPosts(`user/${newUserId}`);
-  }
+onMounted(async () => {
+  selectedUserId.value = "";
+  await loadFollowingUsers();
 });
 
-onMounted(() => {
-  selectedUserId.value = "";
-  loadFollowingUsers();
-  loadUserProfile(selectedUserId.value);
-  loadPosts(`user/${selectedUserId.value}`);
+watch(selectedUserId, async (newUserId) => {
+  if (newUserId) {
+    await loadUserProfile(newUserId);
+    await loadPosts(`user/${newUserId}`);
+  }
 });
 </script>
 
@@ -60,7 +60,7 @@ onMounted(() => {
         <button
           class="button"
           type="button"
-          @click="followsFilter = 'following', loadFollowingUsers()"
+          @click="((followsFilter = 'following'), loadFollowingUsers())"
           :class="{ 'selected-follow': followsFilter === 'following' }"
         >
           Following
@@ -68,7 +68,7 @@ onMounted(() => {
         <button
           class="button"
           type="button"
-          @click="followsFilter = 'followers', loadFollowersUsers()"
+          @click="((followsFilter = 'followers'), loadFollowersUsers())"
           :class="{ 'selected-follow': followsFilter === 'followers' }"
         >
           Followers
@@ -76,17 +76,27 @@ onMounted(() => {
       </div>
       <div class="following-panel" v-if="followsFilter === 'following'">
         <div
-          class="bar-user-box"
+          class="main-follow-box"
           :class="{ selected: selectedUserId === user.id }"
           v-for="user in followingUsers"
           :key="user.id"
         >
           <button class="button" type="button" @click="selectedUser(user.id)">
-            <div class="bar-user-info">
-              <AvatarIcon />
-              <div class="bar-userdata">
-                <h2 class="bar-user-name">{{ user.name }}</h2>
-                <p class="bar-user-username">@{{ user.username }}</p>
+            <div class="box-user-info">
+              <div class="bar-user-avatardata">
+                <AvatarIcon />
+                <div class="bar-userdata">
+                  <h2 class="bar-user-name">{{ user.name }}</h2>
+                  <p class="bar-user-username">@{{ user.username }}</p>
+                </div>
+              </div>
+              <div>
+                <button
+                  class="unfollow-btn button"
+                  @click="unfollowUser(user.id)"
+                >
+                  Unfollow
+                </button>
               </div>
             </div>
           </button>
@@ -94,17 +104,28 @@ onMounted(() => {
       </div>
       <div class="followers-panel" v-else>
         <div
-          class="bar-user-box"
+          class="main-follow-box"
           :class="{ selected: selectedUserId === user.id }"
           v-for="user in followersUsers"
           :key="user.id"
         >
           <button class="button" type="button" @click="selectedUser(user.id)">
-            <div class="bar-user-info">
-              <AvatarIcon />
-              <div class="bar-userdata">
-                <h2 class="bar-user-name">{{ user.name }}</h2>
-                <p class="bar-user-username">@{{ user.username }}</p>
+            <div class="box-user-info">
+              <div class="bar-user-avatardata">
+                <AvatarIcon />
+                <div class="bar-userdata">
+                  <h2 class="bar-user-name">{{ user.name }}</h2>
+                  <p class="bar-user-username">@{{ user.username }}</p>
+                </div>
+              </div>
+              <div>
+                <button
+                  class="unfollow-btn button"
+                  v-if="user.isFollowedByMe === false"
+                  @click=""
+                >
+                  Follow
+                </button>
               </div>
             </div>
           </button>
@@ -112,34 +133,35 @@ onMounted(() => {
       </div>
     </div>
     <div class="dash-content">
-      <div class="dash-profile">
-        <h2>Profile</h2>
-        <div class="profile-head">
-          <div class="profile-info">
-            <h1>{{ userProfile.name || "Unknown User" }}</h1>
-            <h2>@{{ userProfile.username || "Unknown Username" }}</h2>
-            <div class="profile-stats">
-              <div>
-                <p>{{ userProfile.postsCount || 0 }} Posts</p>
+      <div v-if="selectedUserId !== 0">
+        <div class="dash-profile">
+          <h2>Profile</h2>
+          <div class="profile-head">
+            <div class="profile-info">
+              <h1>{{ userProfile.name }}</h1>
+              <h2>@{{ userProfile.username }}</h2>
+              <div class="profile-stats">
+                <div>
+                  <p>{{ userProfile.postsCount }} Posts</p>
+                </div>
+                <div>
+                  <p>{{ userProfile.followersCount }} Followers</p>
+                </div>
+                <div>
+                  <p>{{ userProfile.followingCount }} Following</p>
+                </div>
               </div>
-              <div>
-                <p>{{ userProfile.followersCount || 0 }} Followers</p>
-              </div>
-              <div>
-                <p>{{ userProfile.followingCount || 0 }} Following</p>
+              <div class="profile-titles">
+                <p>{{ userProfile.bio }}</p>
               </div>
             </div>
-            <div class="profile-titles">
-              <p>{{ userProfile.bio || "No bio available." }}</p>
-            </div>
-          </div>
-          <div class="profile-avatar">
+            <div class="profile-avatar"></div>
           </div>
         </div>
-      </div>
-      <div class="dash-posts">
-        <h2>Posts</h2>
-        <Post />
+        <div class="dash-posts">
+          <h2>Posts</h2>
+          <Post />
+        </div>
       </div>
     </div>
   </div>

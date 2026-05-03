@@ -304,6 +304,7 @@ onMounted(async () => {
           id="send-message"
           placeholder="Type a message..."
           v-model="message"
+          @keyup.enter="sendMessage(userChatId)"
         />
         <div class="dash-msg-media">
           <button class="button" type="button" @click="sendMessage(userChatId)">

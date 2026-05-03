@@ -97,7 +97,6 @@ export function usePosts() {
       userdata.value = [];
       const response = await api.get(`/post/${route}`);
       userdata.value = response.data || [];
-      console.log(userdata.value);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();

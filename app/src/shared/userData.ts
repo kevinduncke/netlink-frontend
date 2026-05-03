@@ -8,7 +8,7 @@ import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
 
 // TYPES
-import type { FollowUser, UserChat } from "../types/users";
+import type { Followers, FollowUser, UserChat } from "../types/users";
 import type { SearchFavoriteUser, SearchUser } from "../types/search";
 import type { UserProfile } from "../types/users";
 
@@ -75,9 +75,11 @@ export function useUserData() {
   // ADD FAVORITE USERS
   async function addFavoriteUser(userId: string | number) {
     try {
-      await api.post(`/favorites/${userId}`);
-      // LOAD NEW FAVORITE USERS LOCALLY
-      // REMOVE OLD USER FROM SUGGESTED USERS LOCALLY
+      const response = await api.post(`/favorites/${userId}`);
+      favoriteUsers.value.push(response.data);
+      suggestedUsers.value = suggestedUsers.value.filter(
+        (user) => user.id !== userId,
+      );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -93,7 +95,15 @@ export function useUserData() {
   async function deleteFavoriteUser(userId: string | number) {
     try {
       await api.delete(`/favorites/${userId}`);
+      // ADD REMOVED USER TO SUGGESTED USERS LOCALLY
+      const removedUser = favoriteUsers.value.find((user) => user.id === userId);
+      if (removedUser) {
+        suggestedUsers.value.push(removedUser);
+      }      
       // REMOVE OLD FAVORITE USER FROM FAVORITE USERS LOCALLY
+      favoriteUsers.value = favoriteUsers.value.filter(
+        (user) => user.id !== userId,
+      );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -118,7 +128,7 @@ export function useUserData() {
         return;
       }
 
-      console.log("Error removing all favorite users: ", error);
+      throw error;
     }
   }
 
@@ -161,7 +171,7 @@ export function useUserData() {
       followingUsers.value = response.data;
       const firstFollowingUser = followingUsers.value[0];
       if (firstFollowingUser) {
-        selectedUserId.value = '';
+        selectedUserId.value = "";
         selectedUserId.value = firstFollowingUser.id;
       }
     } catch (error) {
@@ -176,7 +186,7 @@ export function useUserData() {
   }
 
   // LOAD FOLLOWERS USERS
-  const followersUsers = ref<FollowUser[]>([]);
+  const followersUsers = ref<Followers[]>([]);
   async function loadFollowersUsers() {
     try {
       followsFilter.value = "followers";
@@ -185,7 +195,7 @@ export function useUserData() {
 
       const firstFollowerUser = followersUsers.value[0];
       if (firstFollowerUser) {
-        selectedUserId.value = '';
+        selectedUserId.value = "";
         selectedUserId.value = firstFollowerUser.id;
       }
     } catch (error) {
@@ -374,10 +384,20 @@ export function useUserData() {
     searchFilters.fromDate = "";
     searchFilters.toDate = "";
   }
-  // LOAD USERS | FOLLOW USERS
+
+  // FOLLOW USERS
   async function followUser(userId: string | number) {
     await api.post(`/follow/${userId}`);
-    await loadSuggestedUsers("users");
+    suggestedUsers.value = suggestedUsers.value.filter(
+      (user) => user.id !== userId,
+    );
+  }
+  async function unfollowUser(userId: string | number) {
+    await api.delete(`/follow/${userId}`);
+    followingUsers.value = followingUsers.value.filter(
+      (user) => user.id !== userId,
+    );
+    selectedUserId.value = 0;
   }
 
   // SEARCH USERS
@@ -525,7 +545,6 @@ export function useUserData() {
     try {
       const response = await api.post("/chats/new", { userId: userId });
       const newChatId = response.data.chatId;
-      console.log("New chat created with ID: ", newChatId);
       await selectChat(newChatId);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -562,10 +581,9 @@ export function useUserData() {
 
   // HELPER FUNCTIONS
   function selectedUser(userId: string | number) {
-    selectedUserId.value = '';
+    selectedUserId.value = "";
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;
-    console.log(selectedUserId.value);
   }
   function toUtcStartOfDay(date: string): string {
     return date ? `${date}T00:00:00.000Z` : "";
@@ -628,6 +646,7 @@ export function useUserData() {
     searchPost,
     resetFilters,
     followUser,
+    unfollowUser,
     searchUsers,
     loadUserChats,
     filteredSuggestedUsers,

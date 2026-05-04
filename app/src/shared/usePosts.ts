@@ -319,6 +319,36 @@ export function usePosts() {
     }
   }
 
+  // REPOST
+  async function repost(postId: number | string, state: boolean) {
+    try {
+      console.log("Repost state: ", state);
+      if (state === true) {
+        await api.delete(`/post/repost/${postId}`);
+        const selectedPost = userdata.value.find((p) => p.id === postId);
+        if (selectedPost && selectedPost._count.shares) {
+          selectedPost._count.shares--;
+        };
+        userdata.value = userdata.value.filter((p) => p.id !== postId);
+      } else if (state === false) {
+        await api.post(`/post/repost/${postId}`);
+
+        const selectedPost = userdata.value.find((p) => p.id === postId);
+        if (selectedPost) {
+          selectedPost._count.shares++;
+        }
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   // OPTION MODALS
   function displayPostOptions(postId: number | string) {
     openOptionsFor.value = openOptionsFor.value === postId ? "" : postId;
@@ -369,7 +399,16 @@ export function usePosts() {
     if (!currentUserId) return false;
     return String(commentAuthorId) === String(currentUserId);
   }
+  function isAuthorPost(postAuthorId: number | string): boolean {
+    const currentUser = authStore.user as {
+      id?: number | string;
+      userId?: number | string;
+    } | null;
+    const currentUserId = currentUser?.id ?? currentUser?.userId;
 
+    if (!currentUserId) return false;
+    return String(postAuthorId) !== String(currentUserId);
+  }
   function addMention() {
     createPostData.showMentionModal = true;
   }
@@ -444,6 +483,7 @@ export function usePosts() {
     deletePost,
     saveEdit,
     likePost,
+    repost,
 
     // COMMENTS FUNCTIONS
     loadComments,
@@ -465,5 +505,6 @@ export function usePosts() {
     // HELPER FUNCTIONS
     toUtcDateTime,
     isAuthorComment,
+    isAuthorPost,
   };
 }

@@ -96,10 +96,12 @@ export function useUserData() {
     try {
       await api.delete(`/favorites/${userId}`);
       // ADD REMOVED USER TO SUGGESTED USERS LOCALLY
-      const removedUser = favoriteUsers.value.find((user) => user.id === userId);
+      const removedUser = favoriteUsers.value.find(
+        (user) => user.id === userId,
+      );
       if (removedUser) {
         suggestedUsers.value.push(removedUser);
-      }      
+      }
       // REMOVE OLD FAVORITE USER FROM FAVORITE USERS LOCALLY
       favoriteUsers.value = favoriteUsers.value.filter(
         (user) => user.id !== userId,
@@ -389,6 +391,9 @@ export function useUserData() {
   async function followUser(userId: string | number) {
     await api.post(`/follow/${userId}`);
     suggestedUsers.value = suggestedUsers.value.filter(
+      (user) => user.id !== userId,
+    );
+    followersUsers.value = followersUsers.value.filter(
       (user) => user.id !== userId,
     );
   }

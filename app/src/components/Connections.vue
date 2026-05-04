@@ -34,6 +34,7 @@ const {
   loadFollowingUsers,
   loadFollowersUsers,
   loadUserProfile,
+  followUser,
   unfollowUser,
 } = useUserData();
 
@@ -122,7 +123,7 @@ watch(selectedUserId, async (newUserId) => {
                 <button
                   class="unfollow-btn button"
                   v-if="user.isFollowedByMe === false"
-                  @click=""
+                  @click="followUser(user.id)"
                 >
                   Follow
                 </button>

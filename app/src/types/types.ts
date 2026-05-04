@@ -7,7 +7,6 @@ export type PostType = {
   hideLikes: boolean;
   disableComments: boolean;
   createdAt: string;
-  isShared: boolean;
   comments: Comment[];
   author: User;
   _count: {
@@ -16,10 +15,8 @@ export type PostType = {
     shares: number;
   };
   postCount: number;
-  dashboardPosts: {
-    favorites: PostType[];
-    following: PostType[];
-  };
+  isRepost: boolean;
+  repostedAt: string;
 };
 
 export type User = {

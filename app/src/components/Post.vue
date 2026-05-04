@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 // POSTS COMPOSITION
 import { usePosts } from "../shared/usePosts";
 
@@ -23,6 +22,7 @@ const {
   newComment,
   editComment,
   deleteComment,
+  repost,
 
   // OPTION MODALS
   displayPostOptions,
@@ -35,6 +35,7 @@ const {
   // HELPER FUNCTIONS
   toUtcDateTime,
   isAuthorComment,
+  isAuthorPost,
 } = usePosts();
 </script>
 
@@ -49,13 +50,29 @@ const {
           }}</RouterLink>
         </span>
       </div>
-      <div class="dash-post-opts">
-        <button class="button" type="button" @click="displayPostOptions(post.id)">
-          <SpriteIcon name="dots" size="18" color="#535353" title="Post options" />
+      <div class="dash-post-opts" v-if="post.isRepost !== true">
+        <button
+          class="button"
+          type="button"
+          @click="displayPostOptions(post.id)"
+        >
+          <SpriteIcon
+            name="dots"
+            size="18"
+            color="#535353"
+            title="Post options"
+          />
         </button>
-        <div class="dash-pop-delete shadow-light" v-if="openOptionsFor === post.id">
-          <button class="button" type="button" @click="deletePost(post.id)">Delete</button>
-          <button class="button" type="button" @click="openEditModal(post)">Edit</button>
+        <div
+          class="dash-pop-delete shadow-light"
+          v-if="openOptionsFor === post.id"
+        >
+          <button class="button" type="button" @click="deletePost(post.id)">
+            Delete
+          </button>
+          <button class="button" type="button" @click="openEditModal(post)">
+            Edit
+          </button>
         </div>
       </div>
     </div>
@@ -64,7 +81,7 @@ const {
     </div>
     <div class="dash-options-post">
       <button
-       class="button"
+        class="button"
         type="button"
         :class="{ 'dash-commented': post._count.comments }"
         v-if="!post.disableComments"
@@ -74,7 +91,7 @@ const {
         <span>{{ post._count.comments || 0 }}</span>
       </button>
       <button
-       class="button"
+        class="button"
         type="button"
         @click="likePost(post.id, post.author.liked)"
         :class="{ 'dash-liked': post.author.liked }"
@@ -82,7 +99,13 @@ const {
         <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
         <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
       </button>
-      <button class="button" type="button" :class="{ 'dash-shared': post._count.shares }">
+      <button
+        class="button"
+        type="button"
+        :class="{ 'dash-shared': post._count.shares }"
+        @click="repost(post.id, post.isRepost)"
+        v-if="isAuthorPost(post.author.id)"
+      >
         <SpriteIcon name="share" size="16" color="#535353" title="Shares" />
         <span>{{ post._count.shares || 0 }}</span>
       </button>
@@ -114,7 +137,12 @@ const {
               v-if="editingComment.openCommentActions === comment.id"
               @click="startEditComment(comment.id, comment.content)"
             >
-              <SpriteIcon name="edit" size="20" color="#535353" title="Edit comment" />
+              <SpriteIcon
+                name="edit"
+                size="20"
+                color="#535353"
+                title="Edit comment"
+              />
             </button>
             <button
               class="button"
@@ -122,10 +150,24 @@ const {
               v-if="editingComment.openCommentActions === comment.id"
               @click="deleteComment(comment.id, post.id)"
             >
-              <SpriteIcon name="trash" size="20" color="#535353" title="Delete comment" />
+              <SpriteIcon
+                name="trash"
+                size="20"
+                color="#535353"
+                title="Delete comment"
+              />
             </button>
-            <button class="button" type="button" @click="toggleCommentActions(comment.id)">
-              <SpriteIcon name="dots" size="18" color="#535353" title="Comment options" />
+            <button
+              class="button"
+              type="button"
+              @click="toggleCommentActions(comment.id)"
+            >
+              <SpriteIcon
+                name="dots"
+                size="18"
+                color="#535353"
+                title="Comment options"
+              />
             </button>
           </div>
         </div>
@@ -135,7 +177,11 @@ const {
         >
           <input type="text" v-model="editingComment.editedCommentContent" />
           <div class="dash-edit-comment-actions">
-            <button class="button" type="button" @click="editComment(comment.id, post.id)">
+            <button
+              class="button"
+              type="button"
+              @click="editComment(comment.id, post.id)"
+            >
               Save
             </button>
             <button
@@ -165,7 +211,9 @@ const {
         placeholder="Add a comment..."
         v-model="editingComment.postComment"
       />
-      <button class="button" type="button" @click="newComment(post.id)">Post</button>
+      <button class="button" type="button" @click="newComment(post.id)">
+        Post
+      </button>
     </div>
     <div
       class="edit-post-modal"
@@ -179,8 +227,12 @@ const {
           v-model="editingPost.content"
         ></textarea>
         <div class="edit-actions">
-          <button class="button" type="button" @click="closeEditModal()">Cancel</button>
-          <button class="button" type="button" @click="saveEdit(post.id)">Save</button>
+          <button class="button" type="button" @click="closeEditModal()">
+            Cancel
+          </button>
+          <button class="button" type="button" @click="saveEdit(post.id)">
+            Save
+          </button>
         </div>
       </div>
     </div>

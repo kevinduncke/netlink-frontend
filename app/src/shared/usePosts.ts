@@ -322,7 +322,6 @@ export function usePosts() {
   // REPOST
   async function repost(postId: number | string, state: boolean) {
     try {
-      console.log("Repost state: ", state);
       if (state === true) {
         await api.delete(`/post/repost/${postId}`);
         const selectedPost = userdata.value.find((p) => p.id === postId);

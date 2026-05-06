@@ -44,11 +44,13 @@ const {
     <div class="dash-user-post">
       <div class="dash-username">
         <AvatarIcon />
-        <span>
-          <RouterLink :to="`/profile/${post.author.username}`">{{
-            post.author.name || "Unknown User"
-          }}</RouterLink>
-        </span>
+        <div>
+          <span>
+            <RouterLink :to="`/profile/${post.author.username}`">{{
+              post.author.name
+            }}</RouterLink>
+          </span>
+        </div>
       </div>
       <div class="dash-post-opts" v-if="post.isRepost !== true">
         <button
@@ -110,6 +112,12 @@ const {
         <span>{{ post._count.shares || 0 }}</span>
       </button>
     </div>
+    <p v-if="post.isRepost === true" class="dash-repost-by">
+      Reposted by
+      <RouterLink :to="`/profile/${post.repostedBy.username}`">{{
+        post.repostedBy.name
+      }}</RouterLink>
+    </p>
     <div
       class="dash-comments-post"
       v-if="
@@ -301,7 +309,7 @@ const {
   letter-spacing: 0.02rem;
   font-size: 0.8rem;
 }
-.dash-user-post span a {
+.dash-user-post span a, .dash-repost-by a {
   text-decoration: none;
   color: var(--color-primary);
 }
@@ -474,5 +482,12 @@ const {
 }
 .dash-edit-comment button:nth-child(2) {
   color: #535353;
+}
+
+.dash-repost-by {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+  margin: 0;
+  text-align: right;
 }
 </style>

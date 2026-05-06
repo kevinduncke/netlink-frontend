@@ -145,7 +145,7 @@ onMounted(async () => {
             class="filter-check"
             :class="{ 'filter-selected': searchFilters.shared === 'posts' }"
           >
-            <p style="color: #770500">Only show Posts</p>
+            <p>Only show Posts</p>
             <button
               class="button"
               type="button"

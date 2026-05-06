@@ -17,12 +17,14 @@ export type PostType = {
   postCount: number;
   isRepost: boolean;
   repostedAt: string;
+  repostedBy: User;
 };
 
 export type User = {
   id: string | number;
   name: string;
   username: string;
+  bio: string;
   avatarUrl?: string;
   followers: string | number;
   isFollowedByMe: boolean;
@@ -34,12 +36,7 @@ export interface Comment {
   content: string;
   createdAt: string;
   postId: string;
-  author: {
-    id: string | number;
-    name: string;
-    username: string;
-    avatarUrl: string;
-  };
+  author: User;
 }
 
 export interface CreatePost {

@@ -373,8 +373,7 @@ export function useUserData() {
       if (requestId !== latestSearchRequestId) {
         return;
       }
-
-      userdata.value = response.data.posts || [];
+      userdata.value = response.data || [];
     } catch (error) {
       console.error("Error searching posts: ", error);
     }

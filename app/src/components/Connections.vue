@@ -134,7 +134,7 @@ watch(selectedUserId, async (newUserId) => {
       </div>
     </div>
     <div class="dash-content">
-      <div v-if="selectedUserId !== 0">
+      <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
         <div class="dash-profile">
           <h2>Profile</h2>
           <div class="profile-head">
@@ -159,7 +159,7 @@ watch(selectedUserId, async (newUserId) => {
             <div class="profile-avatar"></div>
           </div>
         </div>
-        <div class="dash-posts">
+        <div class="dash-posts" v-if="followingUsers.length > 0 || followersUsers.length > 0">
           <h2>Posts</h2>
           <Post />
         </div>

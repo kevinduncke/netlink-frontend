@@ -204,6 +204,7 @@ onMounted(() => {
   font-family: "Montserrat Light", sans-serif;
   font-size: 0.8rem;
   padding: 0.7rem;
+  box-sizing: border-box;
 }
 .post-text > p {
   font-family: "Montserrat Light", sans-serif;

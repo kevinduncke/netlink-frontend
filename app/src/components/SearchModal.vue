@@ -11,6 +11,9 @@ import type { SearchUser } from "../types/search";
 // COMPONENTS
 import SpriteIcon from "./SpriteIcon.vue";
 
+// STYLES
+import "../styles/input.css"
+
 const props = defineProps({
   mode: { type: String, required: true },
   show: { type: Boolean, required: true },

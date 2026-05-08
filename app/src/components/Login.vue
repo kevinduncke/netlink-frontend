@@ -84,6 +84,7 @@ onMounted(() => {
                 type="email"
                 id="net-email"
                 placeholder="Email or Username"
+                autocomplete="email"
                 v-model="formData.email"
               />
               <p v-if="errors.email" class="form-error">{{ errors.email }}</p>
@@ -94,6 +95,7 @@ onMounted(() => {
                 type="password"
                 id="net-password"
                 placeholder="Password"
+                autocomplete="current-password"
                 v-model="formData.password"
               />
               <p v-if="errors.password" class="form-error">

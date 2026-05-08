@@ -36,7 +36,9 @@ type IconName =
   | "profile"
   | "settings"
   | "more"
-  | "logout";
+  | "logout"
+  | "visibility"
+  | "visibility-off";
 
 const props = withDefaults(
   defineProps<{

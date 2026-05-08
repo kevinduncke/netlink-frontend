@@ -1,6 +1,6 @@
 .profile-head {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   justify-content: space-between;
   margin: 0 2rem 2rem 2rem;
 }
@@ -11,19 +11,16 @@
 .profile-stats {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2rem;
   font-family: "Montserrat Light", sans-serif;
   font-size: var(--font-size-caption);
-  gap: 1rem;
 }
 .profile-titles p {
   font-family: "Montserrat Regular", sans-serif;
   font-size: var(--font-size-caption);
   line-height: 1rem;
 }
-.profile-avatar {
-  background-color: #e8e8e8;
-  height: 125px;
-  width: 125px;
-  border-radius: 100px;
+.profile-avatar {  
+  text-align: center;
 }

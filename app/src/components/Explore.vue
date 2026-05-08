@@ -14,6 +14,7 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 import "../styles/userbutton.css";
 import "../styles/buttons.css";
 import "../styles/body.css";
+import "../styles/input.css"
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";

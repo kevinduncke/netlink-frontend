@@ -3,6 +3,9 @@ import { reactive, watch } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 
+// COMPONENTS
+import SpriteIcon from "./SpriteIcon.vue";
+
 // STYLES
 import "../styles/entry.css";
 import "../styles/input.css";
@@ -124,6 +127,7 @@ async function onSubmit() {
                 type="email"
                 id="net-email"
                 placeholder="Email"
+                autocomplete="email"
                 v-model="formData.email"
               />
               <p v-if="errors.email" class="form-error">{{ errors.email }}</p>
@@ -134,6 +138,7 @@ async function onSubmit() {
                 type="text"
                 id="net-name"
                 placeholder="Full Name"
+                autocomplete="name"
                 v-model="formData.name"
               />
               <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
@@ -144,6 +149,7 @@ async function onSubmit() {
                 type="password"
                 id="net-password"
                 placeholder="Password"
+                autocomplete="current-password"
                 v-model="formData.password"
               />
               <p v-if="errors.password" class="form-error">

@@ -156,7 +156,9 @@ watch(selectedUserId, async (newUserId) => {
                 <p>{{ userProfile.bio }}</p>
               </div>
             </div>
-            <div class="profile-avatar"></div>
+            <div class="profile-avatar">
+              <AvatarIcon height="125" width="125" />
+            </div>
           </div>
         </div>
         <div class="dash-posts" v-if="followingUsers.length > 0 || followersUsers.length > 0">

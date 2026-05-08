@@ -2,6 +2,7 @@
 
 // STYLES
 import "../styles/entry.css";
+import "../styles/input.css"
 
 </script>
 

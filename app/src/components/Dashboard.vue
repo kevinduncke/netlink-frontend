@@ -13,6 +13,7 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 // STYLES
 import "../styles/userbutton.css"
 import "../styles/body.css"
+import "../styles/input.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";

@@ -9,6 +9,7 @@ import SpriteIcon from "./SpriteIcon.vue";
 // STYLES
 import "../styles/body.css";
 import "../styles/input.css";
+import "../styles/input.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";

@@ -6,10 +6,12 @@ import { onBeforeRouteLeave } from "vue-router";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
+import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
 import "../styles/profile.css"
 import "../styles/body.css"
+import "../styles/input.css"
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -232,9 +234,9 @@ onBeforeRouteLeave(() => {
               <p>{{ userProfile.bio }}</p>
             </div>
           </div>
-          <div class="profile-avatar">
-            <img :src="userProfile.avatarUrl" />
-          </div>
+            <div class="profile-avatar">
+              <AvatarIcon height="125" width="125" />
+            </div>
         </div>
       </div>
       <div class="profile-posts">

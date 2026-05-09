@@ -4,6 +4,7 @@ import { onMounted, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
+import Profile from "./Profile.vue";
 import Post from "./Post.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
@@ -27,7 +28,6 @@ const {
   followsFilter,
   followingUsers,
   followersUsers,
-  userProfile,
 
   // FUNCTIONS
   selectedUser,
@@ -137,29 +137,7 @@ watch(selectedUserId, async (newUserId) => {
       <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
         <div class="dash-profile">
           <h2>Profile</h2>
-          <div class="profile-head">
-            <div class="profile-info">
-              <h1>{{ userProfile.name }}</h1>
-              <h2>@{{ userProfile.username }}</h2>
-              <div class="profile-stats">
-                <div>
-                  <p>{{ userProfile.postsCount }} Posts</p>
-                </div>
-                <div>
-                  <p>{{ userProfile.followersCount }} Followers</p>
-                </div>
-                <div>
-                  <p>{{ userProfile.followingCount }} Following</p>
-                </div>
-              </div>
-              <div class="profile-titles">
-                <p>{{ userProfile.bio }}</p>
-              </div>
-            </div>
-            <div class="profile-avatar">
-              <AvatarIcon height="125" width="125" />
-            </div>
-          </div>
+          <Profile />
         </div>
         <div class="dash-posts" v-if="followingUsers.length > 0 || followersUsers.length > 0">
           <h2>Posts</h2>

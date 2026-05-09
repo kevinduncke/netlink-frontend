@@ -40,13 +40,13 @@ const {
   loadPosts,
 } = usePosts();
 
-// SEARCH USERS | SEARCH FILTERS
-watch(searchFilters, searchPost, { deep: true });
-
 onMounted(async () => {
   await loadSuggestedUsers("users");
   await loadPosts("all");
 });
+
+// SEARCH USERS | SEARCH FILTERS
+watch(searchFilters, searchPost, { deep: true });
 </script>
 
 <template>

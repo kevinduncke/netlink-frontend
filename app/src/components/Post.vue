@@ -1,10 +1,20 @@
 <script setup lang="ts">
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
+
 // POSTS COMPOSITION
 import { usePosts } from "../shared/usePosts";
 
 // ICONS
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+
+// USER DATA FUNCTIONS
+const {
+  // FUNCTIONS
+  selectedUser,
+  getUserRoute,
+} = useUserData();
 
 // POST FUNCTIONS
 const {
@@ -46,9 +56,12 @@ const {
         <AvatarIcon />
         <div>
           <span>
-            <RouterLink :to="`/profile/${post.author.username}`">{{
-              post.author.name
-            }}</RouterLink>
+            <RouterLink
+              :to="getUserRoute(post.author.username, post.author.id)"
+              @click="selectedUser(post.author.id)"
+            >
+              {{ post.author.name }}
+            </RouterLink>
           </span>
         </div>
       </div>
@@ -114,9 +127,12 @@ const {
     </div>
     <p v-if="post.isRepost === true" class="dash-repost-by">
       Reposted by
-      <RouterLink :to="`/profile/${post.repostedBy.username}`">{{
-        post.repostedBy.name
-      }}</RouterLink>
+      <RouterLink
+        :to="getUserRoute(post.repostedBy.username, post.repostedBy.id)"
+        @click="selectedUser(post.repostedBy.id)"
+      >
+        {{ post.repostedBy.name }}
+      </RouterLink>
     </p>
     <div
       class="dash-comments-post"
@@ -130,9 +146,12 @@ const {
           <div class="dash-usercmt-info">
             <AvatarIcon height="32px" width="32px" />
             <span>
-              <RouterLink :to="`/profile/${comment.author.id}`">{{
-                comment.author.name
-              }}</RouterLink>
+              <RouterLink
+                :to="getUserRoute(comment.author.username, comment.author.id)"
+                @click="selectedUser(comment.author.id)"
+              >
+                {{ comment.author.name }}
+              </RouterLink>
             </span>
           </div>
           <div
@@ -309,7 +328,8 @@ const {
   letter-spacing: 0.02rem;
   font-size: 0.8rem;
 }
-.dash-user-post span a, .dash-repost-by a {
+.dash-user-post span a,
+.dash-repost-by a {
   text-decoration: none;
   color: var(--color-primary);
 }

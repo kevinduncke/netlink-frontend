@@ -78,12 +78,12 @@ function signOut() {
       <div class="dash-lownav">
         <div
           class="dash-navbtns"
-          :class="{ 'dash-navactive': route.name === 'profile' }"
+          :class="{ 'dash-navactive': route.name === 'account' }"
         >
-          <router-link to="/profile">
+          <router-link to="/account">
             <button class="button">
-              <SpriteIcon name="profile" size="22" title="Profile" />
-              <span>Profile</span>
+              <SpriteIcon name="profile" size="22" title="Account" />
+              <span>Account</span>
             </button>
           </router-link>
         </div>

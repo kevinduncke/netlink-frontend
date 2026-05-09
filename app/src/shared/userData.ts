@@ -18,7 +18,10 @@ import type { ChatMessage, ChatUser } from "../types/chat";
 
 export const selectedUserId = ref<string | number>("");
 
-export function useUserData() {
+// SINGLETON INSTANCE TO SHARE STATTE ACROSS ALL COMPONENTS
+let userDataInstance: ReturnType<typeof createUserData> | null = null;
+
+function createUserData() {
   const authStore = useAuthStore();
   const { editingComment } = usePosts();
   const {
@@ -224,6 +227,28 @@ export function useUserData() {
     followersCount: 0,
     followingCount: 0,
   });
+  function resetUserProfile() {
+    userProfile.value = {
+      name: "",
+      username: "",
+      bio: "",
+      url: "",
+      avatarUrl: "",
+      postsCount: 0,
+      followersCount: 0,
+      followingCount: 0,
+    };
+    originalProfile.value = {
+      name: "",
+      username: "",
+      bio: "",
+      url: "",
+      avatarUrl: "",
+      postsCount: 0,
+      followersCount: 0,
+      followingCount: 0,
+    };
+  }
   async function loadUserProfile(userId: string | number) {
     try {
       const res = await api.get(`/users/${userId}`);
@@ -334,6 +359,18 @@ export function useUserData() {
 
       throw error;
     }
+  }
+
+  // UPDATE WATCHED PROFILE ACCOUNT FIELDS
+  function updateUnsavedProfileChanges() {
+    hasUnsavedChanges.value =
+      (userProfile.value.name ?? "") !== (originalProfile.value.name ?? "") ||
+      (userProfile.value.username ?? "") !==
+        (originalProfile.value.username ?? "") ||
+      (userProfile.value.bio ?? "") !== (originalProfile.value.bio ?? "") ||
+      (userProfile.value.url ?? "") !== (originalProfile.value.url ?? "") ||
+      (userProfile.value.avatarUrl ?? "") !==
+        (originalProfile.value.avatarUrl ?? "");
   }
 
   //================================================
@@ -585,7 +622,15 @@ export function useUserData() {
 
   // HELPER FUNCTIONS
   function selectedUser(userId: string | number) {
-    selectedUserId.value = "";
+    // CHECH IF THE SELECTED USER ID IS THE SAME AS THE CURRENTLY LOGGED USER ID
+    const currentUser = authStore.user as {
+      id?: number | string;
+      userId?: number | string;
+    } | null;
+    if (String(userId) === String(currentUser?.id ?? currentUser?.userId)) {
+      selectedUserId.value = "";
+      return;
+    }
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;
   }
@@ -605,6 +650,17 @@ export function useUserData() {
       });
     },
   );
+  function getUserRoute(username: string, userId: string | number) {
+    const currentUser = authStore.user as {
+      id?: number | string;
+      userId?: number | string;
+    } | null;
+    const currentUserId = currentUser?.id ?? currentUser?.userId;
+
+    return String(userId) === String(currentUserId)
+      ? "/account"
+      : `/user/${username}`;
+  }
 
   return {
     // VARIABLES
@@ -642,11 +698,13 @@ export function useUserData() {
     loadFollowingUsers,
     loadFollowersUsers,
     loadUserProfile,
+    resetUserProfile,
     loadMyProfile,
     toggleEdit,
     toggleCloseEdit,
     saveProfile,
     deleteAccount,
+    updateUnsavedProfileChanges,
     searchPost,
     resetFilters,
     followUser,
@@ -658,10 +716,18 @@ export function useUserData() {
     getUserInfo,
     groupMessagesByDate,
     dateJoinedUser,
+    getUserRoute,
     verifyNewChatSearch,
     clearQuery,
     sendMessage,
     createChat,
     deleteChat,
   };
+}
+
+export function useUserData() {
+  if (!userDataInstance) {
+    userDataInstance = createUserData();
+  }
+  return userDataInstance;
 }

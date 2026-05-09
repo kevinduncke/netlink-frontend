@@ -3,9 +3,6 @@ import { reactive, watch } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 
-// COMPONENTS
-import SpriteIcon from "./SpriteIcon.vue";
-
 // STYLES
 import "../styles/entry.css";
 import "../styles/input.css";

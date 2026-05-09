@@ -7,12 +7,13 @@ import HomeView from "../components/HomeView.vue";
 import Register from "../components/Register.vue";
 import Forgot from "../components/Forgot.vue";
 import Dashboard from "../components/Dashboard.vue";
-import Profile from "../components/Profile.vue";
+import Profile from "../components/Account.vue";
 import PageNotFound from "../components/404.vue";
 import Create from "../components/Create.vue";
 import Explore from "../components/Explore.vue";
 import Connections from "../components/Connections.vue";
 import Messages from "../components/Messages.vue";
+import User from "../components/User.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -58,9 +59,9 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false },
   },
   {
-    path: "/profile",
+    path: "/account",
     component: Profile,
-    name: "profile",
+    name: "account",
     meta: { requiresAuth: true },
   },
   {
@@ -81,6 +82,12 @@ const routes: RouteRecordRaw[] = [
     name: "messages",
     meta: { requiresAuth: true },
   },
+  {
+    path: "/user/:username",
+    component: User,
+    name: "user",
+    meta: { requiresAuth: true },
+  }
 ];
 
 export const router = createRouter({

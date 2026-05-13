@@ -62,6 +62,7 @@ export function usePosts() {
         imageUrl: createPostData.imageUrl,
         hideLikes: createPostData.hideLikes,
         disableComments: createPostData.disableComments,
+        mentions: createPostData.mentions,
       });
 
       createPostData.content = "";
@@ -327,7 +328,7 @@ export function usePosts() {
         const selectedPost = userdata.value.find((p) => p.id === postId);
         if (selectedPost && selectedPost._count.shares) {
           selectedPost._count.shares--;
-        };
+        }
         userdata.value = userdata.value.filter((p) => p.id !== postId);
       } else if (state === false) {
         await api.post(`/post/repost/${postId}`);
@@ -411,8 +412,9 @@ export function usePosts() {
   function addMention() {
     createPostData.showMentionModal = true;
   }
-  function selectMention(username: string) {
+  async function selectMention(username: string) {
     createPostData.content += " @" + username + " ";
+    createPostData.mentions.push(username);
     createPostData.showMentionModal = false;
   }
   function addSpecificFollowers(selectedList: string[]) {

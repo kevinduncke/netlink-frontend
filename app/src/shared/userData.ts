@@ -146,8 +146,6 @@ function createUserData() {
     try {
       const response = await api.get("/users/notifications");
       notifications.value = response.data || [];
-
-      console.log("Loaded notifications: ", notifications.value);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -285,7 +283,6 @@ function createUserData() {
     try {
       const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
-      console.log(res.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();

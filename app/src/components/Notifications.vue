@@ -2,9 +2,6 @@
 // VUE
 import { onMounted } from "vue";
 
-// COMPONENTS
-import SpriteIcon from "./SpriteIcon.vue";
-
 // STYLES
 import "../styles/body.css";
 
@@ -33,14 +30,6 @@ onMounted(async () => {
   <div class="dash-notif-base">
     <div class="notif-head">
       <h2>Notifications</h2>
-      <button class="button" type="button">
-        <SpriteIcon
-          name="heart"
-          size="18"
-          color="#535353"
-          title="notifications"
-        />
-      </button>
     </div>
     <div
       class="notif-base"
@@ -52,12 +41,6 @@ onMounted(async () => {
       <div class="notif-message">
         <span>{{ ntf.fromUser?.username }}</span>
         <p>{{ ntf.content }}</p>
-        <!-- <p v-if="ntf.type === 'FOLLOW'">started following you.</p>
-        <p v-if="ntf.type === 'COMMENT'">commented on your post.</p>
-        <p v-if="ntf.type === 'LIKE'">liked your post.</p>
-        <p v-if="ntf.type === 'REPOST'">reposted your post.</p>
-        <p v-if="ntf.type === 'MENTION'">mentioned you in a comment.</p>
-        <p v-if="ntf.type === 'MESSAGE'">sent you a message.</p> -->
         <span>{{ dateConverter(ntf.createdAt) }}</span>
       </div>
       <div class="notif-box">
@@ -95,9 +78,17 @@ onMounted(async () => {
   gap: 1rem;
   align-items: center;
   justify-content: flex-start;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
 }
 .notif-message {
   gap: 0.2rem;
+}
+.notif-message span:first-child {
+  font-family: "Montserrat SemiBold", sans-serif;
+}
+.notif-message span:last-child {
+  font-size: var(--font-size-caption);
 }
 .notif-empty-text {
   font-family: "Montserrat Regular", sans-serif;

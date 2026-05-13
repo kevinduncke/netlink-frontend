@@ -18,6 +18,7 @@ export type PostType = {
   isRepost: boolean;
   repostedAt: string;
   repostedBy: User;
+  mentions: User[];
 };
 
 export type User = {
@@ -31,6 +32,10 @@ export type User = {
   liked: boolean;
 };
 
+export type UserMention = {
+  username: string;
+}
+
 export interface Comment {
   id: string | number;
   content: string;
@@ -41,10 +46,10 @@ export interface Comment {
 
 export interface CreatePost {
   content: string;
-  mentions: string[];
+  mentions: UserMention[];
   location: string;
   imageUrl: string;
-  visibility: 'PUBLIC' | 'FOLLOWERS' | 'ONLY_ME' | 'SPECIFIC';
+  visibility: "PUBLIC" | "FOLLOWERS" | "ONLY_ME" | "SPECIFIC";
   specificFollowers: string[];
   hideLikes: boolean;
   disableComments: boolean;
@@ -60,7 +65,13 @@ export interface EditingComment {
   openCommentActions: number | string | null;
 }
 
-export type NotificationType = 'FOLLOW' | 'LIKE' | 'COMMENT' | 'REPOST' | 'MENTION' | 'MESSAGE';
+export type NotificationType =
+  | "FOLLOW"
+  | "LIKE"
+  | "COMMENT"
+  | "REPOST"
+  | "MENTION"
+  | "MESSAGE";
 
 export interface Notification {
   id: string | number;

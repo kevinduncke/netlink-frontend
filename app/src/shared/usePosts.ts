@@ -13,6 +13,7 @@ import type {
   Comment,
   EditingComment,
   CreatePost,
+  UserMention
 } from "../types/types.ts";
 
 // POSTS
@@ -24,7 +25,7 @@ export function usePosts() {
   // CREATE POST
   const createPostData: CreatePost = reactive({
     content: "What's on your mind today?",
-    mentions: [],
+    mentions: [] as UserMention[],
     location: "",
     imageUrl: "",
     visibility: "PUBLIC",
@@ -413,8 +414,7 @@ export function usePosts() {
     createPostData.showMentionModal = true;
   }
   async function selectMention(username: string) {
-    createPostData.content += " @" + username + " ";
-    createPostData.mentions.push(username);
+    createPostData.mentions.push({ username });
     createPostData.showMentionModal = false;
   }
   function addSpecificFollowers(selectedList: string[]) {

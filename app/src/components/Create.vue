@@ -6,7 +6,7 @@ import SearchModal from "./SearchModal.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/body.css"
+import "../styles/body.css";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -31,7 +31,7 @@ const {
 
 onMounted(() => {
   loadPosts("my-posts");
-})
+});
 </script>
 
 <template>
@@ -46,6 +46,13 @@ onMounted(() => {
             id="text"
             v-model="createPostData.content"
           ></textarea>
+          <p>
+            Mentions:
+            <span
+              v-for="mention in createPostData.mentions"
+              :key="mention.username"
+            >@{{ mention.username }}</span>
+          </p>
           <p>Location: {{ createPostData.location }}</p>
           <div class="post-adds">
             <p>Add to your post</p>
@@ -71,50 +78,87 @@ onMounted(() => {
         </div>
       </div>
       <div class="mediaPost">
-        <button class="body-box shadow-light button" type="button" @click="createPost()">Post</button>
+        <button
+          class="body-box shadow-light button"
+          type="button"
+          @click="createPost()"
+        >
+          Post
+        </button>
       </div>
       <div class="optionsPost">
         <h2>Options</h2>
         <div class="visibilityPost">
           <p>Who can view your post?</p>
           <div class="modesOptions">
-            <button class="button" type="button" @click="changeVisibility('PUBLIC')">
+            <button
+              class="button"
+              type="button"
+              @click="changeVisibility('PUBLIC')"
+            >
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'PUBLIC' }"
               >
-                <SpriteIcon name="public" size="18" color="#535353" title="Public" />
+                <SpriteIcon
+                  name="public"
+                  size="18"
+                  color="#535353"
+                  title="Public"
+                />
               </div>
               <div class="infoIcon">
                 <p>Public</p>
                 <p>Anyone on/off Netlink</p>
               </div>
             </button>
-            <button class="button" type="button" @click="changeVisibility('FOLLOWERS')">
+            <button
+              class="button"
+              type="button"
+              @click="changeVisibility('FOLLOWERS')"
+            >
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'FOLLOWERS' }"
               >
-                <SpriteIcon name="followers" size="20" color="#535353" title="Followers" />
+                <SpriteIcon
+                  name="followers"
+                  size="20"
+                  color="#535353"
+                  title="Followers"
+                />
               </div>
               <div class="infoIcon">
                 <p>Followers</p>
                 <p>Your followers only</p>
               </div>
             </button>
-            <button class="button" type="button" @click="changeVisibility('ONLY_ME')">
+            <button
+              class="button"
+              type="button"
+              @click="changeVisibility('ONLY_ME')"
+            >
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'ONLY_ME' }"
               >
-                <SpriteIcon name="lock" size="20" color="#535353" title="Only me" />
+                <SpriteIcon
+                  name="lock"
+                  size="20"
+                  color="#535353"
+                  title="Only me"
+                />
               </div>
               <div class="infoIcon">
                 <p>Only Me</p>
                 <p>Only you can see this</p>
               </div>
             </button>
-            <button class="button" type="button" @click="changeVisibility('SPECIFIC')">
+            <button
+              class="button"
+              type="button"
+              @click="changeVisibility('SPECIFIC')"
+            >
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.visibility === 'SPECIFIC' }"
@@ -152,7 +196,11 @@ onMounted(() => {
                 <p>Hide like count</p>
               </div>
             </button>
-            <button class="button" type="button" @click="toggleDisableComments()">
+            <button
+              class="button"
+              type="button"
+              @click="toggleDisableComments()"
+            >
               <div
                 class="btnIcon"
                 :class="{ selected: createPostData.disableComments }"

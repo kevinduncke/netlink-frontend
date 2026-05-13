@@ -92,7 +92,17 @@ const {
       </div>
     </div>
     <div class="dash-content-post">
-      <p>{{ post.content }}</p>
+      <span>
+        {{ post.content }}
+      </span>
+      <span v-for="mention in post.mentions" :key="mention.id">
+        <RouterLink
+          :to="getUserRoute(mention.username, mention.id)"
+          @click="selectedUser(mention.id)"
+        >
+          @{{ mention.username }}
+        </RouterLink>
+      </span>
     </div>
     <div class="dash-options-post">
       <button

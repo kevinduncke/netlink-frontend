@@ -59,3 +59,17 @@ export interface EditingComment {
   editingCommentId: number | string | null;
   openCommentActions: number | string | null;
 }
+
+export type NotificationType = 'FOLLOW' | 'LIKE' | 'COMMENT' | 'REPOST' | 'MENTION' | 'MESSAGE';
+
+export interface Notification {
+  id: string | number;
+  type: NotificationType;
+  content: string;
+  read: boolean;
+  createdAt: string;
+
+  fromUser?: User;
+  post?: PostType;
+  comment?: Comment;
+}

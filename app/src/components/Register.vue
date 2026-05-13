@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { reactive, watch } from "vue";
+import { reactive, watch, ref } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
+
+// COMPONENTS
+import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
 import "../styles/entry.css";
@@ -23,6 +26,11 @@ const errors = reactive({
   name: "",
   general: "",
 });
+
+const showPassword = ref(false);
+function toggleShowPassword() {
+  showPassword.value = !showPassword.value;
+}
 
 // VALIDATION
 const emailPattern = /^[a-zA-Z0-9._%+-]+@netlink\.local$/;
@@ -141,14 +149,29 @@ async function onSubmit() {
               <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
             </div>
 
-            <div class="formGroup">
-              <input
-                type="password"
-                id="net-password"
-                placeholder="Password"
-                autocomplete="current-password"
-                v-model="formData.password"
-              />
+            <div class="formGroup password-field">
+              <div class="passwordGroup">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="net-password"
+                  placeholder="Password"
+                  autocomplete="current-password"
+                  v-model="formData.password"
+                />
+                <button
+                  type="button"
+                  class="icon-btn"
+                  @click="toggleShowPassword"
+                  :aria-pressed="showPassword"
+                  aria-label="Toggle password visibility"
+                >
+                  <SpriteIcon
+                    :name="showPassword ? 'visibility' : 'visibilityoff'"
+                    size="22"
+                    :title="showPassword ? 'visibilityoff' : 'visibility'"
+                  />
+                </button>
+              </div>
               <p v-if="errors.password" class="form-error">
                 {{ errors.password }}
               </p>
@@ -168,7 +191,7 @@ async function onSubmit() {
                   !formData.email.length ||
                   !formData.name.length ||
                   !formData.password.length,
-                'animated-btn': 
+                'animated-btn':
                   formData.email.length &&
                   formData.name.length &&
                   formData.password.length,

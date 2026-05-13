@@ -1,14 +1,16 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, watch } from "vue";
+import { onMounted } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
+import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
+import "../styles/about.css";
 import "../styles/profile.css";
 import "../styles/utilities.css";
 import "../styles/body.css";
@@ -16,39 +18,20 @@ import "../styles/body.css";
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
-// POSTS COMPOSITION
-import { usePosts } from "../shared/usePosts";
-
 // USER DATA FUNCTIONS
 const {
   // VARIABLES
+  userProfile,
   selectedUserId,
+  dateConverter,
 
+  // FUNCTIONS
   resetUserProfile,
-  loadUserProfile,
+  loadSelectedUser,
 } = useUserData();
-
-// POST FUNCTIONS
-const { loadPosts } = usePosts();
-
-async function loadSelectedUser(userId: string | number) {
-  if (!userId) {
-    return;
-  }
-
-  resetUserProfile();
-  await loadUserProfile(userId);
-  await loadPosts(`user/${userId}`);
-}
 
 onMounted(async () => {
   await loadSelectedUser(selectedUserId.value);
-});
-
-watch(selectedUserId, async (newUserId) => {
-  if (newUserId) {
-    await loadSelectedUser(newUserId);
-  }
 });
 
 onBeforeRouteLeave((to) => {
@@ -63,7 +46,51 @@ onBeforeRouteLeave((to) => {
 <template>
   <div class="dash-wrapper">
     <Navigation />
-    <div class="dash-sidepanel"></div>
+    <div class="dash-sidepanel">
+      <div class="about-panel">
+        <div class="dash-data-box">
+          <h2>About this Account</h2>
+          <div class="dash-about-user">
+            <SpriteIcon
+              name="date"
+              size="24"
+              color="#535353"
+              title="Date Joined"
+            />
+            <div>
+              <p>Date Joined</p>
+              <p>{{ dateConverter(userProfile.createdAt) }}</p>
+            </div>
+          </div>
+          <div class="dash-about-user">
+            <SpriteIcon name="link-url" size="24" color="#535353" title="URL" />
+            <div>
+              <p>URL</p>
+              <p>https://netlink.local/{{ userProfile.username }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="dash-data-box">
+          <h2>Block User</h2>
+          <button class="button" type="button">
+            <SpriteIcon name="block" size="24" color="#535353" title="Block" />
+            <p>Block</p>
+          </button>
+        </div>
+        <div class="dash-data-box">
+          <h2>Share Profile</h2>
+          <button class="button" type="button">
+            <SpriteIcon
+              name="email"
+              size="24"
+              color="#535353"
+              title="Share via Email"
+            />
+            <p>Share via Email</p>
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="dash-content">
       <div class="profile-content">
         <h2>Profile</h2>

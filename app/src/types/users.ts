@@ -28,4 +28,5 @@ export type UserProfile = {
   postsCount: number;
   followersCount: number;
   followingCount: number;
+  createdAt: string;
 };

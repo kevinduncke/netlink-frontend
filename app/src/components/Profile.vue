@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, watch } from "vue";
+import { watch } from "vue";
 
 // COMPONENTS
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
@@ -15,14 +15,7 @@ import { useUserData } from "../shared/userData";
 const {
   // VARIABLES
   userProfile,
-
-  // FUNCTIONS
-  loadMyProfile,
 } = useUserData();
-
-onMounted(async () => {
-  await loadMyProfile();
-});
 
 watch(
   () => [

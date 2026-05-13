@@ -15,6 +15,7 @@ import type { UserProfile } from "../types/users";
 // POSTS COMPOSITION + VARIABLES
 import { usePosts } from "../shared/usePosts";
 import type { ChatMessage, ChatUser } from "../types/chat";
+import type { Notification } from "../types/types";
 
 export const selectedUserId = ref<string | number>("");
 
@@ -137,6 +138,34 @@ function createUserData() {
     }
   }
 
+  //================================================
+
+  // NOTIFICATIONS
+  const notifications = ref<Notification[]>([]);
+  async function loadNotifications() {
+    try {
+      const response = await api.get("/users/notifications");
+      notifications.value = response.data || [];
+
+      console.log("Loaded notifications: ", notifications.value);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        notifications.value = [];
+        return;
+      }
+
+      throw error;      
+    }
+  }
+
+  //================================================  
+
   // SUGGESTED USERS
   const suggestedUsers = ref<FollowUser[]>([]);
   async function loadSuggestedUsers(route: string) {
@@ -226,6 +255,7 @@ function createUserData() {
     postsCount: 0,
     followersCount: 0,
     followingCount: 0,
+    createdAt: "",
   });
   function resetUserProfile() {
     userProfile.value = {
@@ -237,6 +267,7 @@ function createUserData() {
       postsCount: 0,
       followersCount: 0,
       followingCount: 0,
+      createdAt: "",
     };
     originalProfile.value = {
       name: "",
@@ -247,12 +278,14 @@ function createUserData() {
       postsCount: 0,
       followersCount: 0,
       followingCount: 0,
+      createdAt: "",
     };
   }
   async function loadUserProfile(userId: string | number) {
     try {
       const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
+      console.log(res.data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -634,22 +667,31 @@ function createUserData() {
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;
   }
+  async function loadSelectedUser(userId: string | number) {
+    if (!userId) {
+      router.push("/dashboard");
+      return;
+    }
+
+    resetUserProfile();
+    await loadUserProfile(userId);
+    await loadPosts(`user/${userId}`);
+  }
   function toUtcStartOfDay(date: string): string {
     return date ? `${date}T00:00:00.000Z` : "";
   }
   function toUtcEndOfDay(date: string): string {
     return date ? `${date}T23:59:59.999Z` : "";
   }
-  const dateJoinedUser = computed(
-    // FORMAT THE MONTH NUMBER TO TEXT AND SHOW ONLY THE MONTH AND YEAR
-    () => {
-      const date = new Date(chatUserInfo.value.createdAt);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-      });
-    },
-  );
+  function dateConverter(value: string): string {
+    // CHAT | MESSAGES = chatUserInfo.value.createdAt
+    // USER = userProfile.value.createdAt
+    const date = new Date(value);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
+  }
   function getUserRoute(username: string, userId: string | number) {
     const currentUser = authStore.user as {
       id?: number | string;
@@ -668,6 +710,7 @@ function createUserData() {
     suggestedUsers,
     favSearchQuery,
     favStateEdit,
+    notifications,
     selectedUserId,
     followsFilter,
     followingUsers,
@@ -693,8 +736,10 @@ function createUserData() {
     addFavoriteUser,
     deleteFavoriteUser,
     removeAllFavoriteUsers,
+    loadNotifications,
     loadSuggestedUsers,
     selectedUser,
+    loadSelectedUser,
     loadFollowingUsers,
     loadFollowersUsers,
     loadUserProfile,
@@ -715,7 +760,7 @@ function createUserData() {
     selectChat,
     getUserInfo,
     groupMessagesByDate,
-    dateJoinedUser,
+    dateConverter,
     getUserRoute,
     verifyNewChatSearch,
     clearQuery,

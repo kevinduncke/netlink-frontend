@@ -1,0 +1,46 @@
+.dash-data-box h2 {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  padding: 1rem 1rem 0 1rem;
+}
+.dash-data-box button {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+  background-color: var(--color-white);
+}
+.dash-data-box button:hover {
+  background-color: var(--color-gray-100);
+}
+.dash-data-box button:hover > svg,
+.dash-about-user:hover > svg {
+  fill: var(--color-primary);
+}
+.dash-data-box button > p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-about-user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+}
+.dash-about-user p:first-child {
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-about-user p:last-child {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+}
+.dash-about-user:last-child {
+  padding-bottom: 1rem;
+}

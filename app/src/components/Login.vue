@@ -123,12 +123,12 @@ onMounted(() => {
           <div class="options-btns">
             <div>
               <router-link :to="{ name: 'forgot-password' }">
-                <button class="opt-btn button">Forgot Password?</button>
+                <button class="opt-btn">Forgot Password?</button>
               </router-link>
             </div>
             <div>
               <router-link :to="{ name: 'register' }">
-                <button class="opt-btn button">Create Account</button>
+                <button class="opt-btn">Create Account</button>
               </router-link>
             </div>
           </div>

@@ -9,7 +9,7 @@ import SpriteIcon from "./SpriteIcon.vue";
 // STYLES
 import "../styles/body.css";
 import "../styles/input.css";
-import "../styles/input.css"
+import "../styles/about.css";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -20,9 +20,10 @@ const {
   searchUsersResults,
   userChats,
   selectedChat,
-  chatUserInfo,
   userChatId,
+  chatUserInfo,
   displayUserInfo,
+  dateConverter,
   message,
 
   // FUNCTIONS
@@ -33,7 +34,6 @@ const {
   selectChat,
   getUserInfo,
   groupMessagesByDate,
-  dateJoinedUser,
   verifyNewChatSearch,
   clearQuery,
   sendMessage,
@@ -243,30 +243,6 @@ onMounted(async () => {
         </div>
         <div v-else>
           <div class="dash-data-box">
-            <h2>Share Profile</h2>
-            <button class="button shadow-light" type="button">
-              <SpriteIcon
-                name="email"
-                size="24"
-                color="#535353"
-                title="Share via Email"
-              />
-              <p>Share via Email</p>
-            </button>
-          </div>
-          <div class="dash-data-box">
-            <h2>Block User</h2>
-            <button class="button" type="button">
-              <SpriteIcon
-                name="block"
-                size="24"
-                color="#535353"
-                title="Block"
-              />
-              <p>Block</p>
-            </button>
-          </div>
-          <div class="dash-data-box">
             <h2>About this Account</h2>
             <div class="dash-about-user">
               <SpriteIcon
@@ -277,7 +253,7 @@ onMounted(async () => {
               />
               <div>
                 <p>Date Joined</p>
-                <p>{{ dateJoinedUser }}</p>
+                <p>{{ dateConverter(chatUserInfo.createdAt) }}</p>
               </div>
             </div>
             <div class="dash-about-user">
@@ -292,6 +268,30 @@ onMounted(async () => {
                 <p>https://netlink.local/{{ chatUserInfo.username }}</p>
               </div>
             </div>
+          </div>
+          <div class="dash-data-box">
+            <h2>Block User</h2>
+            <button class="button" type="button">
+              <SpriteIcon
+                name="block"
+                size="24"
+                color="#535353"
+                title="Block"
+              />
+              <p>Block</p>
+            </button>
+          </div>                    
+          <div class="dash-data-box">
+            <h2>Share Profile</h2>
+            <button class="button" type="button">
+              <SpriteIcon
+                name="email"
+                size="24"
+                color="#535353"
+                title="Share via Email"
+              />
+              <p>Share via Email</p>
+            </button>
           </div>
         </div>
       </div>
@@ -544,51 +544,5 @@ onMounted(async () => {
   background-color: var(--color-white);
   border-radius: var(--radius-md);
   margin: var(--spacing-md) 0;
-}
-.dash-data-box h2 {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  padding: 1rem 1rem 0 1rem;
-}
-.dash-data-box button {
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: start;
-  gap: var(--spacing-md);
-  padding: 0 var(--spacing-md);
-  background-color: var(--color-white);
-}
-.dash-data-box button:hover {
-  background-color: var(--color-gray-100);
-}
-.dash-data-box button:hover > svg,
-.dash-about-user:hover > svg {
-  fill: var(--color-primary);
-}
-.dash-data-box button > p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-.dash-about-user {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: start;
-  gap: var(--spacing-md);
-  padding: 0 var(--spacing-md);
-}
-.dash-about-user p:first-child {
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.8rem;
-}
-.dash-about-user p:last-child {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.75rem;
-}
-.dash-about-user:last-child {
-  padding-bottom: 1rem;
 }
 </style>

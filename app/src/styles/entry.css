@@ -35,10 +35,6 @@
   margin: 0 5rem;
 }
 .formGroup {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  row-gap: 0.5rem;
   margin-bottom: 1rem;
 }
 .formGroup input {
@@ -48,15 +44,34 @@
   font-family: "Montserrat Medium", sans-serif;
   font-size: var(--font-size-input);
   color: #3f3f3f;
+  border-radius: var(--radius-lg);
   border: none;
-  border-radius: 5px;
   outline: none;
+}
+.passwordGroup {
+  display: flex;
+  background-color: var(--color-white);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-lg);
+}
+.passwordGroup input {
+  background-color: transparent;
+}
+.passwordGroup button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  padding: 0 1.5rem;
+  cursor: pointer;
+}
+.passwordGroup button:hover > svg {
+  fill: var(--color-primary);
 }
 .submit-btn {
   width: 100%;
   padding: 1.1rem;
   border: 2px solid #ffffff;
-  border-radius: 5px;
+  border-radius: var(--radius-lg);
   background-color: transparent;
   color: #ffffff;
   font-family: "Montserrat SemiBold", sans-serif;
@@ -76,6 +91,6 @@
   color: #ffffff;
   border: 1px solid #ffffff;
   font-family: "Montserrat Regular", sans-serif;
-  border-radius: 5px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }

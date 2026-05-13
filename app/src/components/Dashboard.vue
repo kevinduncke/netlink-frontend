@@ -4,6 +4,7 @@ import { onMounted, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
+import Notifications from "./Notifications.vue";
 import Post from "./Post.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
@@ -11,9 +12,9 @@ import SpriteIcon from "./SpriteIcon.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
-import "../styles/userbutton.css"
-import "../styles/body.css"
-import "../styles/input.css"
+import "../styles/userbutton.css";
+import "../styles/body.css";
+import "../styles/input.css";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -73,8 +74,17 @@ onMounted(async () => {
       <div class="dash-fav-base">
         <div class="fav-head">
           <h2>Favorites</h2>
-          <button class="button" type="button" @click="favStateEdit = !favStateEdit">
-            <SpriteIcon name="list" size="22" color="#535353" title="Toggle favorites" />
+          <button
+            class="button"
+            type="button"
+            @click="favStateEdit = !favStateEdit"
+          >
+            <SpriteIcon
+              name="list"
+              size="22"
+              color="#535353"
+              title="Toggle favorites"
+            />
           </button>
         </div>
         <div class="fav-user-list" v-if="!favStateEdit">
@@ -104,12 +114,21 @@ onMounted(async () => {
               placeholder="Search"
               v-model="favSearchQuery"
             />
-            <SpriteIcon name="search" size="22" color="#535353" title="Search" />
+            <SpriteIcon
+              name="search"
+              size="22"
+              color="#535353"
+              title="Search"
+            />
           </div>
           <div class="fav-edit-favorites" v-if="favoriteUsers.length > 0">
             <div class="fav-edit-listhead">
               <p>Users</p>
-              <button class="button" type="button" @click="removeAllFavoriteUsers()">
+              <button
+                class="button"
+                type="button"
+                @click="removeAllFavoriteUsers()"
+              >
                 Remove all
               </button>
             </div>
@@ -128,7 +147,11 @@ onMounted(async () => {
                     <p>@{{ user.username }}</p>
                   </div>
                 </div>
-                <button class="button" type="button" @click="deleteFavoriteUser(user.id)">
+                <button
+                  class="button"
+                  type="button"
+                  @click="deleteFavoriteUser(user.id)"
+                >
                   Remove
                 </button>
               </div>
@@ -151,7 +174,11 @@ onMounted(async () => {
                     <p>@{{ user.username }}</p>
                   </div>
                 </div>
-                <button class="button" type="button" @click="addFavoriteUser(user.id)">
+                <button
+                  class="button"
+                  type="button"
+                  @click="addFavoriteUser(user.id)"
+                >
                   Add
                 </button>
               </div>
@@ -159,6 +186,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+      <Notifications />
     </div>
     <div class="dash-content">
       <div class="dash-lposts">

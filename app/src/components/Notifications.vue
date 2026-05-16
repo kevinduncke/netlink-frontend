@@ -3,6 +3,7 @@
 import { onMounted } from "vue";
 
 // STYLES
+import "../styles/buttons.css";
 import "../styles/body.css";
 
 // ICONS
@@ -19,6 +20,11 @@ const {
   // FUNCTIONS
   dateConverter,
   loadNotifications,
+  unfollowUser,
+  followUser,
+  getUserRoute,
+  selectedUser,
+  updateFollowStatus,
 } = useUserData();
 
 onMounted(async () => {
@@ -37,16 +43,42 @@ onMounted(async () => {
       v-for="ntf in notifications"
       :key="ntf.id"
     >
-      <AvatarIcon />
-      <div class="notif-message">
-        <span>{{ ntf.fromUser?.username }}</span>
-        <p>{{ ntf.content }}</p>
-        <span>{{ dateConverter(ntf.createdAt) }}</span>
+      <div class="notif-box">
+        <AvatarIcon />
+        <div>
+          <div class="notif-message">
+            <span>
+              <RouterLink
+                v-if="ntf.fromUser?.username"
+                :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
+                @click="selectedUser(ntf.fromUser?.id)"
+              >
+                {{ ntf.fromUser?.name }}
+              </RouterLink>
+              {{ ntf.content }}
+            </span>
+          </div>
+          <div class="notif-message">
+            <span>{{ dateConverter(ntf.createdAt) }}</span>
+          </div>
+        </div>
       </div>
       <div class="notif-box">
-        <div class="notif-follow" v-if="ntf.type === 'FOLLOW'">
-          <button type="button">
-            {{ ntf.fromUser?.isFollowedByMe ? "Following" : "Follow back" }}
+        <div
+          class="notif-follow"
+          v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
+        >
+          <button
+            type="button"
+            :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
+            @click="
+              ntf.isFollowedByMe
+                ? unfollowUser(ntf.fromUser?.id)
+                : followUser(ntf.fromUser?.id),
+              updateFollowStatus(ntf.id, !ntf.isFollowedByMe)
+            "
+          >
+            {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
           </button>
         </div>
       </div>
@@ -68,31 +100,35 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 1rem;
 }
-.notif-head button {
-  padding: 0 1rem;
-}
-.notif-base,
-.notif-message {
+.notif-base {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-start;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: var(--font-size-body);
+}
+.notif-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  column-gap: 1rem;
 }
 .notif-message {
-  gap: 0.2rem;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-label);
+  margin: 0.25rem 0;
 }
-.notif-message span:first-child {
+.notif-message a {
   font-family: "Montserrat SemiBold", sans-serif;
-}
-.notif-message span:last-child {
-  font-size: var(--font-size-caption);
+  color: var(--color-primary);
+  text-decoration: none;
 }
 .notif-empty-text {
   font-family: "Montserrat Regular", sans-serif;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-label);
   text-align: center;
+}
+.notif-follow button {
+  cursor: pointer;
+  font-size: var(--font-size-label);
 }
 </style>

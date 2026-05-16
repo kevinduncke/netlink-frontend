@@ -81,6 +81,5 @@ export interface Notification {
   createdAt: string;
 
   fromUser?: User;
-  post?: PostType;
-  comment?: Comment;
+  isFollowedByMe?: boolean;
 }

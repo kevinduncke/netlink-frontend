@@ -9,8 +9,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
-  color: #000000;
+  background-color: var(--color-white);
+  color: var(--color-black);
 }
 .ntl-group p {
   text-align: center;
@@ -21,8 +21,8 @@
   display: flex;
   flex-direction: column;
   align-items: normal;
-  background-color: #006145;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-white);
 }
 .ntl-form-container h2 {
   text-align: left;
@@ -43,7 +43,7 @@
   box-sizing: border-box;
   font-family: "Montserrat Medium", sans-serif;
   font-size: var(--font-size-input);
-  color: #3f3f3f;
+  color: var(--color-black-800)!important;
   border-radius: var(--radius-lg);
   border: none;
   outline: none;
@@ -64,16 +64,19 @@
   padding: 0 1.5rem;
   cursor: pointer;
 }
+.icon-btn svg {
+  color: var(--color-black-800);
+}
 .passwordGroup button:hover > svg {
   fill: var(--color-primary);
 }
 .submit-btn {
   width: 100%;
   padding: 1.1rem;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--color-white)!important;
   border-radius: var(--radius-lg);
   background-color: transparent;
-  color: #ffffff;
+  color: var(--color-white);
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: var(--font-size-button);
   cursor: pointer;
@@ -88,8 +91,8 @@
   width: 100%;
   padding: 1.2rem 0;
   background-color: transparent;
-  color: #ffffff;
-  border: 1px solid #ffffff;
+  color: var(--color-white);
+  border: 1px solid var(--color-white);
   font-family: "Montserrat Regular", sans-serif;
   border-radius: var(--radius-lg);
   cursor: pointer;

@@ -158,11 +158,11 @@ function createUserData() {
         return;
       }
 
-      throw error;      
+      throw error;
     }
   }
 
-  //================================================  
+  //================================================
 
   // SUGGESTED USERS
   const suggestedUsers = ref<FollowUser[]>([]);
@@ -470,6 +470,17 @@ function createUserData() {
     );
     selectedUserId.value = 0;
   }
+  function updateFollowStatus(
+    notificationId: string | number,
+    isFollowed: boolean,
+  ) {
+    const notification = notifications.value.find(
+      (ntf) => ntf.id === notificationId,
+    );
+    if (notification) {
+      notification.isFollowedByMe = isFollowed;
+    }
+  }
 
   // SEARCH USERS
   const queryUsers = ref("");
@@ -493,7 +504,7 @@ function createUserData() {
       (chat) => chat.receiver.id === userId,
     );
     if (existingChat) {
-      selectChat(existingChat.chatId);
+      selectChat(existingChat.id);
       queryUsers.value = "";
       searchUsersResults.value = [];
     } else {
@@ -614,8 +625,20 @@ function createUserData() {
   // CREATE A NEW USER CHAT
   async function createChat(userId: string | number) {
     try {
-      const response = await api.post("/chats/new", { userId: userId });
-      const newChatId = response.data.chatId;
+      const response = await api.post("/chats/new", { userId });
+      const newChatId = response.data.id;
+      if (newChatId) {
+        userChats.value.push({
+          id: response.data.id,
+          createdAt: response.data.createdAt,
+          receiver: {
+            id: response.data.receiver.id,
+            name: response.data.receiver.name,
+            username: response.data.receiver.username,
+            avatarUrl: response.data.receiver.avatarUrl,
+          },
+        });
+      }
       await selectChat(newChatId);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -764,6 +787,7 @@ function createUserData() {
     sendMessage,
     createChat,
     deleteChat,
+    updateFollowStatus,
   };
 }
 

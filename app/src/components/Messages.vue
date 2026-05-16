@@ -105,11 +105,11 @@ onMounted(async () => {
         <h2>Chats</h2>
         <div
           class="bar-user-box shadow-light"
-          :class="{ selected: chat.chatId === userChatId }"
+          :class="{ selected: chat.id === userChatId }"
           v-for="chat in userChats"
-          :key="chat.chatId"
+          :key="chat.id"
         >
-          <button class="button" type="button" @click="selectChat(chat.chatId)">
+          <button class="button" type="button" @click="selectChat(chat.id)">
             <div class="bar-user-info">
               <img
                 src="../assets/avatars/40x40.png"
@@ -124,7 +124,7 @@ onMounted(async () => {
               </div>
             </div>
           </button>
-          <button class="button" type="button" @click="selectChat(chat.chatId)">
+          <button class="button" type="button" @click="selectChat(chat.id)">
             <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
           </button>
         </div>

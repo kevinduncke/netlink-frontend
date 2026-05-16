@@ -10,7 +10,8 @@ export interface Followers extends FollowUser {
 };
 
 export type UserChat = {
-  chatId: string | number;
+  id: string | number;
+  createdAt: string;
   receiver: {
     id: string | number;
     name: string;

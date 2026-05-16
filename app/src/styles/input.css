@@ -5,6 +5,6 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px #f4f4f4 inset !important; /* Set to your background */
   box-shadow: 0 0 0px 1000px #f4f4f4 inset !important;
-  -webkit-text-fill-color: #000 !important; /* Set to your text color */
+  -webkit-text-fill-color: #3f3f3f !important; /* Set to your text color */
   transition: background-color 5000s ease-in-out 0s;
 }

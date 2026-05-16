@@ -13,7 +13,7 @@ import type {
   Comment,
   EditingComment,
   CreatePost,
-  UserMention
+  UserMention,
 } from "../types/types.ts";
 
 // POSTS
@@ -198,9 +198,7 @@ export function usePosts() {
     try {
       const response = await api.get(`/post/comments/all/${postId}`);
       const comments: Comment[] = response.data?.comments || [];
-
       const post = userdata.value.find((p) => p.id === postId);
-
       if (!post) return;
 
       post.comments = comments;
@@ -410,6 +408,16 @@ export function usePosts() {
     if (!currentUserId) return false;
     return String(postAuthorId) !== String(currentUserId);
   }
+  function validatePostOwnership(postAuthorId: number | string): boolean {
+    const currentUser = authStore.user as {
+      id?: number | string;
+      userId?: number | string;
+    } | null;
+    const currentUserId = currentUser?.id ?? currentUser?.userId;
+
+    if (!currentUserId) return false;
+    return String(postAuthorId) === String(currentUserId);
+  }
   function addMention() {
     createPostData.showMentionModal = true;
   }
@@ -507,5 +515,6 @@ export function usePosts() {
     toUtcDateTime,
     isAuthorComment,
     isAuthorPost,
+    validatePostOwnership,
   };
 }

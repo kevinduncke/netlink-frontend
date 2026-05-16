@@ -13,8 +13,8 @@
   margin: 0;
 }
 .disabled {
-  border: 2px solid #006a4c !important;
-  color: #00b582;
+  border: 2px solid var(--color-primary-light)!important;
+  color: var(--color-primary-light);
   cursor: auto;
 }
 .animated-btn:hover {

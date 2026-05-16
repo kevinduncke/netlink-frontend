@@ -93,7 +93,7 @@ watch(selectedUserId, async (newUserId) => {
               </div>
               <div>
                 <button
-                  class="unfollow-btn button"
+                  class="unfollow-btn"
                   @click="unfollowUser(user.id)"
                 >
                   Unfollow

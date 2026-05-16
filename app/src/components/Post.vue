@@ -46,6 +46,7 @@ const {
   toUtcDateTime,
   isAuthorComment,
   isAuthorPost,
+  validatePostOwnership,
 } = usePosts();
 </script>
 
@@ -65,7 +66,10 @@ const {
           </span>
         </div>
       </div>
-      <div class="dash-post-opts" v-if="post.isRepost !== true">
+      <div
+        class="dash-post-opts"
+        v-if="post.isRepost !== true && validatePostOwnership(post.author.id)"
+      >
         <button
           class="button"
           type="button"

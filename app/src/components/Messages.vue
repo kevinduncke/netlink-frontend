@@ -19,6 +19,7 @@ const {
   queryUsers,
   searchUsersResults,
   userChats,
+  chatMessages,
   selectedChat,
   userChatId,
   chatUserInfo,
@@ -44,6 +45,9 @@ const {
 watch(queryUsers, searchUsers);
 
 onMounted(async () => {
+  // RESET ALL CHAT-RELATED DATA
+  selectedChat.value = '';
+  chatMessages.value = [];
   await loadSuggestedUsers("following");
   await loadUserChats();
 });

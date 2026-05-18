@@ -14,6 +14,7 @@ const {
   // FUNCTIONS
   selectedUser,
   getUserRoute,
+  loadSelectedUser,
 } = useUserData();
 
 // POST FUNCTIONS
@@ -102,7 +103,7 @@ const {
       <span v-for="mention in post.mentions" :key="mention.id">
         <RouterLink
           :to="getUserRoute(mention.username, mention.id)"
-          @click="selectedUser(mention.id)"
+          @click="selectedUser(mention.id), loadSelectedUser(mention.id)"
         >
           @{{ mention.username }}
         </RouterLink>
@@ -356,6 +357,9 @@ const {
   text-decoration: none;
   font-family: "Montserrat Medium", sans-serif;
   color: var(--color-primary);
+}
+.dash-content-post a:hover {
+  background: none;
 }
 
 .dash-options-post {

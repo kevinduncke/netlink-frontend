@@ -6,6 +6,7 @@ import axios from "axios";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
+import { idEquals, isPresentId } from "./idUtils";
 
 // TYPES
 import type { Followers, FollowUser, UserChat } from "../types/users";
@@ -82,7 +83,7 @@ function createUserData() {
       const response = await api.post(`/favorites/${userId}`);
       favoriteUsers.value.push(response.data);
       suggestedUsers.value = suggestedUsers.value.filter(
-        (user) => user.id !== userId,
+        (user) => !idEquals(user.id, userId),
       );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -101,14 +102,14 @@ function createUserData() {
       await api.delete(`/favorites/${userId}`);
       // ADD REMOVED USER TO SUGGESTED USERS LOCALLY
       const removedUser = favoriteUsers.value.find(
-        (user) => user.id === userId,
+        (user) => idEquals(user.id, userId),
       );
       if (removedUser) {
         suggestedUsers.value.push(removedUser);
       }
       // REMOVE OLD FAVORITE USER FROM FAVORITE USERS LOCALLY
       favoriteUsers.value = favoriteUsers.value.filter(
-        (user) => user.id !== userId,
+        (user) => !idEquals(user.id, userId),
       );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -463,14 +464,14 @@ function createUserData() {
   async function followUser(userId: string | number) {
     await api.post(`/follow/${userId}`);
     suggestedUsers.value = suggestedUsers.value.filter(
-      (user) => user.id !== userId,
+        (user) => !idEquals(user.id, userId),
     );
     followersUsers.value = followersUsers.value.filter(
-      (user) => user.id !== userId,
+      (user) => !idEquals(user.id, userId),
     );
 
     try {
-      if (String(userProfile.value.id) === String(userId)) {
+      if (idEquals(userProfile.value.id, userId)) {
         userProfile.value.isFollowedByMe = true;
         userProfile.value.followersCount =
           (userProfile.value.followersCount ?? 0) + 1;
@@ -482,11 +483,11 @@ function createUserData() {
   async function unfollowUser(userId: string | number) {
     await api.delete(`/follow/${userId}`);
     followingUsers.value = followingUsers.value.filter(
-      (user) => user.id !== userId,
+      (user) => !idEquals(user.id, userId),
     );
 
     try {
-      if (String(userProfile.value.id) === String(userId)) {
+      if (idEquals(userProfile.value.id, userId)) {
         userProfile.value.isFollowedByMe = false;
         userProfile.value.followersCount = Math.max(
           0,
@@ -530,7 +531,7 @@ function createUserData() {
   }
   function verifyNewChatSearch(userId: string | number) {
     const existingChat = userChats.value.find(
-      (chat) => chat.receiver.id === userId,
+      (chat) => idEquals(chat.receiver.id, userId),
     );
     if (existingChat) {
       selectChat(existingChat.id);
@@ -565,7 +566,7 @@ function createUserData() {
   }
   const filteredSuggestedUsers = computed(() =>
     suggestedUsers.value.filter(
-      (user) => !userChats.value.some((chat) => chat.receiver.id === user.id),
+      (user) => !userChats.value.some((chat) => idEquals(chat.receiver.id, user.id)),
     ),
   );
 
@@ -654,6 +655,16 @@ function createUserData() {
   // CREATE A NEW USER CHAT
   async function createChat(userId: string | number) {
     try {
+      // CHECK BEFORE IF THE USER ID IS VALID
+      // AND IF A CHAT WITH THIS USER ALREADY EXISTS
+      if (
+        !isPresentId(userId) ||
+        userChats.value.find((chat) => idEquals(chat.receiver.id, userId))
+      ) {
+        console.error("No user ID provided or chat already exists");
+        return;
+      }
+
       const response = await api.post("/chats/new", { userId });
       const newChatId = response.data.id;
       if (newChatId) {
@@ -709,7 +720,7 @@ function createUserData() {
       id?: number | string;
       userId?: number | string;
     } | null;
-    if (String(userId) === String(currentUser?.id ?? currentUser?.userId)) {
+    if (idEquals(userId, currentUser?.id ?? currentUser?.userId)) {
       selectedUserId.value = "";
       return;
     }
@@ -717,7 +728,7 @@ function createUserData() {
     editingComment.openCommentPostId = null;
   }
   async function loadSelectedUser(userId: string | number) {
-    if (!userId) {
+    if (!isPresentId(userId)) {
       router.push("/dashboard");
       return;
     }
@@ -748,7 +759,7 @@ function createUserData() {
     } | null;
     const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    return String(userId) === String(currentUserId)
+    return idEquals(userId, currentUserId)
       ? "/account"
       : `/user/${username}`;
   }

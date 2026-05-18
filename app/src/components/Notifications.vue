@@ -122,6 +122,9 @@ onMounted(async () => {
   color: var(--color-primary);
   text-decoration: none;
 }
+.notif-message a:hover {
+  background: none;
+}
 .notif-empty-text {
   font-family: "Montserrat Regular", sans-serif;
   font-size: var(--font-size-label);

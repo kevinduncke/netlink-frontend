@@ -28,10 +28,9 @@ const {
   // FUNCTIONS
   resetUserProfile,
   loadSelectedUser,
-  selectedUser,
   unfollowUser,
   followUser,
-  getUserRoute,
+  createChat,
 } = useUserData();
 
 onMounted(async () => {
@@ -93,10 +92,7 @@ onBeforeRouteLeave((to) => {
             />
             <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow Back" }}</p>
           </button>
-          <router-link
-            :to="getUserRoute(userProfile.username, userProfile.id)"
-            @click="selectedUser(userProfile.id)"
-          >
+          <router-link to="/messages" @click="createChat(userProfile.id)">
             <SpriteIcon
               name="messages"
               size="24"

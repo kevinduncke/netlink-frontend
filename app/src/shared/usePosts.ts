@@ -6,6 +6,7 @@ import axios from "axios";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
+import { idEquals, isPresentId } from "./idUtils";
 
 // TYPES
 import type {
@@ -395,8 +396,8 @@ export function usePosts() {
     } | null;
     const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    if (!currentUserId) return false;
-    return String(commentAuthorId) === String(currentUserId);
+    if (!isPresentId(currentUserId)) return false;
+    return idEquals(commentAuthorId, currentUserId);
   }
   function isAuthorPost(postAuthorId: number | string): boolean {
     const currentUser = authStore.user as {
@@ -405,8 +406,8 @@ export function usePosts() {
     } | null;
     const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    if (!currentUserId) return false;
-    return String(postAuthorId) !== String(currentUserId);
+    if (!isPresentId(currentUserId)) return false;
+    return !idEquals(postAuthorId, currentUserId);
   }
   function validatePostOwnership(postAuthorId: number | string): boolean {
     const currentUser = authStore.user as {
@@ -415,8 +416,8 @@ export function usePosts() {
     } | null;
     const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    if (!currentUserId) return false;
-    return String(postAuthorId) === String(currentUserId);
+    if (!isPresentId(currentUserId)) return false;
+    return idEquals(postAuthorId, currentUserId);
   }
   function addMention() {
     createPostData.showMentionModal = true;

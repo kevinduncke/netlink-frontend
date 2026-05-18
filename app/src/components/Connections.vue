@@ -121,7 +121,7 @@ watch(selectedUserId, async (newUserId) => {
               </div>
               <div>
                 <button
-                  class="unfollow-btn button"
+                  class="unfollow-btn"
                   v-if="user.isFollowedByMe === false"
                   @click="followUser(user.id)"
                 >

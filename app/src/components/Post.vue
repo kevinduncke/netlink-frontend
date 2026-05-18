@@ -352,6 +352,11 @@ const {
   font-size: 0.8rem;
   padding: 0.5rem;
 }
+.dash-content-post a {
+  text-decoration: none;
+  font-family: "Montserrat Medium", sans-serif;
+  color: var(--color-primary);
+}
 
 .dash-options-post {
   display: flex;

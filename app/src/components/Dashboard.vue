@@ -204,7 +204,6 @@ onMounted(async () => {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
 }
 .fav-head button {
   background: none;

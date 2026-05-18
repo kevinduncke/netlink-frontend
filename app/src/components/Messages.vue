@@ -132,7 +132,7 @@ onMounted(async () => {
       <div class="dash-suggestions">
         <h2>Suggestions</h2>
         <div
-          class="bar-user-box shadow-light"
+          class="bar-user-box"
           v-for="user in filteredSuggestedUsers"
           :key="user.id"
         >

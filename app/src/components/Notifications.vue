@@ -24,7 +24,7 @@ const {
   followUser,
   getUserRoute,
   selectedUser,
-  updateFollowStatus,
+  updateNotificationFollowStatus,
 } = useUserData();
 
 onMounted(async () => {
@@ -75,7 +75,7 @@ onMounted(async () => {
               ntf.isFollowedByMe
                 ? unfollowUser(ntf.fromUser?.id)
                 : followUser(ntf.fromUser?.id),
-              updateFollowStatus(ntf.id, !ntf.isFollowedByMe)
+              updateNotificationFollowStatus(ntf.id, !ntf.isFollowedByMe)
             "
           >
             {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
@@ -98,13 +98,13 @@ onMounted(async () => {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
 }
 .notif-base {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.5rem;
 }
 .notif-box {
   display: flex;

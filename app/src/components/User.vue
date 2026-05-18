@@ -28,6 +28,10 @@ const {
   // FUNCTIONS
   resetUserProfile,
   loadSelectedUser,
+  selectedUser,
+  unfollowUser,
+  followUser,
+  getUserRoute,
 } = useUserData();
 
 onMounted(async () => {
@@ -71,7 +75,36 @@ onBeforeRouteLeave((to) => {
           </div>
         </div>
         <div class="dash-data-box">
-          <h2>Block User</h2>
+          <h2>Actions</h2>
+          <button
+            class="button"
+            type="button"
+            @click="
+              userProfile.isFollowedByMe
+                ? unfollowUser(userProfile.id)
+                : followUser(userProfile.id)
+            "
+          >
+            <SpriteIcon
+              name="followers"
+              size="24"
+              color="#535353"
+              title="Followers"
+            />
+            <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow Back" }}</p>
+          </button>
+          <router-link
+            :to="getUserRoute(userProfile.username, userProfile.id)"
+            @click="selectedUser(userProfile.id)"
+          >
+            <SpriteIcon
+              name="messages"
+              size="24"
+              color="#535353"
+              title="Messages"
+            />
+            <p>Send a Message</p>
+          </router-link>
           <button class="button" type="button">
             <SpriteIcon name="block" size="24" color="#535353" title="Block" />
             <p>Block</p>

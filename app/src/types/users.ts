@@ -21,6 +21,7 @@ export type UserChat = {
 };
 
 export type UserProfile = {
+  id: string | number;
   name: string;
   username: string;
   bio: string;
@@ -30,4 +31,5 @@ export type UserProfile = {
   followersCount: number;
   followingCount: number;
   createdAt: string;
+  isFollowedByMe: boolean;
 };

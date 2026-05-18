@@ -245,6 +245,7 @@ function createUserData() {
 
   // LOAD USER PROFILE
   const userProfile = ref<UserProfile>({
+    id: "",
     name: "",
     username: "",
     bio: "",
@@ -254,9 +255,11 @@ function createUserData() {
     followersCount: 0,
     followingCount: 0,
     createdAt: "",
+    isFollowedByMe: false,
   });
   function resetUserProfile() {
     userProfile.value = {
+      id: "",
       name: "",
       username: "",
       bio: "",
@@ -266,8 +269,10 @@ function createUserData() {
       followersCount: 0,
       followingCount: 0,
       createdAt: "",
+      isFollowedByMe: false,
     };
     originalProfile.value = {
+      id: "",
       name: "",
       username: "",
       bio: "",
@@ -277,6 +282,7 @@ function createUserData() {
       followersCount: 0,
       followingCount: 0,
       createdAt: "",
+      isFollowedByMe: false,
     };
   }
   async function loadUserProfile(userId: string | number) {
@@ -462,15 +468,38 @@ function createUserData() {
     followersUsers.value = followersUsers.value.filter(
       (user) => user.id !== userId,
     );
+
+    try {
+      if (String(userProfile.value.id) === String(userId)) {
+        userProfile.value.isFollowedByMe = true;
+        userProfile.value.followersCount =
+          (userProfile.value.followersCount ?? 0) + 1;
+      }
+    } catch (e) {
+      // ignore local update errors
+    }
   }
   async function unfollowUser(userId: string | number) {
     await api.delete(`/follow/${userId}`);
     followingUsers.value = followingUsers.value.filter(
       (user) => user.id !== userId,
     );
+
+    try {
+      if (String(userProfile.value.id) === String(userId)) {
+        userProfile.value.isFollowedByMe = false;
+        userProfile.value.followersCount = Math.max(
+          0,
+          (userProfile.value.followersCount ?? 0) - 1,
+        );
+      }
+    } catch (e) {
+      // ignore local update errors
+    }
+
     selectedUserId.value = 0;
   }
-  function updateFollowStatus(
+  function updateNotificationFollowStatus(
     notificationId: string | number,
     isFollowed: boolean,
   ) {
@@ -787,7 +816,7 @@ function createUserData() {
     sendMessage,
     createChat,
     deleteChat,
-    updateFollowStatus,
+    updateNotificationFollowStatus,
   };
 }
 

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 
 // STYLES
-import "../styles/entry.css";
-import "../styles/input.css"
+import "../styles/app-layout.css";
+import "../styles/login.css";
+import "../styles/input.css";
 
 </script>
 
 <template>
-  <div class="ntl-wrapper">
+  <div class="app-layout">
     <div class="ntl-group">
       <img src="../assets/logos/logo-02.png" alt="Netlink Logo" height="200" />
       <p>
@@ -68,5 +69,9 @@ import "../styles/input.css"
   margin-top: var(--spacing-md);
   font-family: "Montserrat Regular", sans-serif;
   border: 1px solid var(--color-white);
+}
+
+a:hover {
+  background: none;
 }
 </style>

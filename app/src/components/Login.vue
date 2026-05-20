@@ -7,7 +7,8 @@ import { useRouter } from "vue-router";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/entry.css";
+import "../styles/app-layout.css";
+import "../styles/login.css";
 import "../styles/input.css";
 import "../styles/validation.css";
 
@@ -74,7 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="ntl-wrapper">
+  <div class="app-layout">
     <div class="ntl-group">
       <img src="../assets/logos/logo-02.png" alt="Netlink Logo" height="200" />
       <p>

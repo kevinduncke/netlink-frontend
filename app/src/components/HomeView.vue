@@ -22,6 +22,10 @@
   flex-direction: column;
 }
 
+a:hover {
+  background: none;
+}
+
 @media screen and (max-width: 768px) {
   .home-base img {
     height: 75px;

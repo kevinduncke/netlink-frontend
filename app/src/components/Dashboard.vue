@@ -12,6 +12,8 @@ import SpriteIcon from "./SpriteIcon.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
+import "../styles/app-layout.css";
+import "../styles/dashboard.css";
 import "../styles/userbutton.css";
 import "../styles/body.css";
 import "../styles/input.css";
@@ -68,7 +70,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="dash-fav-base">

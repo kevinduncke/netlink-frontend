@@ -7,7 +7,7 @@ import { useRouter } from "vue-router";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/app-layout.css";
+import "../styles/login-layout.css";
 import "../styles/login.css";
 import "../styles/input.css";
 import "../styles/validation.css";
@@ -112,19 +112,22 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="login-layout">
     <div class="ntl-group">
       <img src="../assets/logos/logo-02.png" alt="Netlink Logo" height="200" />
       <p>
-        Sign up and join to out
+        Sign up and join to our
         <span style="color: #006145">networking community</span>,
         <br />
         and stand out in the
-        <span style="color: #006145">industry together.</span>
+        <span style="color: #006145">together.</span>
       </p>
     </div>
     <div class="ntl-group ntl-form-container">
       <div class="form-wrapper">
+        <div class="ntl-logo">
+          <img src="../assets/logos/netlink-logo-06.png" alt="Netlink Logo" height="100px">
+        </div>        
         <h2>Get Started on Netlink</h2>
         <div class="form-base">
           <form @submit.prevent="onSubmit()" method="post" id="loginForm">

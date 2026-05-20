@@ -17,6 +17,11 @@
   background-color: var(--color-primary);
   color: var(--color-white);
 }
+.ntl-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .ntl-form-container h2 {
   text-align: left;
   font-family: "Montserrat SemiBold", sans-serif;

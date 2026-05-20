@@ -7,7 +7,7 @@ import { useRouter } from "vue-router";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/app-layout.css";
+import "../styles/login-layout.css";
 import "../styles/login.css";
 import "../styles/input.css";
 import "../styles/validation.css";
@@ -75,16 +75,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="login-layout">
     <div class="ntl-group">
       <img src="../assets/logos/logo-02.png" alt="Netlink Logo" height="200" />
       <p>
-        Stay <span style="color: #006145">connected</span>, share, build <br />
-        and learn <span style="color: #006145">together.</span>
+        Stay <span style="color: #006145">connected</span> and <br />
+        share <span style="color: #006145">together.</span>
       </p>
     </div>
     <div class="ntl-group ntl-form-container">
       <div class="form-wrapper">
+        <div class="ntl-logo">
+          <img src="../assets/logos/netlink-logo-06.png" alt="Netlink Logo" height="100px">
+        </div>
         <h2>Log into Netlink</h2>
         <div class="form-base">
           <form @submit.prevent="onSubmit()" method="post" id="loginForm">

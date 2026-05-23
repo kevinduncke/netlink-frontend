@@ -10,10 +10,11 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 
 // STYLES
 import "../styles/profile.css";
+import "../styles/utilities.css";
+import "../styles/app-layout.css";
+import "../styles/connections.css";
 import "../styles/userbutton.css";
 import "../styles/buttons.css";
-import "../styles/utilities.css";
-import "../styles/body.css";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -54,7 +55,7 @@ watch(selectedUserId, async (newUserId) => {
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="dash-follows-box">
@@ -147,38 +148,3 @@ watch(selectedUserId, async (newUserId) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* COMPONENT STYLES */
-.dash-follows-box {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: var(--color-gray-100);
-  border-radius: var(--radius-md);
-  margin: var(--spacing-sm) 0;
-}
-.dash-follows-box button {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1rem 0;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.8rem;
-}
-.dash-follows-box button:first-child {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-.dash-follows-box button:last-child {
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-.selected-follow {
-  background-color: var(--color-primary) !important;
-  color: var(--color-white);
-}
-.following-panel,
-.followers-panel {
-  margin-top: 1rem;
-}
-</style>

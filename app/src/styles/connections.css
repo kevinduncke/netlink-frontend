@@ -1,0 +1,63 @@
+/* COMPONENT STYLES */
+.dash-follows-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) 0;
+}
+.dash-follows-box button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem 0;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+}
+.dash-follows-box button:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+.dash-follows-box button:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.selected-follow {
+  background-color: var(--color-primary) !important;
+  color: var(--color-white);
+}
+.selected h2, .selected p, .selected button {
+    color: var(--color-white)!important;
+}
+.selected .unfollow-btn:hover {
+    background-color: var(--color-white);
+    color: var(--color-primary)!important;
+    border: 2px solid var(--color-white);
+}
+.following-panel,
+.followers-panel {
+  margin-top: 1rem;
+}
+
+/* MOBILE */
+@media (min-width: 480px) and (max-width: 1023px) {
+  .app-layout {
+    overflow-y: auto;
+  }
+  .dash-sidepanel,
+  .dash-content {
+    overflow-y: hidden;
+    height: max-content;
+  }
+  .dash-content {
+    margin-bottom: 4rem;
+  }
+}
+
+/* LAPTOP */
+@media (min-width: 1024px) {
+}
+
+/* DESKTOP */
+@media (min-width: 1200px) {
+}

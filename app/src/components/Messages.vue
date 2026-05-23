@@ -7,7 +7,7 @@ import Navigation from "./Navigation.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/body.css";
+import "../styles/app-layout.css";
 import "../styles/input.css";
 import "../styles/about.css";
 
@@ -54,7 +54,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="dash-messages">
@@ -381,10 +381,6 @@ onMounted(async () => {
 }
 .bar-user-box button:last-child svg:hover {
   fill: #006145;
-}
-.bar-user-box:hover {
-  border-radius: var(--radius-md);
-  background-color: var(--color-gray-200);
 }
 .bar-useractions {
   display: flex;

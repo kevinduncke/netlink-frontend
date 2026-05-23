@@ -6,7 +6,8 @@ import SearchModal from "./SearchModal.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
-import "../styles/body.css";
+import "../styles/app-layout.css";
+import "../styles/CreatePost.css";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -35,7 +36,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="createPost">
@@ -240,101 +241,3 @@ onMounted(() => {
     @select-multiple="addSpecificFollowers($event)"
   />
 </template>
-
-<style scoped>
-/* COMPONENT STYLES */
-.post-text textarea {
-  width: 100%;
-  height: 100px;
-  border: none;
-  resize: none;
-  outline: none;
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-  padding: 0.7rem;
-  box-sizing: border-box;
-}
-.post-text > p {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
-}
-.post-adds {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.8rem;
-  border: #f6f6f6 2px solid;
-  border-radius: 5px;
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-}
-.mediaPost button {
-  width: 100%;
-  padding: var(--spacing-md) 0;
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 0.8rem;
-}
-.visibilityPost p,
-.settingsPost p {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-}
-.settingsPost {
-  margin-top: 1.5rem;
-}
-.modesOptions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-.modesOptions button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  text-align: left;
-  outline: none;
-}
-.btnIcon {
-  background-color: #ffffff;
-  padding: 0.3rem;
-  border-radius: 50px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e8e8e8;
-}
-.modesOptions button:hover > .btnIcon {
-  border: 1px solid var(--color-primary);
-}
-.modesOptions button:hover > .btnIcon svg {
-  fill: var(--color-primary);
-}
-.btnIcon svg {
-  fill: var(--color-gray-600);
-}
-.selected {
-  background-color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-}
-.selected svg {
-  fill: var(--color-white) !important;
-}
-.infoIcon {
-  padding: 0 1rem;
-}
-.infoIcon p {
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.7rem;
-  margin-bottom: 0.4rem;
-  margin-top: 0;
-}
-.infoIcon p:last-child {
-  font-family: "Montserrat Light", sans-serif;
-  margin-bottom: 0;
-}
-</style>

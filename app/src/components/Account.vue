@@ -9,7 +9,7 @@ import Profile from "./Profile.vue";
 import Post from "./Post.vue";
 
 // STYLES
-import "../styles/body.css"
+import "../styles/app-layout.css";
 import "../styles/input.css"
 
 // USER COMPOSITION
@@ -75,7 +75,7 @@ onBeforeRouteLeave(() => {
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="profile-edit">

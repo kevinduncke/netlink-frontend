@@ -1,9 +1,116 @@
-.navigation-layout {
-    display: grid;
+/* MOBILE */
+.browser-navbar, .mobile-menu {
+  background-color: var(--color-primary);
+}
+.dash-baselogo {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+.nav-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  outline: none;
+}
+.dash-mainnav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+.dash-navbtns {
+  padding: 0.2rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  margin: 0.3rem 0;
+}
+.dash-navbtns a {
+  text-decoration: none;
+}
+.dash-navbtns button {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.8rem;
+  color: var(--color-white);
+  width: 100%;
+}
+.dash-navbtns svg {
+  margin-right: 1rem;
+}
+.dash-navactive {
+  background-color: var(--color-primary-dark);
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.9rem;
+  border: 1px solid transparent !important;
+}
+.dash-navbtns:hover {
+  border: 1px solid #ffffff;
+}
+.dash-lownav {
+  margin-top: 1rem;
 }
 
-/* MOBILE */
-
+.mobile-navbar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  background-color: var(--color-white);
+  position: fixed;
+  border-top: 1px solid var(--color-gray-300);
+  bottom: 0;
+  width: 100%;
+}
+.mobile-navbar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mobile-navbar a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.5rem 0;
+}
+.mobile-navbar svg {
+  color: var(--color-gray-600) !important;
+}
+.mobile-navbar span {
+  color: var(--color-gray-600);
+  font-family: "Montserrat Medium", sans-serif;
+  font-size: 0.6rem;
+  padding: 0.2rem 0;
+}
+.mobile-navactive span {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.6rem;
+  color: var(--color-primary);
+}
+.mobile-navactive svg {
+  color: var(--color-primary) !important;
+}
+@media (min-width: 480px) and (max-width: 1023px) {
+  .browser-navbar {
+    display: none;
+  }
+}
 /* LAPTOP */
+@media (min-width: 1024px) {
+  .mobile-navbar {
+    display: none;
+  }
+}
 
 /* DESKTOP */
+@media (min-width: 1200px) {
+  .mobile-navbar {
+    display: none;
+  }
+}

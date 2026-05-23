@@ -23,7 +23,7 @@ function signOut() {
 </script>
 
 <template>
-  <div class="browser-navbar">
+  <div class="mobile-menu">
     <div class="dash-baselogo">
       <img
         src="../assets/logos/netlink-logo-06.png"
@@ -39,7 +39,7 @@ function signOut() {
         >
           <router-link to="/dashboard">
             <button class="button">
-              <SpriteIcon name="dashboard" size="22" title="Dashboard" />
+              <SpriteIcon name="dashboard" size="48" title="Dashboard" />
               <span>Dashboard</span>
             </button>
           </router-link>
@@ -50,7 +50,7 @@ function signOut() {
         >
           <router-link to="/create">
             <button class="button">
-              <SpriteIcon name="create" size="22" title="Create" />
+              <SpriteIcon name="create" size="48" title="Create" />
               <span>Create & Post</span>
             </button>
           </router-link>
@@ -61,7 +61,7 @@ function signOut() {
         >
           <router-link to="/explore">
             <button class="button">
-              <SpriteIcon name="explore" size="22" title="Explore" />
+              <SpriteIcon name="explore" size="48" title="Explore" />
               <span>Explore</span>
             </button>
           </router-link>
@@ -72,7 +72,7 @@ function signOut() {
         >
           <router-link to="/connections">
             <button class="button">
-              <SpriteIcon name="connections" size="22" title="Connections" />
+              <SpriteIcon name="connections" size="48" title="Connections" />
               <span>Connections</span>
             </button>
           </router-link>
@@ -85,7 +85,7 @@ function signOut() {
         >
           <router-link to="/account">
             <button class="button">
-              <SpriteIcon name="profile" size="22" title="Account" />
+              <SpriteIcon name="profile" size="48" title="Account" />
               <span>Account</span>
             </button>
           </router-link>
@@ -98,7 +98,7 @@ function signOut() {
             <button class="button">
               <SpriteIcon
                 name="messages"
-                size="24"
+                size="48"
                 color="#FFFFFF"
                 title="Messages"
               />
@@ -110,7 +110,7 @@ function signOut() {
           <button class="button">
             <SpriteIcon
               name="settings"
-              size="24"
+              size="48"
               color="#FFFFFF"
               title="Settings"
             />
@@ -119,7 +119,7 @@ function signOut() {
         </div>
         <div class="dash-navbtns">
           <button class="button">
-            <SpriteIcon name="more" size="24" color="#FFFFFF" title="More" />
+            <SpriteIcon name="more" size="48" color="#FFFFFF" title="More" />
             <span>More</span>
           </button>
         </div>
@@ -127,7 +127,7 @@ function signOut() {
           <button class="button" @click="signOut">
             <SpriteIcon
               name="logout"
-              size="24"
+              size="48"
               color="#FFFFFF"
               title="Logout"
             />
@@ -137,61 +137,26 @@ function signOut() {
       </div>
     </div>
   </div>
-  <div class="mobile-navbar">
-    <router-link
-      to="/dashboard"
-      :class="{ 'mobile-navactive': route.name === 'dashboard' }"
-    >
-      <button class="button">
-        <SpriteIcon
-          name="dashboard"
-          size="30"
-          color="#FFFFFF"
-          title="Dashboard"
-        />
-      </button>
-      <span>Dashboard</span>
-    </router-link>
-    <router-link
-      to="/create"
-      :class="{ 'mobile-navactive': route.name === 'create-post' }"
-    >
-      <button class="button">
-        <SpriteIcon name="create" size="30" color="#FFFFFF" title="Create" />
-      </button>
-      <span>Create</span>
-    </router-link>
-    <router-link
-      to="/explore"
-      :class="{ 'mobile-navactive': route.name === 'explore' }"
-    >
-      <button class="button">
-        <SpriteIcon name="explore" size="30" color="#FFFFFF" title="Explore" />
-        <span>Explore</span>
-      </button>
-    </router-link>
-    <router-link
-      to="/connections"
-      :class="{ 'mobile-navactive': route.name === 'connections' }"
-    >
-      <button class="button">
-        <SpriteIcon
-          name="connections"
-          size="30"
-          color="#FFFFFF"
-          title="Connections"
-        />
-        <span>Connections</span>
-      </button>
-    </router-link>
-    <router-link
-      to="/menu"
-      :class="{ 'mobile-navactive': route.name === 'menu' }"
-    >
-      <button type="button">
-        <SpriteIcon name="menu" size="30" color="#FFFFFF" title="Menu" />
-      </button>
-      <span>Menu</span>
-    </router-link>
-  </div>
 </template>
+
+<style scoped>
+.mobile-menu {
+  height: 100vh;
+}
+.mobile-menu .dash-baselogo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+.mobile-menu img {
+    width: 250px;
+}
+.button {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-primary-dark);
+}
+.button span {
+    font-size: 18px;
+}
+</style>

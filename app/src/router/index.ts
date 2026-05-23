@@ -14,6 +14,7 @@ import Explore from "../components/Explore.vue";
 import Connections from "../components/Connections.vue";
 import Messages from "../components/Messages.vue";
 import User from "../components/User.vue";
+import Menu from "../components/Menu.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -86,6 +87,12 @@ const routes: RouteRecordRaw[] = [
     path: "/user/:username",
     component: User,
     name: "user",
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/menu",
+    component: Menu,
+    name: "menu",
     meta: { requiresAuth: true },
   }
 ];

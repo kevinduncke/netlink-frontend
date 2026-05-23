@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import api from "../services/api";
+import { ref } from "@vue/runtime-dom";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -18,6 +19,7 @@ export const useAuthStore = defineStore("auth", {
       }
     })(),
     token: localStorage.getItem("token") || null,
+    isNavOpen: ref(false),
   }),
 
   actions: {

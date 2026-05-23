@@ -15,7 +15,6 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 import "../styles/app-layout.css";
 import "../styles/dashboard.css";
 import "../styles/userbutton.css";
-import "../styles/body.css";
 import "../styles/input.css";
 
 // USER COMPOSITION
@@ -198,95 +197,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* COMPONENT STYLES */
-.fav-head {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-.fav-head button {
-  background: none;
-  outline: none;
-  color: #e3e3e3;
-}
-.fav-head button:hover {
-  color: var(--color-primary);
-}
-.fav-edit-search {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--color-gray-50);
-  padding: var(--spacing-sm) var(--spacing-md);
-  gap: var(--spacing-sm);
-  border-radius: var(--radius-md);
-}
-.fav-edit-search input {
-  width: 100%;
-  background: none;
-  border: none;
-  outline: none;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-  color: #535353;
-}
-.fav-edit-listhead {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-}
-.fav-edit-listhead p,
-.fav-add-suggestions p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-}
-.fav-edit-listhead button {
-  background: none;
-  outline: none;
-  color: #005261;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-}
-.fav-edit-users,
-.fav-add-users {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.fav-user {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-.fav-user button {
-  background: var(--color-gray-100);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-}
-.fav-user button:hover {
-  background: var(--color-gray-200);
-}
-.fav-user-data {
-  display: inherit;
-  align-items: center;
-  gap: 0.5rem;
-}
-.fav-user-names p {
-  margin: 0.3rem !important;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.7rem;
-}
-.fav-add-suggestions {
-  margin-top: 2rem;
-  overflow-y: auto;
-}
-</style>

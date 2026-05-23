@@ -38,7 +38,9 @@ type IconName =
   | "more"
   | "logout"
   | "visibility"
-  | "visibilityoff";
+  | "visibilityoff"
+  | "menu"
+  | "close";
 
 const props = withDefaults(
   defineProps<{

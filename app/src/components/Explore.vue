@@ -13,7 +13,8 @@ import AvatarIcon from "../assets/icons/avatar-icon.vue";
 // STYLES
 import "../styles/userbutton.css";
 import "../styles/buttons.css";
-import "../styles/body.css";
+import "../styles/app-layout.css";
+import "../styles/explore.css";
 import "../styles/input.css"
 
 // POSTS | USERDATA
@@ -50,7 +51,7 @@ watch(searchFilters, searchPost, { deep: true });
 </script>
 
 <template>
-  <div class="dash-wrapper">
+  <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel">
       <div class="search-box">
@@ -230,91 +231,3 @@ watch(searchFilters, searchPost, { deep: true });
     </div>
   </div>
 </template>
-
-<style scoped>
-/* COMPONENT STYLES */
-.search-box {
-  margin-bottom: 2rem;
-}
-.filter-people,
-.filter-shares,
-.filter-dates {
-  margin: 1rem 0;
-}
-.filter-people h3,
-.filter-shares h3,
-.filter-dates h3 {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.8rem;
-  margin: 0;
-}
-.filter-check {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.5rem 0;
-}
-.filter-check p {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  margin: 0;
-}
-.filter-check button {
-  outline: none;
-  padding: 0;
-}
-.filter-check input {
-  border: none;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-.filter-selected svg {
-  fill: #006145;
-}
-.search-box-input {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  -webkit-box-shadow: var(--shadow-light);
-  box-shadow: var(--shadow-light);
-}
-.search-box-input svg:hover {
-  fill: var(--color-primary);
-  cursor: pointer;
-}
-.search-input {
-  width: 100%;
-  box-sizing: border-box;
-  border: none;
-  outline: none;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-}
-.filter-reset {
-  margin: 2rem 0;
-}
-.filter-reset button {
-  border: 2px solid var(--color-gray-500);
-  width: 100%;
-  padding: var(--spacing-md) 0;
-  font-family: "Montserrat Medium", sans-serif;
-  font-size: 0.8rem;
-  color: var(--color-gray-700);
-  letter-spacing: 0.03rem;
-}
-.filter-reset button:hover {
-  border: 2px solid var(--color-primary);
-  color: var(--color-primary);
-}
-.bar-no-users {
-  text-align: center;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  padding: var(--spacing-md) 0;
-}
-</style>

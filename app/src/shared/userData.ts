@@ -101,8 +101,8 @@ function createUserData() {
     try {
       await api.delete(`/favorites/${userId}`);
       // ADD REMOVED USER TO SUGGESTED USERS LOCALLY
-      const removedUser = favoriteUsers.value.find(
-        (user) => idEquals(user.id, userId),
+      const removedUser = favoriteUsers.value.find((user) =>
+        idEquals(user.id, userId),
       );
       if (removedUser) {
         suggestedUsers.value.push(removedUser);
@@ -464,7 +464,7 @@ function createUserData() {
   async function followUser(userId: string | number) {
     await api.post(`/follow/${userId}`);
     suggestedUsers.value = suggestedUsers.value.filter(
-        (user) => !idEquals(user.id, userId),
+      (user) => !idEquals(user.id, userId),
     );
     followersUsers.value = followersUsers.value.filter(
       (user) => !idEquals(user.id, userId),
@@ -530,8 +530,8 @@ function createUserData() {
     }
   }
   function verifyNewChatSearch(userId: string | number) {
-    const existingChat = userChats.value.find(
-      (chat) => idEquals(chat.receiver.id, userId),
+    const existingChat = userChats.value.find((chat) =>
+      idEquals(chat.receiver.id, userId),
     );
     if (existingChat) {
       selectChat(existingChat.id);
@@ -566,7 +566,8 @@ function createUserData() {
   }
   const filteredSuggestedUsers = computed(() =>
     suggestedUsers.value.filter(
-      (user) => !userChats.value.some((chat) => idEquals(chat.receiver.id, user.id)),
+      (user) =>
+        !userChats.value.some((chat) => idEquals(chat.receiver.id, user.id)),
     ),
   );
 
@@ -661,6 +662,13 @@ function createUserData() {
         !isPresentId(userId) ||
         userChats.value.find((chat) => idEquals(chat.receiver.id, userId))
       ) {
+        const existingChatId = userChats.value.find((chat) =>
+          idEquals(chat.receiver.id, userId),
+        )?.id;
+        if (existingChatId) {
+          await selectChat(existingChatId);
+          return;
+        }
         console.error("No user ID provided or chat already exists");
         return;
       }
@@ -759,9 +767,7 @@ function createUserData() {
     } | null;
     const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    return idEquals(userId, currentUserId)
-      ? "/account"
-      : `/user/${username}`;
+    return idEquals(userId, currentUserId) ? "/account" : `/user/${username}`;
   }
 
   return {

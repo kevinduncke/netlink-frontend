@@ -15,7 +15,7 @@ import "../styles/userbutton.css";
 import "../styles/buttons.css";
 import "../styles/app-layout.css";
 import "../styles/explore.css";
-import "../styles/input.css"
+import "../styles/input.css";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -33,10 +33,14 @@ const {
   searchPost,
   resetFilters,
   followUser,
+  selectedUser,
+  getUserRoute,
 } = useUserData();
 
 // POSTS
 const {
+  userdata,
+
   // FUNCTIONS
   loadPosts,
 } = usePosts();
@@ -204,13 +208,18 @@ watch(searchFilters, searchPost, { deep: true });
           :key="user.id || 'ID_NOT_FOUND'"
         >
           <div class="box-user-info">
-            <div class="bar-user-avatardata">
-              <AvatarIcon />
-              <div class="bar-userdata">
-                <h2 class="bar-user-name">{{ user.name }}</h2>
-                <p class="bar-user-username">@{{ user.username }}</p>
+            <RouterLink
+              :to="getUserRoute(user.username, user.id)"
+              @click="selectedUser(user.id)"
+            >
+              <div class="bar-user-avatardata">
+                <AvatarIcon />
+                <div class="bar-userdata">
+                  <h2 class="bar-user-name">{{ user.name }}</h2>
+                  <p class="bar-user-username">@{{ user.username }}</p>
+                </div>
               </div>
-            </div>
+            </RouterLink>
             <div>
               <button class="follow-btn button" @click="followUser(user.id)">
                 Follow
@@ -226,7 +235,16 @@ watch(searchFilters, searchPost, { deep: true });
     <div class="dash-content">
       <div class="explore-content">
         <h2>Explore</h2>
-        <Post />
+        <Post v-if="userdata.length > 0" />
+        <div class="dash-empty-suggestions" v-else>
+          <SpriteIcon
+            name="connections"
+            size="42"
+            color="#535353"
+            title="Connections"
+          />
+          <h2>Follow a user to see their posts</h2>
+        </div>
       </div>
     </div>
   </div>

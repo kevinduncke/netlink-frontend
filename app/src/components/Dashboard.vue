@@ -94,6 +94,7 @@ onMounted(async () => {
             :class="{ selected: selectedUserId === user.id }"
             v-for="user in favoriteUsers"
             :key="user.id"
+            v-if="favoriteUsers.length > 0"
           >
             <button class="button" type="button" @click="selectedUser(user.id)">
               <div class="bar-user-info">
@@ -104,6 +105,15 @@ onMounted(async () => {
                 </div>
               </div>
             </button>
+          </div>
+          <div class="dash-empty-suggestions" v-else>
+            <SpriteIcon
+              name="connections"
+              size="42"
+              color="#535353"
+              title="Connections"
+            />
+            <h2>Choose your favorite users</h2>
           </div>
         </div>
         <div class="dash-fav-edit" v-else>
@@ -165,6 +175,7 @@ onMounted(async () => {
                 class="fav-user"
                 v-for="user in suggestedUsers"
                 :key="user.id"
+                v-if="suggestedUsers.length > 0"
               >
                 <div class="fav-user-data">
                   <div class="fav-user-icon">
@@ -182,6 +193,15 @@ onMounted(async () => {
                 >
                   Add
                 </button>
+              </div>
+              <div class="dash-empty-suggestions" v-else>
+                <SpriteIcon
+                  name="connections"
+                  size="42"
+                  color="#535353"
+                  title="Connections"
+                />
+                <h2>Follow a user to add them to your favorites</h2>
               </div>
             </div>
           </div>

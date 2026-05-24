@@ -7,6 +7,7 @@ import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
+import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
 import "../styles/profile.css";
@@ -76,62 +77,70 @@ watch(selectedUserId, async (newUserId) => {
           Followers
         </button>
       </div>
-      <div class="following-panel" v-if="followsFilter === 'following'">
-        <div
-          class="main-follow-box"
-          :class="{ selected: selectedUserId === user.id }"
-          v-for="user in followingUsers"
-          :key="user.id"
-        >
-          <button class="button" type="button" @click="selectedUser(user.id)">
-            <div class="box-user-info">
-              <div class="bar-user-avatardata">
-                <AvatarIcon />
-                <div class="bar-userdata">
-                  <h2 class="bar-user-name">{{ user.name }}</h2>
-                  <p class="bar-user-username">@{{ user.username }}</p>
+      <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
+        <div class="following-panel" v-if="followsFilter === 'following'">
+          <div
+            class="main-follow-box"
+            :class="{ selected: selectedUserId === user.id }"
+            v-for="user in followingUsers"
+            :key="user.id"
+          >
+            <button class="button" type="button" @click="selectedUser(user.id)">
+              <div class="box-user-info">
+                <div class="bar-user-avatardata">
+                  <AvatarIcon />
+                  <div class="bar-userdata">
+                    <h2 class="bar-user-name">{{ user.name }}</h2>
+                    <p class="bar-user-username">@{{ user.username }}</p>
+                  </div>
+                </div>
+                <div>
+                  <button class="unfollow-btn" @click="unfollowUser(user.id)">
+                    Unfollow
+                  </button>
                 </div>
               </div>
-              <div>
-                <button
-                  class="unfollow-btn"
-                  @click="unfollowUser(user.id)"
-                >
-                  Unfollow
-                </button>
+            </button>
+          </div>
+        </div>
+        <div class="followers-panel" v-else>
+          <div
+            class="main-follow-box"
+            :class="{ selected: selectedUserId === user.id }"
+            v-for="user in followersUsers"
+            :key="user.id"
+          >
+            <button class="button" type="button" @click="selectedUser(user.id)">
+              <div class="box-user-info">
+                <div class="bar-user-avatardata">
+                  <AvatarIcon />
+                  <div class="bar-userdata">
+                    <h2 class="bar-user-name">{{ user.name }}</h2>
+                    <p class="bar-user-username">@{{ user.username }}</p>
+                  </div>
+                </div>
+                <div>
+                  <button
+                    class="unfollow-btn"
+                    v-if="user.isFollowedByMe === false"
+                    @click="followUser(user.id)"
+                  >
+                    Follow
+                  </button>
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="followers-panel" v-else>
-        <div
-          class="main-follow-box"
-          :class="{ selected: selectedUserId === user.id }"
-          v-for="user in followersUsers"
-          :key="user.id"
-        >
-          <button class="button" type="button" @click="selectedUser(user.id)">
-            <div class="box-user-info">
-              <div class="bar-user-avatardata">
-                <AvatarIcon />
-                <div class="bar-userdata">
-                  <h2 class="bar-user-name">{{ user.name }}</h2>
-                  <p class="bar-user-username">@{{ user.username }}</p>
-                </div>
-              </div>
-              <div>
-                <button
-                  class="unfollow-btn"
-                  v-if="user.isFollowedByMe === false"
-                  @click="followUser(user.id)"
-                >
-                  Follow
-                </button>
-              </div>
-            </div>
-          </button>
-        </div>
+      <div class="dash-empty-suggestions" style="height: auto; padding: 5rem 0;" v-else>
+        <SpriteIcon
+          name="connections"
+          size="48"
+          color="#535353"
+          title="Connections"
+        />
+        <h2>No suggestions available</h2>
       </div>
     </div>
     <div class="dash-content">
@@ -140,10 +149,22 @@ watch(selectedUserId, async (newUserId) => {
           <h2>Profile</h2>
           <Profile />
         </div>
-        <div class="dash-posts" v-if="followingUsers.length > 0 || followersUsers.length > 0">
+        <div
+          class="dash-posts"
+          v-if="followingUsers.length > 0 || followersUsers.length > 0"
+        >
           <h2>Posts</h2>
           <Post />
         </div>
+      </div>
+      <div class="dash-empty-connections" v-else>
+        <SpriteIcon
+          name="connections"
+          size="64"
+          color="#535353"
+          title="Connections"
+        />
+        <h2>No connections yet</h2>
       </div>
     </div>
   </div>

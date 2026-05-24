@@ -90,7 +90,7 @@ onBeforeRouteLeave((to) => {
               color="#535353"
               title="Followers"
             />
-            <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow Back" }}</p>
+            <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow" }}</p>
           </button>
           <router-link to="/messages" @click="createChat(userProfile.id)">
             <SpriteIcon

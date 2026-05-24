@@ -46,7 +46,7 @@ watch(queryUsers, searchUsers);
 
 onMounted(async () => {
   // RESET ALL CHAT-RELATED DATA
-  selectedChat.value = '';
+  selectedChat.value = "";
   chatMessages.value = [];
   await loadSuggestedUsers("following");
   await loadUserChats();
@@ -86,7 +86,11 @@ onMounted(async () => {
             v-for="user in searchUsersResults"
             :key="user.id"
           >
-            <button class="button" type="button" @click="verifyNewChatSearch(user.id)">
+            <button
+              class="button"
+              type="button"
+              @click="verifyNewChatSearch(user.id)"
+            >
               <img
                 src="../assets/avatars/40x40.png"
                 alt="User Avatar"
@@ -139,6 +143,7 @@ onMounted(async () => {
           class="bar-user-box"
           v-for="user in filteredSuggestedUsers"
           :key="user.id"
+          v-if="filteredSuggestedUsers.length > 0"
         >
           <button class="button" type="button" @click="createChat(user.id)">
             <div class="bar-user-info">
@@ -155,6 +160,15 @@ onMounted(async () => {
               </div>
             </div>
           </button>
+        </div>
+        <div class="dash-empty-suggestions" v-else>
+          <SpriteIcon
+            name="connections"
+            size="48"
+            color="#535353"
+            title="Connections"
+          />
+          <h2>No suggestions available</h2>
         </div>
       </div>
     </div>
@@ -185,7 +199,11 @@ onMounted(async () => {
                 title="Notifications"
               />
             </button>
-            <button class="button" type="button" @click="deleteChat(userChatId)">
+            <button
+              class="button"
+              type="button"
+              @click="deleteChat(userChatId)"
+            >
               <SpriteIcon
                 name="trash"
                 size="24"
@@ -284,7 +302,7 @@ onMounted(async () => {
               />
               <p>Block</p>
             </button>
-          </div>                    
+          </div>
           <div class="dash-data-box">
             <h2>Share Profile</h2>
             <button class="button" type="button">
@@ -316,12 +334,12 @@ onMounted(async () => {
             <SpriteIcon name="send" size="24" color="#535353" title="Send" />
           </button>
           <button class="button" type="button">
-              <SpriteIcon
-                name="microphone"
-                size="24"
-                color="#535353"
-                title="Microphone"
-              />
+            <SpriteIcon
+              name="microphone"
+              size="24"
+              color="#535353"
+              title="Microphone"
+            />
           </button>
           <button class="button" type="button">
             <SpriteIcon name="photo" size="24" color="#535353" title="Photo" />
@@ -329,7 +347,12 @@ onMounted(async () => {
         </div>
       </div>
       <div class="dash-empty-chats" v-else>
-        <SpriteIcon name="messages" size="64" color="#535353" title="Messages" />
+        <SpriteIcon
+          name="messages"
+          size="64"
+          color="#535353"
+          title="Messages"
+        />
         <h2>Start a conversation</h2>
       </div>
     </div>

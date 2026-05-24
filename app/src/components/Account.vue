@@ -7,10 +7,11 @@ import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
+import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
 import "../styles/app-layout.css";
-import "../styles/input.css"
+import "../styles/input.css";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -37,7 +38,7 @@ const {
   updateUnsavedProfileChanges,
 } = useUserData();
 
-const { loadPosts } = usePosts();
+const { userdata, loadPosts } = usePosts();
 
 onMounted(async () => {
   selectedUserId.value = "";
@@ -100,7 +101,12 @@ onBeforeRouteLeave(() => {
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button class="button" type="button" @click="toggleCloseEdit('name')" v-else>
+          <button
+            class="button"
+            type="button"
+            @click="toggleCloseEdit('name')"
+            v-else
+          >
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -117,14 +123,19 @@ onBeforeRouteLeave(() => {
             />
           </div>
           <button
-            class="button"  
+            class="button"
             type="button"
             @click="toggleEdit('username')"
             v-if="!editingProfile.username"
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button class="button" type="button" @click="toggleCloseEdit('username')" v-else>
+          <button
+            class="button"
+            type="button"
+            @click="toggleCloseEdit('username')"
+            v-else
+          >
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -148,7 +159,12 @@ onBeforeRouteLeave(() => {
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button class="button" type="button" @click="toggleCloseEdit('bio')" v-else>
+          <button
+            class="button"
+            type="button"
+            @click="toggleCloseEdit('bio')"
+            v-else
+          >
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -176,7 +192,12 @@ onBeforeRouteLeave(() => {
           >
             <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
           </button>
-          <button class="button" type="button" @click="toggleCloseEdit('url')" v-else>
+          <button
+            class="button"
+            type="button"
+            @click="toggleCloseEdit('url')"
+            v-else
+          >
             <img src="/icons/check.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
@@ -204,7 +225,11 @@ onBeforeRouteLeave(() => {
       </button>
       <div class="profile-delete">
         <h2>Delete Account</h2>
-        <button type="button" class="delete-btn button" @click="deleteAccount()">
+        <button
+          type="button"
+          class="delete-btn button"
+          @click="deleteAccount()"
+        >
           Delete
         </button>
       </div>
@@ -217,7 +242,16 @@ onBeforeRouteLeave(() => {
       <div class="profile-posts">
         <h2>My Posts</h2>
       </div>
-      <Post />
+      <Post v-if="userdata.length > 0" />
+      <div class="dash-empty-myPosts" style="height: max-content" v-else>
+        <SpriteIcon
+          name="create"
+          size="64"
+          color="#535353"
+          title="Create Post"
+        />
+        <h2>No posts yet</h2>
+      </div>
     </div>
   </div>
 </template>
@@ -304,5 +338,16 @@ onBeforeRouteLeave(() => {
   background-color: var(--color-error);
   border: 2px solid var(--color-white);
   color: var(--color-white);
+}
+.dash-empty-myPosts {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dash-empty-myPosts h2 {
+  font-family: "Montserrat Light", sans-serif;
+  font-size: 1.25rem;
 }
 </style>

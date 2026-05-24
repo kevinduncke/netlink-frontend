@@ -2,6 +2,9 @@
 // VUE
 import { onMounted } from "vue";
 
+// COMPONENTS
+import SpriteIcon from "./SpriteIcon.vue";
+
 // STYLES
 import "../styles/buttons.css";
 import "../styles/body.css";
@@ -72,10 +75,10 @@ onMounted(async () => {
             type="button"
             :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
             @click="
-              ntf.isFollowedByMe
+              (ntf.isFollowedByMe
                 ? unfollowUser(ntf.fromUser?.id)
                 : followUser(ntf.fromUser?.id),
-              updateNotificationFollowStatus(ntf.id, !ntf.isFollowedByMe)
+              updateNotificationFollowStatus(ntf.id, !ntf.isFollowedByMe))
             "
           >
             {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
@@ -84,7 +87,15 @@ onMounted(async () => {
       </div>
     </div>
     <div class="notif-empty" v-else>
-      <p class="notif-empty-text">No notifications yet.</p>
+      <div class="dash-empty-suggestions">
+        <SpriteIcon
+          name="bell"
+          size="42"
+          color="#535353"
+          title="Notifications"
+        />
+        <h2>No notifications yet</h2>
+      </div>
     </div>
   </div>
 </template>
@@ -133,5 +144,18 @@ onMounted(async () => {
 .notif-follow button {
   cursor: pointer;
   font-size: var(--font-size-label);
+  color: var(--color-white);
+  border: 2px solid var(--color-primary);
+}
+.notif-follow button:hover {
+  color: var(--color-primary);
+}
+.notif-follow .unfollow-btn {
+  color: var(--color-gray-800);
+  border-color: 2px solid var(--color-gray-400);
+}
+.notif-follow .unfollow-btn:hover {
+  color: var(--color-white);
+  border: 2px solid var(--color-primary);
 }
 </style>

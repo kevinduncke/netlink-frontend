@@ -100,6 +100,12 @@ export function usePosts() {
       userdata.value = [];
       const response = await api.get(`/post/${route}`);
       userdata.value = response.data || [];
+      if(route === "following") {
+        if (userdata.value.length === 0){
+          const allPosts = await api.get(`/post/all`);
+          userdata.value = allPosts.data || [];
+        }
+      }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();

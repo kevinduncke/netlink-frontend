@@ -103,7 +103,7 @@ const {
       <span v-for="mention in post.mentions" :key="mention.id">
         <RouterLink
           :to="getUserRoute(mention.username, mention.id)"
-          @click="selectedUser(mention.id), loadSelectedUser(mention.id)"
+          @click="(selectedUser(mention.id), loadSelectedUser(mention.id))"
         >
           @{{ mention.username }}
         </RouterLink>
@@ -298,6 +298,9 @@ const {
   justify-content: start;
   align-items: center;
   gap: 0.5rem;
+}
+.dash-username a:hover {
+  background: none;
 }
 
 .dash-post-opts {

@@ -17,6 +17,7 @@ import { onMounted } from "vue";
 const {
   // VARIABLES
   createPostData,
+  userdata,
 
   // FUNCTIONS
   loadPosts,
@@ -52,7 +53,8 @@ onMounted(() => {
             <span
               v-for="mention in createPostData.mentions"
               :key="mention.username"
-            >@{{ mention.username }}</span>
+              > @{{ mention.username }}</span
+            >
           </p>
           <p>Location: {{ createPostData.location }}</p>
           <div class="post-adds">
@@ -222,9 +224,18 @@ onMounted(() => {
       </div>
     </div>
     <div class="dash-content">
-      <div class="dash-myPosts">
+      <div class="dash-myPosts" v-if="userdata.length > 0">
         <h2>My Posts</h2>
         <Post />
+      </div>
+      <div class="dash-empty-posts" v-else>
+        <SpriteIcon
+          name="create"
+          size="64"
+          color="#535353"
+          title="Create Post"
+        />
+        <h2>Create a post</h2>
       </div>
     </div>
   </div>

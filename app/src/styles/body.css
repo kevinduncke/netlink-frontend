@@ -36,3 +36,15 @@
   border: none;
   cursor: pointer;
 }
+
+.dash-empty-suggestions {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dash-empty-suggestions h2 {
+  font-family: "Montserrat Light", sans-serif;
+  font-size: 0.8rem;
+}

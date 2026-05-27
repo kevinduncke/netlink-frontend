@@ -133,7 +133,7 @@ const {
         class="button"
         type="button"
         :class="{ 'dash-shared': post._count.shares }"
-        @click="repost(post.id, post.isRepost)"
+        @click="repost(post.id, post.repostedByMe)"
         v-if="isAuthorPost(post.author.id)"
       >
         <SpriteIcon name="share" size="16" color="#535353" title="Shares" />

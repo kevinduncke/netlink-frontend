@@ -16,6 +16,7 @@ export type PostType = {
   };
   postCount: number;
   isRepost: boolean;
+  repostedByMe: boolean;
   repostedAt: string;
   repostedBy: User;
   mentions: User[];

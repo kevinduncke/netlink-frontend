@@ -55,16 +55,6 @@ export function usePosts() {
   // CREATE POST
   async function createPost() {
     try {
-      console.log(
-        "Post created mentions for:",
-        createPostData.mentions,
-      );
-
-      console.log(
-        "Post created specific followers for:",
-        createPostData.specificFollowers,
-      );
-
       await api.post("/post/", {
         content: createPostData.content,
         visibility: createPostData.visibility,
@@ -109,6 +99,7 @@ export function usePosts() {
       userdata.value = [];
       const response = await api.get(`/post/${route}`);
       userdata.value = response.data || [];
+
       if (route === "following") {
         if (userdata.value.length === 0) {
           const allPosts = await api.get(`/post/all`);
@@ -215,6 +206,7 @@ export function usePosts() {
       const response = await api.get(`/post/comments/all/${postId}`);
       const comments: Comment[] = response.data?.comments || [];
       const post = userdata.value.find((p) => p.id === postId);
+      
       if (!post) return;
 
       post.comments = comments;
@@ -439,7 +431,6 @@ export function usePosts() {
   }
   async function addSpecificFollowers(id: string | number) {
     createPostData.specificFollowers.push({ id });
-    console.log(id);
   }
   function addLocation() {
     navigator.geolocation.getCurrentPosition(

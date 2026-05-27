@@ -51,13 +51,13 @@ const routes: RouteRecordRaw[] = [
     path: "/explore",
     component: Explore,
     name: "explore",
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: "/connections",
     component: Connections,
     name: "connections",
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: "/account",
@@ -69,7 +69,7 @@ const routes: RouteRecordRaw[] = [
     path: "/:pathMatch(.*)*",
     component: PageNotFound,
     name: "page-not-found",
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: "/create",
@@ -94,7 +94,7 @@ const routes: RouteRecordRaw[] = [
     component: Menu,
     name: "menu",
     meta: { requiresAuth: true },
-  }
+  },
 ];
 
 export const router = createRouter({

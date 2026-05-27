@@ -85,22 +85,24 @@ watch(selectedUserId, async (newUserId) => {
             v-for="user in followingUsers"
             :key="user.id"
           >
-            <button class="button" type="button" @click="selectedUser(user.id)">
+            <div class="user-box-connection">
               <div class="box-user-info">
-                <div class="bar-user-avatardata">
-                  <AvatarIcon />
-                  <div class="bar-userdata">
-                    <h2 class="bar-user-name">{{ user.name }}</h2>
-                    <p class="bar-user-username">@{{ user.username }}</p>
+                <button type="button" @click="selectedUser(user.id)">
+                  <div class="bar-user-avatardata">
+                    <AvatarIcon />
+                    <div class="bar-userdata">
+                      <h2 class="bar-user-name">{{ user.name }}</h2>
+                      <p class="bar-user-username">@{{ user.username }}</p>
+                    </div>
                   </div>
-                </div>
+                </button>
                 <div>
                   <button class="unfollow-btn" @click="unfollowUser(user.id)">
                     Unfollow
                   </button>
                 </div>
               </div>
-            </button>
+            </div>
           </div>
         </div>
         <div class="followers-panel" v-else>
@@ -110,15 +112,17 @@ watch(selectedUserId, async (newUserId) => {
             v-for="user in followersUsers"
             :key="user.id"
           >
-            <button class="button" type="button" @click="selectedUser(user.id)">
+            <div class="user-box-connection">
               <div class="box-user-info">
-                <div class="bar-user-avatardata">
-                  <AvatarIcon />
-                  <div class="bar-userdata">
-                    <h2 class="bar-user-name">{{ user.name }}</h2>
-                    <p class="bar-user-username">@{{ user.username }}</p>
+                <button type="button" @click="selectedUser(user.id)">
+                  <div class="bar-user-avatardata">
+                    <AvatarIcon />
+                    <div class="bar-userdata">
+                      <h2 class="bar-user-name">{{ user.name }}</h2>
+                      <p class="bar-user-username">@{{ user.username }}</p>
+                    </div>
                   </div>
-                </div>
+                </button>
                 <div>
                   <button
                     class="unfollow-btn"
@@ -129,11 +133,15 @@ watch(selectedUserId, async (newUserId) => {
                   </button>
                 </div>
               </div>
-            </button>
+            </div>
           </div>
         </div>
       </div>
-      <div class="dash-empty-suggestions" style="height: auto; padding: 5rem 0;" v-else>
+      <div
+        class="dash-empty-suggestions"
+        style="height: auto; padding: 5rem 0"
+        v-else
+      >
         <SpriteIcon
           name="connections"
           size="48"

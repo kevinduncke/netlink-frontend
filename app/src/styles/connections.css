@@ -38,6 +38,11 @@
 .followers-panel {
   margin-top: 1rem;
 }
+.user-box-connection button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
 .dash-empty-connections {
   height: 100%;
   display: flex;

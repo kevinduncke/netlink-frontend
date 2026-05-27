@@ -554,6 +554,10 @@ function createUserData() {
     try {
       const response = await api.get("/chats");
       userChats.value = response.data || [];
+
+      selectedChat.value = "";
+      chatMessages.value = [];
+      userChatId.value = "";
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -611,21 +615,23 @@ function createUserData() {
   const groupMessagesByDate = computed(() => {
     const groups: Record<string, ChatMessage[]> = {};
 
-    for (const message of chatMessages.value) {
-      const date = new Date(message.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+    if (selectedChat) {
+      for (const message of chatMessages.value) {
+        const date = new Date(message.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
 
-      if (!groups[date]) {
-        groups[date] = [];
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+
+        groups[date].push(message);
       }
 
-      groups[date].push(message);
+      return groups;
     }
-
-    return groups;
   });
 
   // SEND NEW MESSAGE IN SELECTED USER CHAT

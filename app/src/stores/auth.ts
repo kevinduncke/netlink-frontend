@@ -49,11 +49,11 @@ export const useAuthStore = defineStore("auth", {
     },
 
     isAuthenticated() {
-      if (this.token && this.user){
+      if (this.token && this.user) {
         return true;
       } else {
         return false;
       }
-    }
+    },
   },
 });

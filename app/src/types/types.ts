@@ -36,6 +36,10 @@ export type UserMention = {
   username: string;
 }
 
+export type SpecificFollower = {
+  id: string | number;
+}
+
 export interface Comment {
   id: string | number;
   content: string;
@@ -50,11 +54,9 @@ export interface CreatePost {
   location: string;
   imageUrl: string;
   visibility: "PUBLIC" | "FOLLOWERS" | "ONLY_ME" | "SPECIFIC";
-  specificFollowers: string[];
+  specificFollowers: SpecificFollower[];
   hideLikes: boolean;
   disableComments: boolean;
-  showMentionModal: boolean;
-  showSpecificModal: boolean;
 }
 
 export interface EditingComment {

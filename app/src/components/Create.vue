@@ -1,13 +1,22 @@
 <script setup lang="ts">
+// VUE
+import { ref, watch } from "vue";
+
+// SERVICES
+import api from "../services/api";
+
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
-import SearchModal from "./SearchModal.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
+import "../styles/input.css";
 import "../styles/app-layout.css";
 import "../styles/CreatePost.css";
+
+// TYPES
+import type { SearchUser } from "../types/search";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
@@ -21,7 +30,6 @@ const {
 
   // FUNCTIONS
   loadPosts,
-  addMention,
   addLocation,
   createPost,
   changeVisibility,
@@ -30,6 +38,27 @@ const {
   selectMention,
   addSpecificFollowers,
 } = usePosts();
+
+// USER | FOLLOWING USERS
+import { useUserData } from "../shared/userData";
+
+const { followingUsers, loadFollowingUsers } = useUserData();
+
+const query = ref("");
+const results = ref<SearchUser[]>([]);
+const selectedUsers = ref<string[]>([]);
+
+async function searchUsers() {
+  const response = await api.get(`/users/search?query=${query.value}`);
+  results.value = response.data;
+}
+
+watch(query, searchUsers);
+
+function addMention(username: string) {
+  selectMention(username);
+  query.value = "";
+}
 
 onMounted(() => {
   loadPosts("my-posts");
@@ -53,21 +82,14 @@ onMounted(() => {
             <span
               v-for="mention in createPostData.mentions"
               :key="mention.username"
-              > @{{ mention.username }}</span
+            >
+              @{{ mention.username }}</span
             >
           </p>
           <p>Location: {{ createPostData.location }}</p>
           <div class="post-adds">
             <p>Add to your post</p>
             <div>
-              <button class="button" type="button" @click="addMention()">
-                <SpriteIcon
-                  name="at"
-                  size="24"
-                  color="#535353"
-                  title="Add mention"
-                />
-              </button>
               <button class="button" type="button" @click="addLocation()">
                 <SpriteIcon
                   name="location"
@@ -89,10 +111,71 @@ onMounted(() => {
           Post
         </button>
       </div>
+      <div class="addMentions">
+        <h2>Add Mentions</h2>
+        <div class="input-search shadow-light">
+          <div>
+            <SpriteIcon
+              name="search"
+              size="24"
+              color="#535353"
+              title="Search User"
+            />
+          </div>
+          <input
+            type="text"
+            name="search"
+            id="search"
+            placeholder="Search for a user"
+            v-model="query"
+          />
+        </div>
+        <div class="input-results" v-if="results.length > 0">
+          <div class="user-result" v-for="user in results" :key="user.id">
+            <button class="button" @click="addMention(user.username)">
+              {{ user.username }}
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="optionsPost">
         <h2>Options</h2>
+        <div class="modesOptions">
+          <button class="button" type="button" @click="toggleHideLikes()">
+            <div
+              class="btnIcon"
+              :class="{ selected: createPostData.hideLikes }"
+            >
+              <SpriteIcon
+                name="heart"
+                size="18"
+                color="#535353"
+                title="Hide Likes"
+              />
+            </div>
+            <div class="infoIcon">
+              <p>Hide like count</p>
+            </div>
+          </button>
+          <button class="button" type="button" @click="toggleDisableComments()">
+            <div
+              class="btnIcon"
+              :class="{ selected: createPostData.disableComments }"
+            >
+              <SpriteIcon
+                name="comment"
+                size="18"
+                color="#535353"
+                title="Hide Comments"
+              />
+            </div>
+            <div class="infoIcon">
+              <p>Turn off commenting</p>
+            </div>
+          </button>
+        </div>
         <div class="visibilityPost">
-          <p>Who can view your post?</p>
+          <p>Visibility</p>
           <div class="modesOptions">
             <button
               class="button"
@@ -160,7 +243,7 @@ onMounted(() => {
             <button
               class="button"
               type="button"
-              @click="changeVisibility('SPECIFIC')"
+              @click="(changeVisibility('SPECIFIC'), loadFollowingUsers())"
             >
               <div
                 class="btnIcon"
@@ -180,45 +263,24 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <div class="settingsPost">
-          <p>Post Settings</p>
-          <div class="modesOptions">
-            <button class="button" type="button" @click="toggleHideLikes()">
-              <div
-                class="btnIcon"
-                :class="{ selected: createPostData.hideLikes }"
-              >
-                <SpriteIcon
-                  name="heart"
-                  size="18"
-                  color="#535353"
-                  title="Hide Likes"
-                />
-              </div>
-              <div class="infoIcon">
-                <p>Hide like count</p>
-              </div>
-            </button>
-            <button
-              class="button"
-              type="button"
-              @click="toggleDisableComments()"
+        <div class="sp-following-box" v-if="followingUsers.length > 0 && createPostData.visibility === 'SPECIFIC'">
+          <p>Specific Followers</p>
+          <div class="following-list">
+            <div
+              class="followingUsers-result"
+              v-for="user in followingUsers"
+              :key="user.id"
             >
-              <div
-                class="btnIcon"
-                :class="{ selected: createPostData.disableComments }"
-              >
-                <SpriteIcon
-                  name="comment"
-                  size="18"
-                  color="#535353"
-                  title="Hide Comments"
-                />
-              </div>
-              <div class="infoIcon">
-                <p>Turn off commenting</p>
-              </div>
-            </button>
+              <input
+                type="checkbox"
+                name="following-user"
+                :id="`following-user-${user.username}`"
+                :value="user.id"
+                v-model="selectedUsers"
+                @change="addSpecificFollowers(user.id)"
+              />
+              <span>{{ user.username }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -239,16 +301,4 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <SearchModal
-    :show="createPostData.showMentionModal"
-    mode="mention"
-    @close="createPostData.showMentionModal = false"
-    @select="selectMention($event)"
-  />
-  <SearchModal
-    :show="createPostData.showSpecificModal"
-    mode="specific"
-    @close="createPostData.showSpecificModal = false"
-    @select-multiple="addSpecificFollowers($event)"
-  />
 </template>

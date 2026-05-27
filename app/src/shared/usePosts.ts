@@ -15,6 +15,7 @@ import type {
   EditingComment,
   CreatePost,
   UserMention,
+  SpecificFollower,
 } from "../types/types.ts";
 
 // POSTS
@@ -30,11 +31,9 @@ export function usePosts() {
     location: "",
     imageUrl: "",
     visibility: "PUBLIC",
-    specificFollowers: [],
+    specificFollowers: [] as SpecificFollower[],
     hideLikes: false,
     disableComments: false,
-    showMentionModal: false,
-    showSpecificModal: false,
   });
 
   // POST COMPONENT OPTIONS
@@ -56,10 +55,20 @@ export function usePosts() {
   // CREATE POST
   async function createPost() {
     try {
+      console.log(
+        "Post created mentions for:",
+        createPostData.mentions,
+      );
+
+      console.log(
+        "Post created specific followers for:",
+        createPostData.specificFollowers,
+      );
+
       await api.post("/post/", {
         content: createPostData.content,
         visibility: createPostData.visibility,
-        specificTo: createPostData.specificFollowers,
+        specificFollowers: createPostData.specificFollowers,
         location: createPostData.location,
         imageUrl: createPostData.imageUrl,
         hideLikes: createPostData.hideLikes,
@@ -100,8 +109,8 @@ export function usePosts() {
       userdata.value = [];
       const response = await api.get(`/post/${route}`);
       userdata.value = response.data || [];
-      if(route === "following") {
-        if (userdata.value.length === 0){
+      if (route === "following") {
+        if (userdata.value.length === 0) {
           const allPosts = await api.get(`/post/all`);
           userdata.value = allPosts.data || [];
         }
@@ -425,17 +434,12 @@ export function usePosts() {
     if (!isPresentId(currentUserId)) return false;
     return idEquals(postAuthorId, currentUserId);
   }
-  function addMention() {
-    createPostData.showMentionModal = true;
-  }
   async function selectMention(username: string) {
     createPostData.mentions.push({ username });
-    createPostData.showMentionModal = false;
   }
-  function addSpecificFollowers(selectedList: string[]) {
-    const set = new Set([...createPostData.specificFollowers, ...selectedList]);
-    createPostData.specificFollowers = Array.from(set);
-    createPostData.showSpecificModal = false;
+  async function addSpecificFollowers(id: string | number) {
+    createPostData.specificFollowers.push({ id });
+    console.log(id);
   }
   function addLocation() {
     navigator.geolocation.getCurrentPosition(
@@ -467,9 +471,6 @@ export function usePosts() {
       default:
         createPostData.visibility = "PUBLIC";
     }
-    if (mode === "SPECIFIC") {
-      createPostData.showSpecificModal = true;
-    }
   }
   function toggleHideLikes() {
     createPostData.hideLikes = !createPostData.hideLikes;
@@ -489,7 +490,6 @@ export function usePosts() {
 
     // CREATE POST FUNCTIONS
     createPost,
-    addMention,
     addLocation,
     selectMention,
     addSpecificFollowers,

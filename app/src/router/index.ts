@@ -69,7 +69,7 @@ const routes: RouteRecordRaw[] = [
     path: "/:pathMatch(.*)*",
     component: PageNotFound,
     name: "page-not-found",
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
   {
     path: "/create",
@@ -106,7 +106,7 @@ export const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore();
 
-  if (to.meta?.requiresAuth && !auth.token) {
+  if (to.meta?.requiresAuth && !auth.isAuthenticated()) {
     next("/login");
   } else {
     next();

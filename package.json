@@ -1,5 +1,9 @@
 {
   "devDependencies": {
-    "sass": "^1.99.0"
+    "sass": "^1.99.0",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "vue-sonner": "^2.0.9"
   }
 }

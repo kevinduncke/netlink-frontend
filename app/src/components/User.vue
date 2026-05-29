@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // VUE
 import { onMounted } from "vue";
-import { onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave, useRouter } from "vue-router";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
@@ -32,6 +32,13 @@ const {
   followUser,
   createChat,
 } = useUserData();
+
+const router = useRouter();
+
+async function handleSendMessage() {
+  await createChat(userProfile.value.id);
+  await router.push("/messages");
+}
 
 onMounted(async () => {
   await loadSelectedUser(selectedUserId.value);
@@ -92,7 +99,7 @@ onBeforeRouteLeave((to) => {
             />
             <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow" }}</p>
           </button>
-          <router-link to="/messages" @click="createChat(userProfile.id)">
+          <button class="button" type="button" @click="handleSendMessage">
             <SpriteIcon
               name="messages"
               size="24"
@@ -100,7 +107,7 @@ onBeforeRouteLeave((to) => {
               title="Messages"
             />
             <p>Send a Message</p>
-          </router-link>
+          </button>
           <button class="button" type="button">
             <SpriteIcon name="block" size="24" color="#535353" title="Block" />
             <p>Block</p>

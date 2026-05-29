@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, watch } from "vue";
+import { onMounted, onBeforeUnmount, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
@@ -50,8 +50,27 @@ onMounted(async () => {
   await loadPosts("all");
 });
 
-// SEARCH USERS | SEARCH FILTERS
-watch(searchFilters, searchPost, { deep: true });
+let searchPostTimer: ReturnType<typeof window.setTimeout> | null = null;
+
+watch(
+  searchFilters,
+  () => {
+    if (searchPostTimer) {
+      window.clearTimeout(searchPostTimer);
+    }
+
+    searchPostTimer = window.setTimeout(() => {
+      searchPost();
+    }, 300);
+  },
+  { deep: true },
+);
+
+onBeforeUnmount(() => {
+  if (searchPostTimer) {
+    window.clearTimeout(searchPostTimer);
+  }
+});
 </script>
 
 <template>

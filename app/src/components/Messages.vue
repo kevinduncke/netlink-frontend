@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, watch } from "vue";
+import { onMounted, onBeforeUnmount, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
@@ -19,7 +19,6 @@ const {
   queryUsers,
   searchUsersResults,
   userChats,
-  chatMessages,
   selectedChat,
   userChatId,
   chatUserInfo,
@@ -34,6 +33,7 @@ const {
   filteredSuggestedUsers,
   selectChat,
   getUserInfo,
+  loadChatMessages,
   groupMessagesByDate,
   verifyNewChatSearch,
   clearQuery,
@@ -42,12 +42,31 @@ const {
   deleteChat,
 } = useUserData();
 
-watch(queryUsers, searchUsers);
+let searchUsersTimer: ReturnType<typeof window.setTimeout> | null = null;
+
+watch(queryUsers, () => {
+  if (searchUsersTimer) {
+    window.clearTimeout(searchUsersTimer);
+  }
+
+  searchUsersTimer = window.setTimeout(() => {
+    searchUsers();
+  }, 300);
+});
+
+onBeforeUnmount(() => {
+  if (searchUsersTimer) {
+    window.clearTimeout(searchUsersTimer);
+  }
+});
+
+watch(selectedChat, async () => {
+  if (selectedChat.value) {
+    await loadChatMessages(selectedChat.value);
+  }
+});
 
 onMounted(async () => {
-  // RESET ALL CHAT-RELATED DATA
-  selectedChat.value = "";
-  chatMessages.value = [];
   await loadSuggestedUsers("following");
   await loadUserChats();
 });

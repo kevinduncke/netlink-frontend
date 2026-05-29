@@ -27,8 +27,21 @@ const {
   followUser,
   getUserRoute,
   selectedUser,
-  updateNotificationFollowStatus,
 } = useUserData();
+
+async function handleNotificationFollow(ntf: {
+  id: string | number;
+  isFollowedByMe?: boolean;
+  fromUser?: { id?: string | number };
+}) {
+  if (ntf.fromUser?.id === undefined) return;
+
+  if (ntf.isFollowedByMe) {
+    await unfollowUser(ntf.fromUser.id);
+  } else {
+    await followUser(ntf.fromUser.id);
+  }
+}
 
 onMounted(async () => {
   await loadNotifications();
@@ -74,12 +87,7 @@ onMounted(async () => {
           <button
             type="button"
             :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
-            @click="
-              (ntf.isFollowedByMe
-                ? unfollowUser(ntf.fromUser?.id)
-                : followUser(ntf.fromUser?.id),
-              updateNotificationFollowStatus(ntf.id, !ntf.isFollowedByMe))
-            "
+            @click="handleNotificationFollow(ntf)"
           >
             {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
           </button>

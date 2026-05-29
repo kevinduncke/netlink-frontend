@@ -7,6 +7,7 @@ import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
 import { idEquals, isPresentId } from "./idUtils";
+import { consoleMutationFeedback, runLikeMutation, runCreateComment, runDeleteComment, runRepostMutation, runCreatePost, runEditPost, runDeletePost } from "./actions";
 
 // TYPES
 import type {
@@ -55,15 +56,32 @@ export function usePosts() {
   // CREATE POST
   async function createPost() {
     try {
-      await api.post("/post/", {
+      const optimisticPost: PostType = {
+        id: `temp-${Date.now()}` as any,
         content: createPostData.content,
-        visibility: createPostData.visibility,
-        specificFollowers: createPostData.specificFollowers,
-        location: createPostData.location,
-        imageUrl: createPostData.imageUrl,
-        hideLikes: createPostData.hideLikes,
-        disableComments: createPostData.disableComments,
-        mentions: createPostData.mentions,
+        author: authStore.user as any,
+        createdAt: new Date().toISOString(),
+        _count: { likes: 0, comments: 0, shares: 0 },
+        isRepost: false,
+      } as PostType;
+
+      await runCreatePost({
+        posts: userdata,
+        post: optimisticPost,
+        onRequest: async () => {
+          const response = await api.post("/post/", {
+            content: createPostData.content,
+            visibility: createPostData.visibility,
+            specificFollowers: createPostData.specificFollowers,
+            location: createPostData.location,
+            imageUrl: createPostData.imageUrl,
+            hideLikes: createPostData.hideLikes,
+            disableComments: createPostData.disableComments,
+            mentions: createPostData.mentions,
+          });
+          return response.data as PostType;
+        },
+        onFeedback: consoleMutationFeedback,
       });
 
       createPostData.content = "";
@@ -74,8 +92,6 @@ export function usePosts() {
       createPostData.imageUrl = "";
       createPostData.hideLikes = false;
       createPostData.disableComments = false;
-
-      loadPosts("my-posts");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -120,10 +136,14 @@ export function usePosts() {
   // DELETE POST
   async function deletePost(postId: number | string) {
     try {
-      await api.delete(`/post/delete/${postId}`);
-
-      // REMOVE POST LOCALLY
-      userdata.value = userdata.value.filter((post) => post.id !== postId);
+      await runDeletePost({
+        posts: userdata,
+        postId,
+        onRequest: async (pId) => {
+          await api.delete(`/post/delete/${pId}`);
+        },
+        onFeedback: consoleMutationFeedback,
+      });
       openOptionsFor.value = "";
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -139,18 +159,18 @@ export function usePosts() {
   // SAVE EDITED POST
   async function saveEdit(postId: number | string) {
     if (!editingPost.value) return;
-
     try {
-      await api.put(`/post/update/${editingPost.value.id}`, {
-        content: editingPost.value.content,
-      });
-
-      // LOAD EDITED POST LOCALLY
       const selectedPost = userdata.value.find((p) => p.id === postId);
+      if (!selectedPost) return;
 
-      if (selectedPost) {
-        selectedPost.content = editingPost.value.content;
-      }
+      await runEditPost({
+        post: selectedPost,
+        newContent: editingPost.value.content,
+        onRequest: async (pId, content) => {
+          await api.put(`/post/update/${pId}`, { content });
+        },
+        onFeedback: consoleMutationFeedback,
+      });
 
       closeEditModal();
       openOptionsFor.value = "";
@@ -168,27 +188,21 @@ export function usePosts() {
   // LIKE / UNLIKE POST
   async function likePost(postId: number, state: boolean) {
     try {
-      if (state === true) {
-        await api.post(`/post/unlike/${postId}`);
-      } else if (state === false) {
-        await api.post(`/post/like/${postId}`);
-      }
+      const selectedPost = userdata.value.find((post) => post.id === postId);
+      if (!selectedPost) return;
 
-      // UPDATE LIKE COUNT LOCALLY
-      const selectedPost = userdata.value.find((p) => p.id === postId);
-      if (selectedPost) {
-        if (state === false) {
-          selectedPost._count.likes = selectedPost._count.likes
-            ? selectedPost._count.likes + 1
-            : 1;
-          selectedPost.author.liked = true;
-        } else if (state === true) {
-          selectedPost._count.likes = selectedPost._count.likes
-            ? selectedPost._count.likes - 1
-            : 0;
-          selectedPost.author.liked = false;
-        }
-      }
+      await runLikeMutation({
+        post: selectedPost,
+        nextLiked: !state,
+        onRequest: async (currentPostId, nextLiked) => {
+          if (nextLiked) {
+            await api.post(`/post/like/${currentPostId}`);
+          } else {
+            await api.post(`/post/unlike/${currentPostId}`);
+          }
+        },
+        onFeedback: consoleMutationFeedback,
+      });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -206,7 +220,7 @@ export function usePosts() {
       const response = await api.get(`/post/comments/all/${postId}`);
       const comments: Comment[] = response.data?.comments || [];
       const post = userdata.value.find((p) => p.id === postId);
-      
+
       if (!post) return;
 
       post.comments = comments;
@@ -226,25 +240,25 @@ export function usePosts() {
     try {
       if (!editingComment.postComment.trim()) return;
 
-      const response = await api.post(`/post/comment/${postId}`, {
-        content: editingComment.postComment,
-      });
-
-      const newCommentData: Comment = response.data;
-
-      // UPDATE COMMENT LOCALLY AND PUSH NEW COMMENT TO THE TOP
       const selectedPost = userdata.value.find((p) => p.id === postId);
+      if (!selectedPost) return;
 
-      if (selectedPost) {
-        if (!selectedPost.comments) {
-          selectedPost.comments = [newCommentData];
-        } else {
-          selectedPost.comments.unshift(newCommentData);
-        }
-        selectedPost._count.comments = selectedPost._count.comments
-          ? selectedPost._count.comments + 1
-          : 1;
-      }
+      const optimisticComment: Comment = {
+        id: `temp-${Date.now()}` as any,
+        content: editingComment.postComment,
+        author: authStore.user as any,
+        createdAt: new Date().toISOString(),
+      } as Comment;
+
+      await runCreateComment({
+        post: selectedPost,
+        comment: optimisticComment,
+        onRequest: async (currentPostId, content) => {
+          const response = await api.post(`/post/comment/${currentPostId}`, { content });
+          return response.data as Comment;
+        },
+        onFeedback: consoleMutationFeedback,
+      });
 
       editingComment.postComment = "";
     } catch (error) {
@@ -303,19 +317,17 @@ export function usePosts() {
     postId: number | string,
   ) {
     try {
-      await api.delete(`/post/comment/${commentId}`);
-
-      // REMOVE COMMENT LOCALLY
       const selectedPost = userdata.value.find((p) => p.id === postId);
+      if (!selectedPost) return;
 
-      if (selectedPost) {
-        selectedPost.comments = selectedPost.comments?.filter(
-          (c) => c.id !== commentId,
-        );
-        selectedPost._count.comments = selectedPost._count.comments
-          ? selectedPost._count.comments - 1
-          : 0;
-      }
+      await runDeleteComment({
+        post: selectedPost,
+        commentId,
+        onRequest: async (cId) => {
+          await api.delete(`/post/comment/${cId}`);
+        },
+        onFeedback: consoleMutationFeedback,
+      });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -330,21 +342,22 @@ export function usePosts() {
   // REPOST
   async function repost(postId: number | string, state: boolean) {
     try {
-      if (state === true) {
-        await api.delete(`/post/repost/${postId}`);
-        const selectedPost = userdata.value.find((p) => p.id === postId);
-        if (selectedPost && selectedPost._count.shares) {
-          selectedPost._count.shares--;
-        }
-        userdata.value = userdata.value.filter((p) => p.id !== postId);
-      } else if (state === false) {
-        await api.post(`/post/repost/${postId}`);
+      const selectedPost = userdata.value.find((p) => p.id === postId);
+      if (!selectedPost) return;
 
-        const selectedPost = userdata.value.find((p) => p.id === postId);
-        if (selectedPost) {
-          selectedPost._count.shares++;
-        }
-      }
+      await runRepostMutation({
+        post: selectedPost,
+        posts: userdata,
+        nextState: state,
+        onRequest: async (currentPostId, nextState) => {
+          if (nextState === true) {
+            await api.delete(`/post/repost/${currentPostId}`);
+          } else {
+            await api.post(`/post/repost/${currentPostId}`);
+          }
+        },
+        onFeedback: consoleMutationFeedback,
+      });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -430,7 +443,18 @@ export function usePosts() {
     createPostData.mentions.push({ username });
   }
   async function addSpecificFollowers(id: string | number) {
-    createPostData.specificFollowers.push({ id });
+    if (
+      createPostData.specificFollowers.some((follower) =>
+        idEquals(follower.id, id),
+      )
+    ) {
+      createPostData.specificFollowers =
+        createPostData.specificFollowers.filter(
+          (follower) => !idEquals(follower.id, id),
+        );
+    } else {
+      createPostData.specificFollowers.push({ id });
+    }
   }
   function addLocation() {
     navigator.geolocation.getCurrentPosition(

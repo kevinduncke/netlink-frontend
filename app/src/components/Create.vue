@@ -46,7 +46,6 @@ const { followingUsers, loadFollowingUsers } = useUserData();
 
 const query = ref("");
 const results = ref<SearchUser[]>([]);
-const selectedUsers = ref<string[]>([]);
 
 async function searchUsers() {
   const response = await api.get(`/users/search?query=${query.value}`);
@@ -276,7 +275,6 @@ onMounted(() => {
                 name="following-user"
                 :id="`following-user-${user.username}`"
                 :value="user.id"
-                v-model="selectedUsers"
                 @change="addSpecificFollowers(user.id)"
               />
               <span>{{ user.username }}</span>

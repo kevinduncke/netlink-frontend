@@ -17,6 +17,13 @@ import type { UserProfile } from "../types/users";
 import { usePosts } from "../shared/usePosts";
 import type { ChatMessage, ChatUser } from "../types/chat";
 import type { Notification } from "../types/types";
+import {
+  consoleMutationFeedback,
+  runFollowMutation,
+  runSendMessage,
+  runCreateChat,
+  runDeleteChat,
+} from "./actions";
 
 export const selectedUserId = ref<string | number>("");
 
@@ -462,62 +469,64 @@ function createUserData() {
 
   // FOLLOW USERS
   async function followUser(userId: string | number) {
-    await api.post(`/follow/${userId}`);
-    suggestedUsers.value = suggestedUsers.value.filter(
-      (user) => !idEquals(user.id, userId),
-    );
-    followersUsers.value = followersUsers.value.filter(
-      (user) => !idEquals(user.id, userId),
-    );
-
     try {
-      if (idEquals(userProfile.value.id, userId)) {
-        userProfile.value.isFollowedByMe = true;
-        userProfile.value.followersCount =
-          (userProfile.value.followersCount ?? 0) + 1;
-      }
-    } catch (e) {
-      // ignore local update errors
+      await runFollowMutation({
+        state: {
+          suggestedUsers,
+          followersUsers,
+          followingUsers,
+          userProfile,
+          notifications,
+          selectedUserId,
+        },
+        userId,
+        nextIsFollowed: true,
+        onRequest: async (currentUserId) => {
+          await api.post(`/follow/${currentUserId}`);
+        },
+        onFeedback: consoleMutationFeedback,
+      });
+    } catch (error) {
+      throw error;
     }
   }
   async function unfollowUser(userId: string | number) {
-    await api.delete(`/follow/${userId}`);
-    followingUsers.value = followingUsers.value.filter(
-      (user) => !idEquals(user.id, userId),
-    );
-
     try {
-      if (idEquals(userProfile.value.id, userId)) {
-        userProfile.value.isFollowedByMe = false;
-        userProfile.value.followersCount = Math.max(
-          0,
-          (userProfile.value.followersCount ?? 0) - 1,
-        );
-      }
-    } catch (e) {
-      // ignore local update errors
-    }
-
-    selectedUserId.value = 0;
-  }
-  function updateNotificationFollowStatus(
-    notificationId: string | number,
-    isFollowed: boolean,
-  ) {
-    const notification = notifications.value.find(
-      (ntf) => ntf.id === notificationId,
-    );
-    if (notification) {
-      notification.isFollowedByMe = isFollowed;
+      await runFollowMutation({
+        state: {
+          suggestedUsers,
+          followersUsers,
+          followingUsers,
+          userProfile,
+          notifications,
+          selectedUserId,
+        },
+        userId,
+        nextIsFollowed: false,
+        onRequest: async (currentUserId) => {
+          await api.delete(`/follow/${currentUserId}`);
+        },
+        onFeedback: consoleMutationFeedback,
+      });
+      selectedUserId.value = 0;
+    } catch (error) {
+      throw error;
     }
   }
 
   // SEARCH USERS
   const queryUsers = ref("");
   const searchUsersResults = ref<SearchUser[]>([]);
+  let latestSearchUsersRequestId = 0;
   async function searchUsers() {
     try {
+      const requestId = ++latestSearchUsersRequestId;
       const response = await api.get(`/users/search?query=${queryUsers.value}`);
+
+      if (requestId !== latestSearchUsersRequestId) {
+        return;
+      }
+
       searchUsersResults.value = response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -587,13 +596,43 @@ function createUserData() {
   const chatMessages = ref<ChatMessage[]>([]);
   const userChatId = ref<string | number>("");
   const displayUserInfo = ref<boolean>(false);
+  function resetChatState() {
+    chatMessages.value = [];
+    chatUserInfo.value = {
+      id: "",
+      name: "",
+      username: "",
+      avatarUrl: "",
+      createdAt: "",
+    };
+    userChatId.value = "";
+    displayUserInfo.value = false;
+  }
   async function selectChat(chatId: string | number) {
     try {
-      selectedChat.value = chatId;
-      if (!chatId) {
+      if (!isPresentId(chatId)) {
         console.error("No chat ID provided");
         return;
       }
+
+      selectedChat.value = chatId;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
+    }
+  }
+  function getUserInfo() {
+    displayUserInfo.value = !displayUserInfo.value;
+  }
+
+  // LOAD MESSAGES + GROUP THEM BY DATE
+  async function loadChatMessages(chatId: string | number) {
+    try {
       const response = await api.get(`/chats/${chatId}/messages`);
       chatMessages.value = response.data.message || [];
       chatUserInfo.value = response.data.receiver;
@@ -608,9 +647,6 @@ function createUserData() {
 
       throw error;
     }
-  }
-  function getUserInfo() {
-    displayUserInfo.value = !displayUserInfo.value;
   }
   const groupMessagesByDate = computed(() => {
     const groups: Record<string, ChatMessage[]> = {};
@@ -641,13 +677,28 @@ function createUserData() {
       // PREVENT SENDING EMPTY MESSAGES
       if (!message.value.trim()) return;
 
-      await api.post(`/chats/${chatId}/new`, {
-        content: message.value.trim(),
-      });
-      message.value = "";
+      const currentUser = authStore.user as { id?: string | number; userId?: string | number } | null;
+      const senderId = currentUser?.id ?? currentUser?.userId ?? "";
 
-      // RELOAD MESSAGES AFTER SENDING
-      await selectChat(chatId);
+      const optimisticMsg: ChatMessage = {
+        id: `temp-${Date.now()}` as any,
+        content: message.value.trim(),
+        createdAt: new Date().toISOString(),
+        chatId: chatId,
+        senderId: senderId,
+      } as ChatMessage;
+
+      await runSendMessage({
+        messages: chatMessages,
+        message: optimisticMsg,
+        onRequest: async (cId, content) => {
+          const response = await api.post(`/chats/${cId}/new`, { content });
+          return response.data as ChatMessage;
+        },
+        onFeedback: consoleMutationFeedback,
+      });
+
+      message.value = "";
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -679,21 +730,30 @@ function createUserData() {
         return;
       }
 
-      const response = await api.post("/chats/new", { userId });
-      const newChatId = response.data.id;
-      if (newChatId) {
-        userChats.value.push({
-          id: response.data.id,
-          createdAt: response.data.createdAt,
-          receiver: {
-            id: response.data.receiver.id,
-            name: response.data.receiver.name,
-            username: response.data.receiver.username,
-            avatarUrl: response.data.receiver.avatarUrl,
-          },
-        });
-      }
-      await selectChat(newChatId);
+      // optimistic chat object
+      const optimisticChat: UserChat = {
+        id: `temp-${Date.now()}` as any,
+        createdAt: new Date().toISOString(),
+        receiver: {
+          id: userId,
+          name: "",
+          username: "",
+          avatarUrl: "",
+        },
+      } as UserChat;
+
+      const serverChat = await runCreateChat({
+        chats: userChats,
+        chat: optimisticChat,
+        onRequest: async (uId) => {
+          const response = await api.post("/chats/new", { userId: uId });
+          return response.data as UserChat;
+        },
+        onFeedback: consoleMutationFeedback,
+      });
+
+      const newChatId = serverChat?.id;
+      if (newChatId) await selectChat(newChatId);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -708,10 +768,17 @@ function createUserData() {
   // DELETE A USER CHAT
   async function deleteChat(chatId: string | number) {
     try {
-      await api.delete(`/chats/${chatId}`);
+      await runDeleteChat({
+        chats: userChats,
+        chatId,
+        onRequest: async (cId) => {
+          await api.delete(`/chats/${cId}`);
+        },
+        onFeedback: consoleMutationFeedback,
+      });
+
       selectedChat.value = "";
-      chatMessages.value = [];
-      userChatId.value = "";
+      resetChatState();
       await loadUserChats();
       await loadSuggestedUsers("following");
     } catch (error) {
@@ -831,6 +898,7 @@ function createUserData() {
     filteredSuggestedUsers,
     selectChat,
     getUserInfo,
+    loadChatMessages,
     groupMessagesByDate,
     dateConverter,
     getUserRoute,
@@ -839,7 +907,6 @@ function createUserData() {
     sendMessage,
     createChat,
     deleteChat,
-    updateNotificationFollowStatus,
   };
 }
 

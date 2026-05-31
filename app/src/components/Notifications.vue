@@ -3,7 +3,9 @@
 import { onMounted } from "vue";
 
 // COMPONENTS
-import SpriteIcon from "./SpriteIcon.vue";
+import LoadingState from "./states/LoadingState.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
 
 // STYLES
 import "../styles/buttons.css";
@@ -19,6 +21,8 @@ import { useUserData } from "../shared/userData";
 const {
   // VARIABLES
   notifications,
+  loadingNotifications,
+  notificationsError,
 
   // FUNCTIONS
   dateConverter,
@@ -53,58 +57,64 @@ onMounted(async () => {
     <div class="notif-head">
       <h2>Notifications</h2>
     </div>
-    <div
-      class="notif-base"
-      v-if="notifications.length > 0"
-      v-for="ntf in notifications"
-      :key="ntf.id"
-    >
-      <div class="notif-box">
-        <AvatarIcon />
-        <div>
-          <div class="notif-message">
-            <span>
-              <RouterLink
-                v-if="ntf.fromUser?.username"
-                :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
-                @click="selectedUser(ntf.fromUser?.id)"
-              >
-                {{ ntf.fromUser?.name }}
-              </RouterLink>
-              {{ ntf.content }}
-            </span>
-          </div>
-          <div class="notif-message">
-            <span>{{ dateConverter(ntf.createdAt) }}</span>
+    <LoadingState
+      v-if="loadingNotifications"
+      title="Loading notifications"
+      message="Fetching your latest activity."
+    />
+    <ErrorState
+      v-else-if="notificationsError"
+      :message="notificationsError"
+      @retry="loadNotifications"
+    />
+    <template v-else-if="notifications.length > 0">
+      <div
+        class="notif-base"
+        v-for="ntf in notifications"
+        :key="ntf.id"
+      >
+        <div class="notif-box">
+          <AvatarIcon />
+          <div>
+            <div class="notif-message">
+              <span>
+                <RouterLink
+                  v-if="ntf.fromUser?.username"
+                  :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
+                  @click="selectedUser(ntf.fromUser?.id)"
+                >
+                  {{ ntf.fromUser?.name }}
+                </RouterLink>
+                {{ ntf.content }}
+              </span>
+            </div>
+            <div class="notif-message">
+              <span>{{ dateConverter(ntf.createdAt) }}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="notif-box">
-        <div
-          class="notif-follow"
-          v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
-        >
-          <button
-            type="button"
-            :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
-            @click="handleNotificationFollow(ntf)"
+        <div class="notif-box">
+          <div
+            class="notif-follow"
+            v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
           >
-            {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
-          </button>
+            <button
+              type="button"
+              :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
+              @click="handleNotificationFollow(ntf)"
+            >
+              {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="notif-empty" v-else>
-      <div class="dash-empty-suggestions">
-        <SpriteIcon
-          name="bell"
-          size="42"
-          color="#535353"
-          title="Notifications"
-        />
-        <h2>No notifications yet</h2>
-      </div>
-    </div>
+    </template>
+    <EmptyState
+      v-else
+      title="No notifications yet"
+      message="Activity from the people you follow will appear here."
+      icon="bell"
+    />
   </div>
 </template>
 

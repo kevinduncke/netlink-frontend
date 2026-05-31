@@ -7,6 +7,10 @@ import Navigation from "./Navigation.vue";
 import Notifications from "./Notifications.vue";
 import Post from "./Post.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
+import SkeletonUserRow from "./states/SkeletonUserRow.vue";
+import SkeletonPost from "./states/SkeletonPost.vue";
 
 // ICONS
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
@@ -27,7 +31,13 @@ import { usePosts } from "../shared/usePosts";
 const {
   // VARIABLES
   favoriteUsers,
+  loadingFavoriteUsers,
+  favoriteUsersError,
   suggestedUsers,
+  loadingSearchFavoriteUsers,
+  searchFavoriteUsersError,
+  loadingSuggestedUsers,
+  suggestedUsersError,
   favSearchQuery,
   favStateEdit,
   selectedUserId,
@@ -43,7 +53,26 @@ const {
 } = useUserData();
 
 // POST FUNCTIONS
-const { loadPosts } = usePosts();
+const { userdata, loadingPosts, postsError, loadPosts } = usePosts();
+
+async function refreshDashboardFavorites() {
+  if (favStateEdit.value && favSearchQuery.value.trim()) {
+    await searchFavoriteUsers(favSearchQuery.value);
+    return;
+  }
+
+  await loadFavoriteUsers();
+  await loadSuggestedUsers("favorites");
+}
+
+async function refreshDashboardFeed() {
+  if (selectedUserId.value) {
+    await loadPosts(`user/${selectedUserId.value}`);
+    return;
+  }
+
+  await loadPosts("following");
+}
 
 watch(favSearchQuery, (newQuery) => {
   if (newQuery.trim() === "") {
@@ -89,12 +118,18 @@ onMounted(async () => {
           </button>
         </div>
         <div class="fav-user-list" v-if="!favStateEdit">
+          <SkeletonUserRow v-if="loadingFavoriteUsers" :count="4" />
+          <ErrorState
+            v-else-if="favoriteUsersError"
+            :message="favoriteUsersError"
+            @retry="refreshDashboardFavorites"
+          />
           <div
+            v-else-if="favoriteUsers.length > 0"
             class="bar-user-box"
             :class="{ selected: selectedUserId === user.id }"
             v-for="user in favoriteUsers"
             :key="user.id"
-            v-if="favoriteUsers.length > 0"
           >
             <button class="button" type="button" @click="selectedUser(user.id)">
               <div class="bar-user-info">
@@ -106,15 +141,12 @@ onMounted(async () => {
               </div>
             </button>
           </div>
-          <div class="dash-empty-suggestions" v-else>
-            <SpriteIcon
-              name="connections"
-              size="42"
-              color="#535353"
-              title="Connections"
-            />
-            <h2>Choose your favorite users</h2>
-          </div>
+          <EmptyState
+            v-else
+            title="No favorites yet"
+            message="Choose your favorite users to keep them here."
+            icon="connections"
+          />
         </div>
         <div class="dash-fav-edit" v-else>
           <div class="fav-edit-search">
@@ -132,50 +164,69 @@ onMounted(async () => {
               title="Search"
             />
           </div>
-          <div class="fav-edit-favorites" v-if="favoriteUsers.length > 0">
-            <div class="fav-edit-listhead">
-              <p>Users</p>
-              <button
-                class="button"
-                type="button"
-                @click="removeAllFavoriteUsers()"
-              >
-                Remove all
-              </button>
-            </div>
-            <div class="fav-edit-users">
-              <div
-                class="fav-user"
-                v-for="user in favoriteUsers"
-                :key="user.id"
-              >
-                <div class="fav-user-data">
-                  <div class="fav-user-icon">
-                    <AvatarIcon />
-                  </div>
-                  <div class="fav-user-names">
-                    <p>{{ user.name }}</p>
-                    <p>@{{ user.username }}</p>
-                  </div>
-                </div>
+          <div class="fav-edit-favorites">
+            <SkeletonUserRow v-if="loadingSearchFavoriteUsers" :count="4" />
+            <ErrorState
+              v-else-if="searchFavoriteUsersError"
+              :message="searchFavoriteUsersError"
+              @retry="refreshDashboardFavorites"
+            />
+            <template v-else-if="favoriteUsers.length > 0">
+              <div class="fav-edit-listhead">
+                <p>Users</p>
                 <button
                   class="button"
                   type="button"
-                  @click="deleteFavoriteUser(user.id)"
+                  @click="removeAllFavoriteUsers()"
                 >
-                  Remove
+                  Remove all
                 </button>
               </div>
-            </div>
+              <div class="fav-edit-users">
+                <div
+                  class="fav-user"
+                  v-for="user in favoriteUsers"
+                  :key="user.id"
+                >
+                  <div class="fav-user-data">
+                    <div class="fav-user-icon">
+                      <AvatarIcon />
+                    </div>
+                    <div class="fav-user-names">
+                      <p>{{ user.name }}</p>
+                      <p>@{{ user.username }}</p>
+                    </div>
+                  </div>
+                  <button
+                    class="button"
+                    type="button"
+                    @click="deleteFavoriteUser(user.id)"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </template>
+            <EmptyState
+              v-else
+              title="No favorites yet"
+              message="Add users here to manage your favorites."
+              icon="connections"
+            />
           </div>
           <div class="fav-add-suggestions">
             <p>Suggestions</p>
-            <div class="fav-add-users">
+            <SkeletonUserRow v-if="loadingSuggestedUsers" :count="4" />
+            <ErrorState
+              v-else-if="suggestedUsersError"
+              :message="suggestedUsersError"
+              @retry="loadSuggestedUsers('favorites')"
+            />
+            <div class="fav-add-users" v-else-if="suggestedUsers.length > 0">
               <div
                 class="fav-user"
                 v-for="user in suggestedUsers"
                 :key="user.id"
-                v-if="suggestedUsers.length > 0"
               >
                 <div class="fav-user-data">
                   <div class="fav-user-icon">
@@ -194,16 +245,13 @@ onMounted(async () => {
                   Add
                 </button>
               </div>
-              <div class="dash-empty-suggestions" v-else>
-                <SpriteIcon
-                  name="connections"
-                  size="42"
-                  color="#535353"
-                  title="Connections"
-                />
-                <h2>Follow a user to add them to your favorites</h2>
-              </div>
             </div>
+            <EmptyState
+              v-else
+              title="No suggestions available"
+              message="Follow more users to expand your favorites list."
+              icon="connections"
+            />
           </div>
         </div>
       </div>
@@ -212,7 +260,19 @@ onMounted(async () => {
     <div class="dash-content">
       <div class="dash-lposts">
         <h2>Lastest Posts</h2>
-        <Post />
+        <SkeletonPost v-if="loadingPosts" />
+        <ErrorState
+          v-else-if="postsError"
+          :message="postsError"
+          @retry="refreshDashboardFeed"
+        />
+        <Post v-else-if="userdata.length > 0" />
+        <EmptyState
+          v-else
+          title="No posts yet"
+          message="There is nothing to show in this feed right now."
+          icon="dashboard"
+        />
       </div>
     </div>
   </div>

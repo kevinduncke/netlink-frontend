@@ -7,7 +7,10 @@ import { onBeforeRouteLeave } from "vue-router";
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
-import SpriteIcon from "./SpriteIcon.vue";
+import LoadingState from "./states/LoadingState.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
+import SkeletonPost from "./states/SkeletonPost.vue";
 
 // STYLES
 import "../styles/app-layout.css";
@@ -27,6 +30,8 @@ const {
   editingProfile,
   hasUnsavedChanges,
   selectedUserId,
+  loadingMyProfile,
+  myProfileError,
 
   // FUNCTIONS
   loadMyProfile,
@@ -38,7 +43,11 @@ const {
   updateUnsavedProfileChanges,
 } = useUserData();
 
-const { userdata, loadPosts } = usePosts();
+const { userdata, loadingPosts, postsError, loadPosts } = usePosts();
+
+async function refreshAccountPosts() {
+  await loadPosts("my-posts");
+}
 
 onMounted(async () => {
   selectedUserId.value = "";
@@ -81,6 +90,17 @@ onBeforeRouteLeave(() => {
     <div class="dash-sidepanel">
       <div class="profile-edit">
         <h2>Edit Profile</h2>
+        <LoadingState
+          v-if="loadingMyProfile"
+          title="Loading profile"
+          message="Fetching your account details."
+        />
+        <ErrorState
+          v-else-if="myProfileError"
+          :message="myProfileError"
+          @retry="loadMyProfile"
+        />
+        <div v-else>
         <div class="profile-box body-box shadow-light">
           <div class="profile-boxinput">
             <label>Name</label>
@@ -233,25 +253,39 @@ onBeforeRouteLeave(() => {
           Delete
         </button>
       </div>
+        </div>
     </div>
     <div class="dash-content">
       <div class="profile-content">
         <h2>Profile</h2>
+        <LoadingState
+          v-if="loadingMyProfile"
+          title="Loading profile"
+          message="Preparing your public profile."
+        />
+        <ErrorState
+          v-else-if="myProfileError"
+          :message="myProfileError"
+          @retry="loadMyProfile"
+        />
+        <Profile v-else />
       </div>
-      <Profile />
       <div class="profile-posts">
         <h2>My Posts</h2>
       </div>
-      <Post v-if="userdata.length > 0" />
-      <div class="dash-empty-myPosts" style="height: max-content" v-else>
-        <SpriteIcon
-          name="create"
-          size="64"
-          color="#535353"
-          title="Create Post"
-        />
-        <h2>No posts yet</h2>
-      </div>
+      <SkeletonPost v-if="loadingPosts" />
+      <ErrorState
+        v-else-if="postsError"
+        :message="postsError"
+        @retry="refreshAccountPosts"
+      />
+      <Post v-else-if="userdata.length > 0" />
+      <EmptyState
+        v-else
+        title="No posts yet"
+        message="Create your first post to show it here."
+        icon="create"
+      />
     </div>
   </div>
 </template>

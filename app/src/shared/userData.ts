@@ -44,11 +44,18 @@ function createUserData() {
 
   // LOAD FAVORITE USERS
   const favoriteUsers = ref<FollowUser[]>([]);
+  const loadingFavoriteUsers = ref(false);
+  const favoriteUsersError = ref("");
   async function loadFavoriteUsers() {
+    loadingFavoriteUsers.value = true;
+    favoriteUsersError.value = "";
+
     try {
       const response = await api.get("/favorites");
       favoriteUsers.value = response.data.users;
     } catch (error) {
+      favoriteUsersError.value = "Failed to load favorite users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -56,12 +63,19 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingFavoriteUsers.value = false;
     }
   }
 
   // SEARCH FAVORITE USERS
   const favSearchQuery = ref<string>("");
+  const loadingSearchFavoriteUsers = ref(false);
+  const searchFavoriteUsersError = ref("");
   async function searchFavoriteUsers(query: string) {
+    loadingSearchFavoriteUsers.value = true;
+    searchFavoriteUsersError.value = "";
+
     try {
       const response = await api.get("/favorites/search", {
         params: { q: query },
@@ -71,6 +85,8 @@ function createUserData() {
       favoriteUsers.value = users.filter((u) => u.isFavorite);
       suggestedUsers.value = users.filter((u) => !u.isFavorite);
     } catch (error) {
+      searchFavoriteUsersError.value = "Failed to search favorite users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -78,6 +94,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingSearchFavoriteUsers.value = false;
     }
   }
 
@@ -150,11 +168,18 @@ function createUserData() {
 
   // NOTIFICATIONS
   const notifications = ref<Notification[]>([]);
+  const loadingNotifications = ref(false);
+  const notificationsError = ref("");
   async function loadNotifications() {
+    loadingNotifications.value = true;
+    notificationsError.value = "";
+
     try {
       const response = await api.get("/users/notifications");
       notifications.value = response.data || [];
     } catch (error) {
+      notificationsError.value = "Failed to load notifications.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -167,6 +192,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingNotifications.value = false;
     }
   }
 
@@ -174,7 +201,12 @@ function createUserData() {
 
   // SUGGESTED USERS
   const suggestedUsers = ref<FollowUser[]>([]);
+  const loadingSuggestedUsers = ref(false);
+  const suggestedUsersError = ref("");
   async function loadSuggestedUsers(route: string) {
+    loadingSuggestedUsers.value = true;
+    suggestedUsersError.value = "";
+
     try {
       let response = [] as any;
       if (route === "favorites") {
@@ -188,6 +220,8 @@ function createUserData() {
         suggestedUsers.value = response.data || [];
       }
     } catch (error) {
+      suggestedUsersError.value = "Failed to load suggested users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -195,6 +229,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingSuggestedUsers.value = false;
     }
   }
 
@@ -205,7 +241,13 @@ function createUserData() {
 
   // LOAD FOLLOWING USERS
   const followingUsers = ref<FollowUser[]>([]);
+  const loadingFollowingUsers = ref(false);
+  const followingUsersError = ref("");
+
   async function loadFollowingUsers() {
+    loadingFollowingUsers.value = true;
+    followingUsersError.value = "";
+
     try {
       const response = await api.get("/follow/following");
       followingUsers.value = response.data;
@@ -215,6 +257,8 @@ function createUserData() {
         selectedUserId.value = firstFollowingUser.id;
       }
     } catch (error) {
+      followingUsersError.value = "Failed to load following users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -222,12 +266,20 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingFollowingUsers.value = false;
     }
   }
 
   // LOAD FOLLOWERS USERS
   const followersUsers = ref<Followers[]>([]);
+  const loadingFollowersUsers = ref(false);
+  const followersUsersError = ref("");
+
   async function loadFollowersUsers() {
+    loadingFollowersUsers.value = true;
+    followersUsersError.value = "";
+
     try {
       followsFilter.value = "followers";
       const response = await api.get("/follow/followers");
@@ -239,6 +291,8 @@ function createUserData() {
         selectedUserId.value = firstFollowerUser.id;
       }
     } catch (error) {
+      followersUsersError.value = "Failed to load followers users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -246,6 +300,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingFollowersUsers.value = false;
     }
   }
 
@@ -293,11 +349,19 @@ function createUserData() {
       isFollowedByMe: false,
     };
   }
+  const loadingUserProfile = ref(false);
+  const userProfileError = ref("");
+
   async function loadUserProfile(userId: string | number) {
+    loadingUserProfile.value = true;
+    userProfileError.value = "";
+
     try {
       const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
     } catch (error) {
+      userProfileError.value = "Failed to load user profile.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -305,17 +369,27 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingUserProfile.value = false;
     }
   }
 
   // LOAD LOGGED USER PROFILE
   const originalProfile = ref({} as UserProfile);
+  const loadingMyProfile = ref(false);
+  const myProfileError = ref("");
+
   async function loadMyProfile() {
+    loadingMyProfile.value = true;
+    myProfileError.value = "";
+
     try {
       const response = await api.get("/users/me");
       originalProfile.value = structuredClone(response.data);
       userProfile.value = response.data;
     } catch (error) {
+      myProfileError.value = "Failed to load your profile.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -323,6 +397,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingMyProfile.value = false;
     }
   }
 
@@ -428,7 +504,13 @@ function createUserData() {
     toDate: "",
   });
   let latestSearchRequestId = 0;
+  const loadingSearchPosts = ref(false);
+  const searchPostsError = ref("");
+
   async function searchPost(filters = searchFilters) {
+    loadingSearchPosts.value = true;
+    searchPostsError.value = "";
+
     try {
       const requestId = ++latestSearchRequestId;
       const hasActiveFilters =
@@ -456,7 +538,10 @@ function createUserData() {
       }
       userdata.value = response.data || [];
     } catch (error) {
+      searchPostsError.value = "Failed to search posts.";
       console.error("Error searching posts: ", error);
+    } finally {
+      loadingSearchPosts.value = false;
     }
   }
   function resetFilters() {
@@ -518,7 +603,13 @@ function createUserData() {
   const queryUsers = ref("");
   const searchUsersResults = ref<SearchUser[]>([]);
   let latestSearchUsersRequestId = 0;
+  const loadingSearchUsers = ref(false);
+  const searchUsersError = ref("");
+
   async function searchUsers() {
+    loadingSearchUsers.value = true;
+    searchUsersError.value = "";
+
     try {
       const requestId = ++latestSearchUsersRequestId;
       const response = await api.get(`/users/search?query=${queryUsers.value}`);
@@ -529,6 +620,8 @@ function createUserData() {
 
       searchUsersResults.value = response.data;
     } catch (error) {
+      searchUsersError.value = "Failed to search users.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -536,6 +629,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingSearchUsers.value = false;
     }
   }
   function verifyNewChatSearch(userId: string | number) {
@@ -559,7 +654,13 @@ function createUserData() {
 
   // LOAD USER CHATS
   const userChats = ref<UserChat[]>([]);
+  const loadingUserChats = ref(false);
+  const userChatsError = ref("");
+
   async function loadUserChats() {
+    loadingUserChats.value = true;
+    userChatsError.value = "";
+
     try {
       const response = await api.get("/chats");
       userChats.value = response.data || [];
@@ -568,6 +669,8 @@ function createUserData() {
       chatMessages.value = [];
       userChatId.value = "";
     } catch (error) {
+      userChatsError.value = "Failed to load your chats.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -575,6 +678,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingUserChats.value = false;
     }
   }
   const filteredSuggestedUsers = computed(() =>
@@ -594,6 +699,8 @@ function createUserData() {
     createdAt: "",
   });
   const chatMessages = ref<ChatMessage[]>([]);
+  const loadingChatMessages = ref(false);
+  const chatMessagesError = ref("");
   const userChatId = ref<string | number>("");
   const displayUserInfo = ref<boolean>(false);
   function resetChatState() {
@@ -632,6 +739,9 @@ function createUserData() {
 
   // LOAD MESSAGES + GROUP THEM BY DATE
   async function loadChatMessages(chatId: string | number) {
+    loadingChatMessages.value = true;
+    chatMessagesError.value = "";
+
     try {
       const response = await api.get(`/chats/${chatId}/messages`);
       chatMessages.value = response.data.message || [];
@@ -639,6 +749,8 @@ function createUserData() {
       userChatId.value = chatId;
       displayUserInfo.value = false;
     } catch (error) {
+      chatMessagesError.value = "Failed to load chat messages.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -646,6 +758,8 @@ function createUserData() {
       }
 
       throw error;
+    } finally {
+      loadingChatMessages.value = false;
     }
   }
   const groupMessagesByDate = computed(() => {
@@ -677,7 +791,10 @@ function createUserData() {
       // PREVENT SENDING EMPTY MESSAGES
       if (!message.value.trim()) return;
 
-      const currentUser = authStore.user as { id?: string | number; userId?: string | number } | null;
+      const currentUser = authStore.user as {
+        id?: string | number;
+        userId?: string | number;
+      } | null;
       const senderId = currentUser?.id ?? currentUser?.userId ?? "";
 
       const optimisticMsg: ChatMessage = {
@@ -792,6 +909,18 @@ function createUserData() {
     }
   }
 
+  // LOAD SELECTED USER PROFILE + POSTS
+  async function loadSelectedUser(userId: string | number) {
+    if (!isPresentId(userId)) {
+      router.push("/dashboard");
+      return;
+    }
+
+    resetUserProfile();
+    await loadUserProfile(userId);
+    await loadPosts(`user/${userId}`);
+  }
+
   //================================================
 
   // HELPER FUNCTIONS
@@ -807,16 +936,6 @@ function createUserData() {
     }
     selectedUserId.value = userId;
     editingComment.openCommentPostId = null;
-  }
-  async function loadSelectedUser(userId: string | number) {
-    if (!isPresentId(userId)) {
-      router.push("/dashboard");
-      return;
-    }
-
-    resetUserProfile();
-    await loadUserProfile(userId);
-    await loadPosts(`user/${userId}`);
   }
   function toUtcStartOfDay(date: string): string {
     return date ? `${date}T00:00:00.000Z` : "";
@@ -846,25 +965,49 @@ function createUserData() {
   return {
     // VARIABLES
     favoriteUsers,
+    loadingFavoriteUsers,
+    favoriteUsersError,
     suggestedUsers,
+    loadingSearchFavoriteUsers,
+    searchFavoriteUsersError,
+    loadingSuggestedUsers,
+    suggestedUsersError,
     favSearchQuery,
     favStateEdit,
     notifications,
+    loadingNotifications,
+    notificationsError,
     selectedUserId,
     followsFilter,
     followingUsers,
+    loadingFollowingUsers,
+    followingUsersError,
     followersUsers,
+    loadingFollowersUsers,
+    followersUsersError,
     userProfile,
+    loadingUserProfile,
+    userProfileError,
     originalProfile,
+    loadingMyProfile,
+    myProfileError,
     editingProfile,
     hasUnsavedChanges,
     searchFilters,
+    loadingSearchPosts,
+    searchPostsError,
     queryUsers,
+    loadingSearchUsers,
+    searchUsersError,
     searchUsersResults,
     userChats,
+    loadingUserChats,
+    userChatsError,
     selectedChat,
     chatUserInfo,
     chatMessages,
+    loadingChatMessages,
+    chatMessagesError,
     userChatId,
     displayUserInfo,
     message,

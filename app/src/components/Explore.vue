@@ -1,11 +1,15 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, onBeforeUnmount, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, watch } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+import SkeletonUserRow from "./states/SkeletonUserRow.vue";
+import SkeletonPost from "./states/SkeletonPost.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
 
 // ICONS
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
@@ -26,7 +30,11 @@ import { useUserData } from "../shared/userData";
 const {
   // VARIABLES
   suggestedUsers,
+  loadingSuggestedUsers,
+  suggestedUsersError,
   searchFilters,
+  loadingSearchPosts,
+  searchPostsError,
 
   // FUNCTIONS
   loadSuggestedUsers,
@@ -40,10 +48,39 @@ const {
 // POSTS
 const {
   userdata,
+  loadingPosts,
+  postsError,
 
   // FUNCTIONS
   loadPosts,
 } = usePosts();
+
+const hasActiveSearch = computed(() => {
+  return (
+    searchFilters.query.trim() !== "" ||
+    searchFilters.people !== "anyone" ||
+    searchFilters.shared !== "all" ||
+    searchFilters.fromDate !== "" ||
+    searchFilters.toDate !== ""
+  );
+});
+
+const currentPostsError = computed(() =>
+  hasActiveSearch.value ? searchPostsError.value : postsError.value,
+);
+
+async function refreshExplorePosts() {
+  if (hasActiveSearch.value) {
+    await searchPost();
+    return;
+  }
+
+  await loadPosts("all");
+}
+
+async function refreshSuggestedUsers() {
+  await loadSuggestedUsers("users");
+}
 
 onMounted(async () => {
   await loadSuggestedUsers("users");
@@ -220,9 +257,15 @@ onBeforeUnmount(() => {
       </div>
       <div class="bar-new-follows">
         <h2>Who to follow</h2>
+        <SkeletonUserRow v-if="loadingSuggestedUsers" :count="4" />
+        <ErrorState
+          v-else-if="suggestedUsersError"
+          :message="suggestedUsersError"
+          @retry="refreshSuggestedUsers"
+        />
         <div
+          v-else-if="suggestedUsers.length > 0"
           class="main-follow-box"
-          v-if="suggestedUsers.length > 0"
           v-for="user in suggestedUsers"
           :key="user.id || 'ID_NOT_FOUND'"
         >
@@ -246,24 +289,36 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </div>
-        <div v-else class="bar-no-users">
-          <p>No user suggestions available.</p>
-        </div>
+        <EmptyState
+          v-else
+          title="No suggestions available"
+          message="Follow a few people to improve your recommendations."
+          icon="connections"
+        />
       </div>
     </div>
     <div class="dash-content">
       <div class="explore-content">
         <h2>Explore</h2>
-        <Post v-if="userdata.length > 0" />
-        <div class="dash-empty-suggestions" v-else>
-          <SpriteIcon
-            name="connections"
-            size="42"
-            color="#535353"
-            title="Connections"
-          />
-          <h2>Follow a user to see their posts</h2>
-        </div>
+        <SkeletonPost v-if="loadingPosts || loadingSearchPosts" />
+        <ErrorState
+          v-else-if="currentPostsError"
+          :message="currentPostsError"
+          @retry="refreshExplorePosts"
+        />
+        <Post v-else-if="userdata.length > 0" />
+        <EmptyState
+          v-else-if="hasActiveSearch"
+          title="No results found"
+          message="Try a different search or loosen the filters."
+          icon="search"
+        />
+        <EmptyState
+          v-else
+          title="No posts yet"
+          message="Follow a user to see their posts."
+          icon="connections"
+        />
       </div>
     </div>
   </div>

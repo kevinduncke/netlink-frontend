@@ -52,7 +52,7 @@ const {
 </script>
 
 <template>
-  <div v-for="post in userdata" :key="post.id" class="dash-post">
+  <div v-for="post in userdata" :key="post.id" class="dash-post shadow-light">
     <div class="dash-user-post">
       <div class="dash-username">
         <AvatarIcon />

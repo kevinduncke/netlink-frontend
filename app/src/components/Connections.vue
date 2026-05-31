@@ -7,7 +7,11 @@ import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
-import SpriteIcon from "./SpriteIcon.vue";
+import SkeletonUserRow from "./states/SkeletonUserRow.vue";
+import SkeletonPost from "./states/SkeletonPost.vue";
+import LoadingState from "./states/LoadingState.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
 
 // STYLES
 import "../styles/profile.css";
@@ -30,6 +34,12 @@ const {
   followsFilter,
   followingUsers,
   followersUsers,
+  loadingFollowingUsers,
+  followingUsersError,
+  loadingFollowersUsers,
+  followersUsersError,
+  loadingUserProfile,
+  userProfileError,
 
   // FUNCTIONS
   selectedUser,
@@ -41,7 +51,16 @@ const {
 } = useUserData();
 
 // POST FUNCTIONS
-const { loadPosts } = usePosts();
+const { userdata, loadingPosts, postsError, loadPosts } = usePosts();
+
+async function refreshSelectedConnection() {
+  if (!selectedUserId.value) {
+    return;
+  }
+
+  await loadUserProfile(selectedUserId.value);
+  await loadPosts(`user/${selectedUserId.value}`);
+}
 onMounted(async () => {
   selectedUserId.value = "";
   await loadFollowingUsers();
@@ -79,7 +98,14 @@ watch(selectedUserId, async (newUserId) => {
       </div>
       <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
         <div class="following-panel" v-if="followsFilter === 'following'">
+          <SkeletonUserRow v-if="loadingFollowingUsers" :count="4" />
+          <ErrorState
+            v-else-if="followingUsersError"
+            :message="followingUsersError"
+            @retry="loadFollowingUsers"
+          />
           <div
+            v-else-if="followingUsers.length > 0"
             class="main-follow-box"
             :class="{ selected: selectedUserId === user.id }"
             v-for="user in followingUsers"
@@ -104,9 +130,22 @@ watch(selectedUserId, async (newUserId) => {
               </div>
             </div>
           </div>
+          <EmptyState
+            v-else
+            title="No following users"
+            message="Follow someone to see them here."
+            icon="connections"
+          />
         </div>
         <div class="followers-panel" v-else>
+          <SkeletonUserRow v-if="loadingFollowersUsers" :count="4" />
+          <ErrorState
+            v-else-if="followersUsersError"
+            :message="followersUsersError"
+            @retry="loadFollowersUsers"
+          />
           <div
+            v-else-if="followersUsers.length > 0"
             class="main-follow-box"
             :class="{ selected: selectedUserId === user.id }"
             v-for="user in followersUsers"
@@ -135,45 +174,63 @@ watch(selectedUserId, async (newUserId) => {
               </div>
             </div>
           </div>
+          <EmptyState
+            v-else
+            title="No followers yet"
+            message="Your audience will appear here once people follow you."
+            icon="connections"
+          />
         </div>
       </div>
-      <div
-        class="dash-empty-suggestions"
-        style="height: auto; padding: 5rem 0"
+      <EmptyState
         v-else
-      >
-        <SpriteIcon
-          name="connections"
-          size="48"
-          color="#535353"
-          title="Connections"
-        />
-        <h2>No suggestions available</h2>
-      </div>
+        title="No connections yet"
+        message="Follow people or wait for them to follow you."
+        icon="connections"
+      />
     </div>
     <div class="dash-content">
       <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
         <div class="dash-profile">
           <h2>Profile</h2>
-          <Profile />
+          <LoadingState
+            v-if="loadingUserProfile"
+            title="Loading profile"
+            message="Fetching the selected account."
+          />
+          <ErrorState
+            v-else-if="userProfileError"
+            :message="userProfileError"
+            @retry="refreshSelectedConnection"
+          />
+          <Profile v-else />
         </div>
         <div
           class="dash-posts"
           v-if="followingUsers.length > 0 || followersUsers.length > 0"
         >
           <h2>Posts</h2>
-          <Post />
+          <SkeletonPost v-if="loadingPosts" />
+          <ErrorState
+            v-else-if="postsError"
+            :message="postsError"
+            @retry="refreshSelectedConnection"
+          />
+          <Post v-else-if="userdata.length > 0" />
+          <EmptyState
+            v-else
+            title="No posts yet"
+            message="This account has not shared anything yet."
+            icon="create"
+          />
         </div>
       </div>
-      <div class="dash-empty-connections" v-else>
-        <SpriteIcon
-          name="connections"
-          size="64"
-          color="#535353"
-          title="Connections"
-        />
-        <h2>No connections yet</h2>
-      </div>
+      <EmptyState
+        v-else
+        title="No connections yet"
+        message="Follow a user to start filling this space."
+        icon="connections"
+      />
     </div>
   </div>
 </template>

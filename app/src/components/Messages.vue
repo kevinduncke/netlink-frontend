@@ -5,6 +5,10 @@ import { onMounted, onBeforeUnmount, watch } from "vue";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+import LoadingState from "./states/LoadingState.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
+import SkeletonUserRow from "./states/SkeletonUserRow.vue";
 
 // STYLES
 import "../styles/app-layout.css";
@@ -19,11 +23,20 @@ const {
   queryUsers,
   searchUsersResults,
   userChats,
+  loadingSearchUsers,
+  searchUsersError,
+  loadingUserChats,
+  userChatsError,
+  loadingSuggestedUsers,
+  suggestedUsersError,
   selectedChat,
+  loadingChatMessages,
+  chatMessagesError,
   userChatId,
   chatUserInfo,
   displayUserInfo,
   dateConverter,
+  chatMessages,
   message,
 
   // FUNCTIONS
@@ -41,6 +54,24 @@ const {
   createChat,
   deleteChat,
 } = useUserData();
+
+async function refreshChatMessages() {
+  if (selectedChat.value) {
+    await loadChatMessages(selectedChat.value);
+  }
+}
+
+async function refreshUserSearch() {
+  await searchUsers();
+}
+
+async function refreshUserChats() {
+  await loadUserChats();
+}
+
+async function refreshSuggestedUsers() {
+  await loadSuggestedUsers("following");
+}
 
 let searchUsersTimer: ReturnType<typeof window.setTimeout> | null = null;
 
@@ -99,7 +130,16 @@ onMounted(async () => {
             <img src="/icons/close.svg" alt="Check" width="18" height="18" />
           </button>
         </div>
-        <div class="dash-users-modal" v-if="searchUsersResults.length > 0">
+        <SkeletonUserRow v-if="loadingSearchUsers" :count="3" />
+        <ErrorState
+          v-else-if="searchUsersError"
+          :message="searchUsersError"
+          @retry="refreshUserSearch"
+        />
+        <div
+          class="dash-users-modal"
+          v-else-if="searchUsersResults.length > 0"
+        >
           <div
             class="dash-user-item dash-search-item"
             v-for="user in searchUsersResults"
@@ -127,10 +167,23 @@ onMounted(async () => {
             </button>
           </div>
         </div>
+        <EmptyState
+          v-else-if="queryUsers.trim().length > 0"
+          title="No users found"
+          message="Try a different name or username."
+          icon="search"
+        />
       </div>
-      <div class="dash-chats" v-if="userChats.length > 0">
+      <div class="dash-chats">
         <h2>Chats</h2>
+        <SkeletonUserRow v-if="loadingUserChats" :count="4" />
+        <ErrorState
+          v-else-if="userChatsError"
+          :message="userChatsError"
+          @retry="refreshUserChats"
+        />
         <div
+          v-else-if="userChats.length > 0"
           class="bar-user-box shadow-light"
           :class="{ selected: chat.id === userChatId }"
           v-for="chat in userChats"
@@ -155,14 +208,21 @@ onMounted(async () => {
             <SpriteIcon name="send" size="24" color="#e3e3e3" title="Send" />
           </button>
         </div>
+        <EmptyState
+          v-else
+          title="No chats yet"
+          message="Start a new conversation from the search box."
+          icon="messages"
+        />
       </div>
       <div class="dash-suggestions">
         <h2>Suggestions</h2>
+        <SkeletonUserRow v-if="loadingSuggestedUsers" :count="3" />
         <div
           class="bar-user-box"
+          v-else-if="filteredSuggestedUsers.length > 0"
           v-for="user in filteredSuggestedUsers"
           :key="user.id"
-          v-if="filteredSuggestedUsers.length > 0"
         >
           <button class="button" type="button" @click="createChat(user.id)">
             <div class="bar-user-info">
@@ -180,15 +240,17 @@ onMounted(async () => {
             </div>
           </button>
         </div>
-        <div class="dash-empty-suggestions" v-else>
-          <SpriteIcon
-            name="connections"
-            size="48"
-            color="#535353"
-            title="Connections"
-          />
-          <h2>No suggestions available</h2>
-        </div>
+        <ErrorState
+          v-else-if="suggestedUsersError"
+          :message="suggestedUsersError"
+          @retry="refreshSuggestedUsers"
+        />
+        <EmptyState
+          v-else
+          title="No suggestions available"
+          message="Follow more people to fill this list."
+          icon="connections"
+        />
       </div>
     </div>
     <div class="dash-content">
@@ -241,8 +303,24 @@ onMounted(async () => {
         v-if="selectedChat"
         :class="{ 'dash-modal-info': displayUserInfo === true }"
       >
+        <LoadingState
+          v-if="loadingChatMessages"
+          title="Loading conversation"
+          message="Fetching the latest messages."
+        />
+        <ErrorState
+          v-else-if="chatMessagesError"
+          :message="chatMessagesError"
+          @retry="refreshChatMessages"
+        />
+        <EmptyState
+          v-else-if="chatMessages.length === 0"
+          title="No messages yet"
+          message="Send the first message to start the chat."
+          icon="messages"
+        />
         <div
-          v-if="!displayUserInfo"
+          v-else-if="!displayUserInfo"
           class="dash-date-group"
           v-for="(messages, date) in groupMessagesByDate"
           :key="date"

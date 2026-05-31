@@ -7,7 +7,16 @@ import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 import { router } from "../router";
 import { idEquals, isPresentId } from "./idUtils";
-import { consoleMutationFeedback, runLikeMutation, runCreateComment, runDeleteComment, runRepostMutation, runCreatePost, runEditPost, runDeletePost } from "./actions";
+import {
+  consoleMutationFeedback,
+  runLikeMutation,
+  runCreateComment,
+  runDeleteComment,
+  runRepostMutation,
+  runCreatePost,
+  runEditPost,
+  runDeletePost,
+} from "./actions";
 
 // TYPES
 import type {
@@ -21,6 +30,12 @@ import type {
 
 // POSTS
 export const userdata = ref<PostType[]>([]);
+
+// STATES
+const loadingPosts = ref(false);
+const postsError = ref("");
+const loadingComments = ref(false);
+const commentsError = ref("");
 
 export function usePosts() {
   const authStore = useAuthStore();
@@ -110,6 +125,10 @@ export function usePosts() {
       router.push("/login");
       return;
     }
+
+    loadingPosts.value = true;
+    postsError.value = "";
+
     try {
       // CLEAN PREVIOUS DATA
       userdata.value = [];
@@ -123,6 +142,8 @@ export function usePosts() {
         }
       }
     } catch (error) {
+      postsError.value = "Failed to load posts.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -130,6 +151,8 @@ export function usePosts() {
       }
 
       throw error;
+    } finally {
+      loadingPosts.value = false;
     }
   }
 
@@ -216,6 +239,9 @@ export function usePosts() {
 
   // LOAD COMMENTS
   async function loadComments(postId: number | string) {
+    loadingComments.value = true;
+    commentsError.value = "";
+
     try {
       const response = await api.get(`/post/comments/all/${postId}`);
       const comments: Comment[] = response.data?.comments || [];
@@ -225,6 +251,8 @@ export function usePosts() {
 
       post.comments = comments;
     } catch (error) {
+      commentsError.value = "Failed to load comments.";
+
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
         router.push("/login");
@@ -232,6 +260,8 @@ export function usePosts() {
       }
 
       throw error;
+    } finally {
+      loadingComments.value = false;
     }
   }
 
@@ -254,7 +284,9 @@ export function usePosts() {
         post: selectedPost,
         comment: optimisticComment,
         onRequest: async (currentPostId, content) => {
-          const response = await api.post(`/post/comment/${currentPostId}`, { content });
+          const response = await api.post(`/post/comment/${currentPostId}`, {
+            content,
+          });
           return response.data as Comment;
         },
         onFeedback: consoleMutationFeedback,
@@ -502,6 +534,10 @@ export function usePosts() {
     openEditModalFor,
     editingPost,
     editingComment,
+    loadingPosts,
+    postsError,
+    loadingComments,
+    commentsError,
 
     // CREATE POST FUNCTIONS
     createPost,

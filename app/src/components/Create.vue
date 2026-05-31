@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { ref, watch } from "vue";
+import { onMounted, onBeforeUnmount, ref, watch } from "vue";
 
 // SERVICES
 import api from "../services/api";
@@ -9,6 +9,10 @@ import api from "../services/api";
 import Navigation from "./Navigation.vue";
 import Post from "./Post.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+import SkeletonUserRow from "./states/SkeletonUserRow.vue";
+import SkeletonPost from "./states/SkeletonPost.vue";
+import ErrorState from "./states/ErrorState.vue";
+import EmptyState from "./states/EmptyState.vue";
 
 // STYLES
 import "../styles/input.css";
@@ -20,13 +24,14 @@ import type { SearchUser } from "../types/search";
 
 // POSTS | USERDATA
 import { usePosts } from "../shared/usePosts";
-import { onMounted } from "vue";
 
 // POSTS
 const {
   // VARIABLES
   createPostData,
   userdata,
+  loadingPosts,
+  postsError,
 
   // FUNCTIONS
   loadPosts,
@@ -42,17 +47,50 @@ const {
 // USER | FOLLOWING USERS
 import { useUserData } from "../shared/userData";
 
-const { followingUsers, loadFollowingUsers } = useUserData();
+const { followingUsers, loadingFollowingUsers, followingUsersError, loadFollowingUsers } = useUserData();
 
 const query = ref("");
 const results = ref<SearchUser[]>([]);
+const loadingSearchUsers = ref(false);
+const searchUsersError = ref("");
+
+let searchUsersTimer: ReturnType<typeof window.setTimeout> | null = null;
 
 async function searchUsers() {
-  const response = await api.get(`/users/search?query=${query.value}`);
-  results.value = response.data;
+  loadingSearchUsers.value = true;
+  searchUsersError.value = "";
+
+  try {
+    if (query.value.trim() === "") {
+      results.value = [];
+      return;
+    }
+
+    const response = await api.get(`/users/search?query=${query.value}`);
+    results.value = response.data;
+  } catch (error) {
+    searchUsersError.value = "Failed to search users.";
+    console.error("Error searching users: ", error);
+  } finally {
+    loadingSearchUsers.value = false;
+  }
 }
 
-watch(query, searchUsers);
+watch(query, () => {
+  if (searchUsersTimer) {
+    window.clearTimeout(searchUsersTimer);
+  }
+
+  searchUsersTimer = window.setTimeout(() => {
+    searchUsers();
+  }, 300);
+});
+
+onBeforeUnmount(() => {
+  if (searchUsersTimer) {
+    window.clearTimeout(searchUsersTimer);
+  }
+});
 
 function addMention(username: string) {
   selectMention(username);
@@ -129,13 +167,25 @@ onMounted(() => {
             v-model="query"
           />
         </div>
-        <div class="input-results" v-if="results.length > 0">
+        <SkeletonUserRow v-if="loadingSearchUsers" :count="3" />
+        <ErrorState
+          v-else-if="searchUsersError"
+          :message="searchUsersError"
+          @retry="searchUsers"
+        />
+        <div class="input-results" v-else-if="results.length > 0">
           <div class="user-result" v-for="user in results" :key="user.id">
             <button class="button" @click="addMention(user.username)">
               {{ user.username }}
             </button>
           </div>
         </div>
+        <EmptyState
+          v-else-if="query.trim().length > 0"
+          title="No users found"
+          message="Try a different username."
+          icon="search"
+        />
       </div>
       <div class="optionsPost">
         <h2>Options</h2>
@@ -262,9 +312,15 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <div class="sp-following-box" v-if="followingUsers.length > 0 && createPostData.visibility === 'SPECIFIC'">
+        <div class="sp-following-box" v-if="createPostData.visibility === 'SPECIFIC'">
           <p>Specific Followers</p>
-          <div class="following-list">
+          <SkeletonUserRow v-if="loadingFollowingUsers" :count="3" />
+          <ErrorState
+            v-else-if="followingUsersError"
+            :message="followingUsersError"
+            @retry="loadFollowingUsers"
+          />
+          <div class="following-list" v-else-if="followingUsers.length > 0">
             <div
               class="followingUsers-result"
               v-for="user in followingUsers"
@@ -280,22 +336,31 @@ onMounted(() => {
               <span>{{ user.username }}</span>
             </div>
           </div>
+          <EmptyState
+            v-else
+            title="No followers to choose from"
+            message="Follow more users before selecting a specific audience."
+            icon="connections"
+          />
         </div>
       </div>
     </div>
     <div class="dash-content">
-      <div class="dash-myPosts" v-if="userdata.length > 0">
+      <div class="dash-myPosts">
         <h2>My Posts</h2>
-        <Post />
-      </div>
-      <div class="dash-empty-posts" v-else>
-        <SpriteIcon
-          name="create"
-          size="64"
-          color="#535353"
-          title="Create Post"
+        <SkeletonPost v-if="loadingPosts" />
+        <ErrorState
+          v-else-if="postsError"
+          :message="postsError"
+          @retry="() => loadPosts('my-posts')"
         />
-        <h2>Create a post</h2>
+        <Post v-else-if="userdata.length > 0" />
+        <EmptyState
+          v-else
+          title="No posts yet"
+          message="Create a post to preview it here."
+          icon="create"
+        />
       </div>
     </div>
   </div>

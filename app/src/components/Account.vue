@@ -39,6 +39,7 @@ const {
   toggleEdit,
   toggleCloseEdit,
   saveProfile,
+  changePrivacyAccount,
   deleteAccount,
   updateUnsavedProfileChanges,
 } = useUserData();
@@ -62,11 +63,13 @@ watch(
     userProfile.value.bio,
     userProfile.value.url,
     userProfile.value.avatarUrl,
+    userProfile.value.privacyMode,
     originalProfile.value.name,
     originalProfile.value.username,
     originalProfile.value.bio,
     originalProfile.value.url,
     originalProfile.value.avatarUrl,
+    originalProfile.value.privacyMode,
   ],
   () => {
     updateUnsavedProfileChanges();
@@ -101,159 +104,169 @@ onBeforeRouteLeave(() => {
           @retry="loadMyProfile"
         />
         <div v-else>
-        <div class="profile-box body-box shadow-light">
-          <div class="profile-boxinput">
-            <label>Name</label>
-            <input
-              type="text"
-              name="name"
-              v-model="userProfile.name"
-              id="profile-name"
-              placeholder="Edit your name."
-              :disabled="!editingProfile.name"
-            />
+          <div class="profile-box body-box shadow-light">
+            <div class="profile-boxinput">
+              <label>Name</label>
+              <input
+                type="text"
+                name="name"
+                v-model="userProfile.name"
+                id="profile-name"
+                placeholder="Edit your name."
+                :disabled="!editingProfile.name"
+              />
+            </div>
+            <button
+              class="button"
+              type="button"
+              @click="toggleEdit('name')"
+              v-if="!editingProfile.name"
+            >
+              <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
+            </button>
+            <button
+              class="button"
+              type="button"
+              @click="toggleCloseEdit('name')"
+              v-else
+            >
+              <img src="/icons/check.svg" alt="Check" width="18" height="18" />
+            </button>
           </div>
+          <div class="profile-box body-box shadow-light">
+            <div class="profile-boxinput">
+              <label>Username</label>
+              <input
+                type="text"
+                name="username"
+                v-model="userProfile.username"
+                id="profile-username"
+                placeholder="Edit your username."
+                :disabled="!editingProfile.username"
+              />
+            </div>
+            <button
+              class="button"
+              type="button"
+              @click="toggleEdit('username')"
+              v-if="!editingProfile.username"
+            >
+              <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
+            </button>
+            <button
+              class="button"
+              type="button"
+              @click="toggleCloseEdit('username')"
+              v-else
+            >
+              <img src="/icons/check.svg" alt="Check" width="18" height="18" />
+            </button>
+          </div>
+          <div class="profile-box body-box shadow-light">
+            <div class="profile-boxinput">
+              <label>Bio</label>
+              <input
+                type="text"
+                name="bio"
+                v-model="userProfile.bio"
+                id="profile-bio"
+                placeholder="Edit your bio."
+                :disabled="!editingProfile.bio"
+              />
+            </div>
+            <button
+              class="button"
+              type="button"
+              @click="toggleEdit('bio')"
+              v-if="!editingProfile.bio"
+            >
+              <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
+            </button>
+            <button
+              class="button"
+              type="button"
+              @click="toggleCloseEdit('bio')"
+              v-else
+            >
+              <img src="/icons/check.svg" alt="Check" width="18" height="18" />
+            </button>
+          </div>
+        </div>
+        <div class="profile-links">
+          <h2>Links</h2>
+          <p>Your links are visible to everyone on Netlink.</p>
+          <div class="profile-box body-box shadow-light">
+            <div class="profile-boxinput">
+              <label>URL</label>
+              <input
+                type="text"
+                name="url"
+                v-model="userProfile.url"
+                id="profile-url"
+                placeholder="https://"
+                :disabled="!editingProfile.url"
+              />
+            </div>
+            <button
+              class="button"
+              type="button"
+              @click="toggleEdit('url')"
+              v-if="!editingProfile.url"
+            >
+              <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
+            </button>
+            <button
+              class="button"
+              type="button"
+              @click="toggleCloseEdit('url')"
+              v-else
+            >
+              <img src="/icons/check.svg" alt="Check" width="18" height="18" />
+            </button>
+          </div>
+        </div>
+        <div class="profile-privacy">
+          <h2>Privacy</h2>
+          <p>
+            When your account is public, your profile and posts can be seen by
+            anyone, on or off the platform.
+          </p>
+          <p>
+            When your account is private, only the followers you approve can see
+            what you share and your followers list and found your profile.
+          </p>
+          <p>
+            Your profile is currently
+            <span>{{ userProfile.privacyMode ? "locked." : "unlocked." }}</span>
+          </p>
           <button
-            class="button"
             type="button"
-            @click="toggleEdit('name')"
-            v-if="!editingProfile.name"
-          >
-            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
-          </button>
-          <button
             class="button"
-            type="button"
-            @click="toggleCloseEdit('name')"
-            v-else
+            @click="changePrivacyAccount(userProfile.privacyMode)"
           >
-            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
+            {{ userProfile.privacyMode ? "Unlock" : "Lock" }} Account
           </button>
         </div>
-        <div class="profile-box body-box shadow-light">
-          <div class="profile-boxinput">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              v-model="userProfile.username"
-              id="profile-username"
-              placeholder="Edit your username."
-              :disabled="!editingProfile.username"
-            />
-          </div>
-          <button
-            class="button"
-            type="button"
-            @click="toggleEdit('username')"
-            v-if="!editingProfile.username"
-          >
-            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
-          </button>
-          <button
-            class="button"
-            type="button"
-            @click="toggleCloseEdit('username')"
-            v-else
-          >
-            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
-          </button>
-        </div>
-        <div class="profile-box body-box shadow-light">
-          <div class="profile-boxinput">
-            <label>Bio</label>
-            <input
-              type="text"
-              name="bio"
-              v-model="userProfile.bio"
-              id="profile-bio"
-              placeholder="Edit your bio."
-              :disabled="!editingProfile.bio"
-            />
-          </div>
-          <button
-            class="button"
-            type="button"
-            @click="toggleEdit('bio')"
-            v-if="!editingProfile.bio"
-          >
-            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
-          </button>
-          <button
-            class="button"
-            type="button"
-            @click="toggleCloseEdit('bio')"
-            v-else
-          >
-            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
-          </button>
-        </div>
-      </div>
-      <div class="profile-links">
-        <h2>Links</h2>
-        <p>Your links are visible to everyone on Netlink.</p>
-        <div class="profile-box body-box shadow-light">
-          <div class="profile-boxinput">
-            <label>URL</label>
-            <input
-              type="text"
-              name="url"
-              v-model="userProfile.url"
-              id="profile-url"
-              placeholder="https://"
-              :disabled="!editingProfile.url"
-            />
-          </div>
-          <button
-            class="button"
-            type="button"
-            @click="toggleEdit('url')"
-            v-if="!editingProfile.url"
-          >
-            <img src="/icons/edit.svg" alt="Edit" width="18" height="18" />
-          </button>
-          <button
-            class="button"
-            type="button"
-            @click="toggleCloseEdit('url')"
-            v-else
-          >
-            <img src="/icons/check.svg" alt="Check" width="18" height="18" />
-          </button>
-        </div>
-      </div>
-      <div class="profile-privacy">
-        <h2>Privacy</h2>
-        <p>
-          When your account is public, your profile and posts can be seen by
-          anyone, on or off the platform.
-        </p>
-        <p>
-          When your account is private, only the followers you approve can see
-          what you share and your followers list and found your profile.
-        </p>
-        <p>Your profile is currently <span>unlocked</span>.</p>
-      </div>
-      <button
-        type="button"
-        class="save-btn button"
-        @click="saveProfile()"
-        :disabled="!hasUnsavedChanges"
-        v-if="hasUnsavedChanges"
-      >
-        Save
-      </button>
-      <div class="profile-delete">
-        <h2>Delete Account</h2>
         <button
           type="button"
-          class="delete-btn button"
-          @click="deleteAccount()"
+          class="save-btn button"
+          @click="saveProfile()"
+          :disabled="!hasUnsavedChanges"
+          v-if="hasUnsavedChanges"
         >
-          Delete
+          Save
         </button>
-      </div>
+        <div class="profile-delete">
+          <h2>Delete Account</h2>
+          <button
+            type="button"
+            class="delete-btn button"
+            @click="deleteAccount()"
+          >
+            Delete
+          </button>
         </div>
+      </div>
     </div>
     <div class="dash-content">
       <div class="profile-content">
@@ -306,6 +319,19 @@ onBeforeRouteLeave(() => {
 }
 .profile-privacy span {
   font-family: "Montserrat Medium", sans-serif;
+}
+.profile-privacy button {
+  width: 100%;
+  padding: 0.8rem 0;
+  border: 2px solid var(--color-gray-700);
+  border-radius: var(--radius-md);
+  font-family: "Montserrat SemiBold", sans-serif;
+  color: var(--color-gray-800);
+}
+.profile-privacy button:hover {
+  background-color: var(--color-white);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 .profile-box {
   display: flex;
@@ -361,17 +387,17 @@ onBeforeRouteLeave(() => {
 .delete-btn {
   width: 100%;
   padding: 0.8rem 0;
-  border: 2px solid var(--color-error);
+  border: 2px solid var(--color-gray-700);
   border-radius: var(--radius-md);
   background-color: var(--color-white);
   font-family: "Montserrat SemiBold", sans-serif;
-  color: var(--color-error);
+  color: var(--color-gray-800);
   margin-top: var(--spacing-sm);
 }
 .delete-btn:hover {
-  background-color: var(--color-error);
-  border: 2px solid var(--color-white);
-  color: var(--color-white);
+  background-color: var(--color-white);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
 }
 .dash-empty-myPosts {
   height: 100%;

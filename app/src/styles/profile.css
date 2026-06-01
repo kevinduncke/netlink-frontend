@@ -24,3 +24,23 @@
 .profile-avatar {  
   text-align: center;
 }
+
+.private-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+.private-content h2 {
+  padding: 1rem;
+  margin: 0;
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: var(--font-size-body-lg);
+}
+.private-content p {
+  padding: 0;
+  margin: 0;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
+}

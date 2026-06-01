@@ -320,6 +320,8 @@ function createUserData() {
     followingCount: 0,
     createdAt: "",
     isFollowedByMe: false,
+    privacyMode: false,
+    accountVisibility: "public",
   });
   function resetUserProfile() {
     userProfile.value = {
@@ -334,6 +336,8 @@ function createUserData() {
       followingCount: 0,
       createdAt: "",
       isFollowedByMe: false,
+      privacyMode: false,
+      accountVisibility: "public",
     };
     originalProfile.value = {
       id: "",
@@ -347,6 +351,8 @@ function createUserData() {
       followingCount: 0,
       createdAt: "",
       isFollowedByMe: false,
+      privacyMode: false,
+      accountVisibility: "public",
     };
   }
   const loadingUserProfile = ref(false);
@@ -359,6 +365,15 @@ function createUserData() {
     try {
       const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
+
+      if (
+        userProfile.value.privacyMode === true &&
+        userProfile.value.isFollowedByMe === false
+      ) {
+        userProfile.value.accountVisibility = "private";
+      } else {
+        userProfile.value.accountVisibility = "public";
+      }
     } catch (error) {
       userProfileError.value = "Failed to load user profile.";
 
@@ -454,6 +469,17 @@ function createUserData() {
       }
 
       throw error;
+    }
+  }
+
+  // CHANGE LOGGED USER ACCOUNT PRIVACY
+  async function changePrivacyAccount(state: boolean) {
+    try {
+      await api.patch("/users/me/privacy", { privacyMode: !state });
+      userProfile.value.privacyMode = !state;
+      originalProfile.value.privacyMode = !state;
+    } catch (error) {
+      console.error("Error changing privacy settings: ", error);
     }
   }
 
@@ -1030,6 +1056,7 @@ function createUserData() {
     toggleEdit,
     toggleCloseEdit,
     saveProfile,
+    changePrivacyAccount,
     deleteAccount,
     updateUnsavedProfileChanges,
     searchPost,

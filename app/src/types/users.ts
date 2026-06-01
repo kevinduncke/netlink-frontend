@@ -32,4 +32,6 @@ export type UserProfile = {
   followingCount: number;
   createdAt: string;
   isFollowedByMe: boolean;
+  privacyMode: boolean;
+  accountVisibility: "public" | "private";
 };

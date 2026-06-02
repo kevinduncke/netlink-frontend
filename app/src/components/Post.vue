@@ -52,229 +52,236 @@ const {
 </script>
 
 <template>
-  <div v-for="post in userdata" :key="post.id" class="dash-post shadow-light">
-    <div class="dash-user-post">
-      <div class="dash-username">
-        <AvatarIcon />
-        <div>
-          <span>
-            <RouterLink
-              :to="getUserRoute(post.author.username, post.author.id)"
-              @click="selectedUser(post.author.id)"
-            >
-              {{ post.author.name }}
-            </RouterLink>
-          </span>
-        </div>
-      </div>
-      <div
-        class="dash-post-opts"
-        v-if="post.isRepost !== true && validatePostOwnership(post.author.id)"
-      >
-        <button
-          class="button"
-          type="button"
-          @click="displayPostOptions(post.id)"
-        >
-          <SpriteIcon
-            name="dots"
-            size="18"
-            color="#535353"
-            title="Post options"
-          />
-        </button>
-        <div
-          class="dash-pop-delete shadow-light"
-          v-if="openOptionsFor === post.id"
-        >
-          <button class="button" type="button" @click="deletePost(post.id)">
-            Delete
-          </button>
-          <button class="button" type="button" @click="openEditModal(post)">
-            Edit
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="dash-content-post">
-      <span>
-        {{ post.content }}
-      </span>
-      <span v-for="mention in post.mentions" :key="mention.id">
-        <RouterLink
-          :to="getUserRoute(mention.username, mention.id)"
-          @click="(selectedUser(mention.id), loadSelectedUser(mention.id))"
-        >
-          @{{ mention.username }}
-        </RouterLink>
-      </span>
-    </div>
-    <div class="dash-options-post">
-      <button
-        class="button"
-        type="button"
-        :class="{ 'dash-commented': post._count.comments }"
-        v-if="!post.disableComments"
-        @click="toggleCommentInput(post.id)"
-      >
-        <SpriteIcon name="comment" size="16" color="#535353" title="Comments" />
-        <span>{{ post._count.comments || 0 }}</span>
-      </button>
-      <button
-        class="button"
-        type="button"
-        @click="likePost(post.id, post.author.liked)"
-        :class="{ 'dash-liked': post.author.liked }"
-      >
-        <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
-        <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
-      </button>
-      <button
-        class="button"
-        type="button"
-        :class="{ 'dash-shared': post._count.shares }"
-        @click="repost(post.id, post.repostedByMe)"
-        v-if="isAuthorPost(post.author.id)"
-      >
-        <SpriteIcon name="share" size="16" color="#535353" title="Shares" />
-        <span>{{ post._count.shares || 0 }}</span>
-      </button>
-    </div>
-    <p v-if="post.isRepost === true" class="dash-repost-by">
-      Reposted by
-      <RouterLink
-        :to="getUserRoute(post.repostedBy.username, post.repostedBy.id)"
-        @click="selectedUser(post.repostedBy.id)"
-      >
-        {{ post.repostedBy.name }}
-      </RouterLink>
-    </p>
-    <div
-      class="dash-comments-post"
-      v-if="
-        editingComment.openCommentPostId === post.id &&
-        (post._count.comments ?? 0) > 0
-      "
-    >
-      <div v-for="comment in post.comments" :key="comment.createdAt">
-        <div class="dash-username-comment">
-          <div class="dash-usercmt-info">
-            <AvatarIcon height="32px" width="32px" />
+  <div v-for="post in userdata" :key="post.id">
+    <div class="dash-post shadow-light">
+      <div class="dash-user-post">
+        <div class="dash-username">
+          <AvatarIcon />
+          <div>
             <span>
               <RouterLink
-                :to="getUserRoute(comment.author.username, comment.author.id)"
-                @click="selectedUser(comment.author.id)"
+                :to="getUserRoute(post.author.username, post.author.id)"
+                @click="selectedUser(post.author.id)"
               >
-                {{ comment.author.name }}
+                {{ post.author.name }}
               </RouterLink>
             </span>
           </div>
-          <div
-            class="dash-usercmt-actions"
-            v-if="isAuthorComment(comment.author.id)"
-          >
-            <button
-              class="button"
-              type="button"
-              v-if="editingComment.openCommentActions === comment.id"
-              @click="startEditComment(comment.id, comment.content)"
-            >
-              <SpriteIcon
-                name="edit"
-                size="20"
-                color="#535353"
-                title="Edit comment"
-              />
-            </button>
-            <button
-              class="button"
-              type="button"
-              v-if="editingComment.openCommentActions === comment.id"
-              @click="deleteComment(comment.id, post.id)"
-            >
-              <SpriteIcon
-                name="trash"
-                size="20"
-                color="#535353"
-                title="Delete comment"
-              />
-            </button>
-            <button
-              class="button"
-              type="button"
-              @click="toggleCommentActions(comment.id)"
-            >
-              <SpriteIcon
-                name="dots"
-                size="18"
-                color="#535353"
-                title="Comment options"
-              />
-            </button>
-          </div>
         </div>
         <div
-          v-if="editingComment.editingCommentId === comment.id"
-          class="dash-edit-comment"
+          class="dash-post-opts"
+          v-if="post.isRepost !== true && validatePostOwnership(post.author.id)"
         >
-          <input type="text" v-model="editingComment.editedCommentContent" />
-          <div class="dash-edit-comment-actions">
-            <button
-              class="button"
-              type="button"
-              @click="editComment(comment.id, post.id)"
-            >
-              Save
+          <button
+            class="button"
+            type="button"
+            @click="displayPostOptions(post.id)"
+          >
+            <SpriteIcon
+              name="dots"
+              size="18"
+              color="#535353"
+              title="Post options"
+            />
+          </button>
+          <div
+            class="dash-pop-delete shadow-light"
+            v-if="openOptionsFor === post.id"
+          >
+            <button class="button" type="button" @click="deletePost(post.id)">
+              Delete
             </button>
-            <button
-              class="button"
-              type="button"
-              @click="
-                editingComment.editingCommentId = null;
-                editingComment.editedCommentContent = '';
-              "
-            >
-              Cancel
+            <button class="button" type="button" @click="openEditModal(post)">
+              Edit
             </button>
           </div>
         </div>
-        <p v-else>{{ comment.content }}</p>
-        <p>{{ toUtcDateTime(comment.createdAt) }}</p>
       </div>
-    </div>
-    <div
-      class="dash-new-comment-post"
-      v-if="editingComment.openCommentPostId === post.id"
-    >
-      <input
-        type="text"
-        name="post-comment"
-        id="post-comment"
-        placeholder="Add a comment..."
-        v-model="editingComment.postComment"
-      />
-      <button class="button" type="button" @click="newComment(post.id)">
-        Post
-      </button>
-    </div>
-    <div
-      class="edit-post-modal"
-      v-if="openEditModalFor === post.id && editingPost"
-    >
-      <h2 class="edit-title">Edit Post</h2>
-      <div class="edit-post">
-        <textarea
-          name="text"
-          id="text"
-          v-model="editingPost.content"
-        ></textarea>
-        <div class="edit-actions">
-          <button class="button" type="button" @click="closeEditModal()">
-            Cancel
-          </button>
-          <button class="button" type="button" @click="saveEdit(post.id)">
-            Save
-          </button>
+      <div class="dash-content-post">
+        <span>
+          {{ post.content }}
+        </span>
+        <span v-for="mention in post.mentions" :key="mention.id">
+          <RouterLink
+            :to="getUserRoute(mention.username, mention.id)"
+            @click="(selectedUser(mention.id), loadSelectedUser(mention.id))"
+          >
+            @{{ mention.username }}
+          </RouterLink>
+        </span>
+      </div>
+      <div class="dash-options-post">
+        <button
+          class="button"
+          type="button"
+          :class="{ 'dash-commented': post._count.comments }"
+          v-if="!post.disableComments"
+          @click="toggleCommentInput(post.id)"
+        >
+          <SpriteIcon
+            name="comment"
+            size="16"
+            color="#535353"
+            title="Comments"
+          />
+          <span>{{ post._count.comments || 0 }}</span>
+        </button>
+        <button
+          class="button"
+          type="button"
+          @click="likePost(post.id, post.author.liked)"
+          :class="{ 'dash-liked': post.author.liked }"
+        >
+          <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
+          <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
+        </button>
+        <button
+          class="button"
+          type="button"
+          :class="{ 'dash-shared': post._count.shares }"
+          @click="repost(post.id, post.repostedByMe)"
+          v-if="isAuthorPost(post.author.id)"
+        >
+          <SpriteIcon name="share" size="16" color="#535353" title="Shares" />
+          <span>{{ post._count.shares || 0 }}</span>
+        </button>
+      </div>
+      <p v-if="post.isRepost === true" class="dash-repost-by">
+        Reposted by
+        <RouterLink
+          :to="getUserRoute(post.repostedBy.username, post.repostedBy.id)"
+          @click="selectedUser(post.repostedBy.id)"
+        >
+          {{ post.repostedBy.name }}
+        </RouterLink>
+      </p>
+      <div
+        class="dash-comments-post"
+        v-if="
+          editingComment.openCommentPostId === post.id &&
+          (post._count.comments ?? 0) > 0
+        "
+      >
+        <div v-for="comment in post.comments" :key="comment.createdAt">
+          <div class="dash-username-comment">
+            <div class="dash-usercmt-info">
+              <AvatarIcon height="32px" width="32px" />
+              <span>
+                <RouterLink
+                  :to="getUserRoute(comment.author.username, comment.author.id)"
+                  @click="selectedUser(comment.author.id)"
+                >
+                  {{ comment.author.name }}
+                </RouterLink>
+              </span>
+            </div>
+            <div
+              class="dash-usercmt-actions"
+              v-if="isAuthorComment(comment.author.id)"
+            >
+              <button
+                class="button"
+                type="button"
+                v-if="editingComment.openCommentActions === comment.id"
+                @click="startEditComment(comment.id, comment.content)"
+              >
+                <SpriteIcon
+                  name="edit"
+                  size="20"
+                  color="#535353"
+                  title="Edit comment"
+                />
+              </button>
+              <button
+                class="button"
+                type="button"
+                v-if="editingComment.openCommentActions === comment.id"
+                @click="deleteComment(comment.id, post.id)"
+              >
+                <SpriteIcon
+                  name="trash"
+                  size="20"
+                  color="#535353"
+                  title="Delete comment"
+                />
+              </button>
+              <button
+                class="button"
+                type="button"
+                @click="toggleCommentActions(comment.id)"
+              >
+                <SpriteIcon
+                  name="dots"
+                  size="18"
+                  color="#535353"
+                  title="Comment options"
+                />
+              </button>
+            </div>
+          </div>
+          <div
+            v-if="editingComment.editingCommentId === comment.id"
+            class="dash-edit-comment"
+          >
+            <input type="text" v-model="editingComment.editedCommentContent" />
+            <div class="dash-edit-comment-actions">
+              <button
+                class="button"
+                type="button"
+                @click="editComment(comment.id, post.id)"
+              >
+                Save
+              </button>
+              <button
+                class="button"
+                type="button"
+                @click="
+                  editingComment.editingCommentId = null;
+                  editingComment.editedCommentContent = '';
+                "
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          <p v-else>{{ comment.content }}</p>
+          <p>{{ toUtcDateTime(comment.createdAt) }}</p>
+        </div>
+      </div>
+      <div
+        class="dash-new-comment-post"
+        v-if="editingComment.openCommentPostId === post.id"
+      >
+        <input
+          type="text"
+          name="post-comment"
+          id="post-comment"
+          placeholder="Add a comment..."
+          v-model="editingComment.postComment"
+        />
+        <button class="button" type="button" @click="newComment(post.id)">
+          Post
+        </button>
+      </div>
+      <div
+        class="edit-post-modal"
+        v-if="openEditModalFor === post.id && editingPost"
+      >
+        <h2 class="edit-title">Edit Post</h2>
+        <div class="edit-post">
+          <textarea
+            name="text"
+            id="text"
+            v-model="editingPost.content"
+          ></textarea>
+          <div class="edit-actions">
+            <button class="button" type="button" @click="closeEditModal()">
+              Cancel
+            </button>
+            <button class="button" type="button" @click="saveEdit(post.id)">
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

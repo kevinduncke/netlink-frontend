@@ -366,14 +366,10 @@ function createUserData() {
       const res = await api.get(`/users/${userId}`);
       userProfile.value = res.data;
 
-      if (
-        userProfile.value.privacyMode === true &&
-        userProfile.value.isFollowedByMe === false
-      ) {
-        userProfile.value.accountVisibility = "private";
-      } else {
-        userProfile.value.accountVisibility = "public";
-      }
+      userProfile.value.accountVisibility = accountVisibility(
+        userProfile.value.privacyMode,
+        userProfile.value.isFollowedByMe,
+      );
     } catch (error) {
       userProfileError.value = "Failed to load user profile.";
 
@@ -482,6 +478,18 @@ function createUserData() {
       console.error("Error changing privacy settings: ", error);
     }
   }
+
+  // CHECK ACCOUNT PRIVACY VISIBILITY
+  function accountVisibility(
+    privacyMode: boolean,
+    isFollowedByMe: boolean,
+  ): "public" | "private" {
+    if (privacyMode === true && isFollowedByMe === false) {
+      return "private";
+    } else {
+      return "public";
+    }
+  }  
 
   // DELETE LOGGED USER ACCOUNT
   async function deleteAccount() {

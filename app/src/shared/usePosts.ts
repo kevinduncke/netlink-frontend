@@ -32,8 +32,7 @@ import type {
 export const userdata = ref<PostType[]>([]);
 
 // STATES
-const loadingPosts = ref(false);
-const postsError = ref("");
+
 const loadingComments = ref(false);
 const commentsError = ref("");
 
@@ -119,6 +118,9 @@ export function usePosts() {
   }
 
   // LOAD POST
+  const loadingPosts = ref(false);
+  const postsError = ref("");
+
   async function loadPosts(route: string) {
     // CHECK IF USER IS AUTHENTICATED
     if (!authStore.token) {

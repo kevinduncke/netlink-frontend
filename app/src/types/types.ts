@@ -29,7 +29,6 @@ export type User = {
   bio: string;
   avatarUrl?: string;
   followers: string | number;
-  isFollowedByMe: boolean;
   liked: boolean;
 };
 

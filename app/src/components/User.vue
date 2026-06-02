@@ -133,13 +133,9 @@ onBeforeRouteLeave((to) => {
         <Profile />
       </div>
       <div
-        class="posts-content"
-        v-if="userProfile.accountVisibility === 'public'"
+        class="private-content"
+        v-if="userProfile.accountVisibility === 'private'"
       >
-        <h2>Posts</h2>
-        <Post />
-      </div>
-      <div class="private-content" v-else>
         <SpriteIcon
           name="lock"
           size="48"
@@ -148,6 +144,10 @@ onBeforeRouteLeave((to) => {
         />
         <h2>This profile is private</h2>
         <p>Request to follow this user to see their posts.</p>
+      </div>
+      <div class="posts-content" v-else>
+        <h2>Posts</h2>
+        <Post />
       </div>
     </div>
   </div>

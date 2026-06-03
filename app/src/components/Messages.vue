@@ -136,10 +136,7 @@ onMounted(async () => {
           :message="searchUsersError"
           @retry="refreshUserSearch"
         />
-        <div
-          class="dash-users-modal"
-          v-else-if="searchUsersResults.length > 0"
-        >
+        <div class="dash-users-modal" v-else-if="searchUsersResults.length > 0">
           <div
             class="dash-user-item dash-search-item"
             v-for="user in searchUsersResults"
@@ -348,14 +345,33 @@ onMounted(async () => {
             <div class="dash-message-boxme" v-else>
               <div class="dash-my-msg">
                 <p>{{ msg.content }}</p>
-                <time :datetime="msg.createdAt">
-                  {{
-                    new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  }}
-                </time>
+                <div 
+                  class="dash-msg-info"
+                  :class="{ 'msg-readed': msg.read === true }"
+                >
+                  <time :datetime="msg.createdAt">
+                    {{
+                      new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    }}
+                  </time>
+                  <SpriteIcon
+                    v-if="msg.received === true"
+                    name="checked"
+                    size="18"
+                    color="#e3e3e3"
+                    title="Received"
+                  />
+                  <SpriteIcon
+                    v-else
+                    name="check"
+                    size="18"
+                    color="#e3e3e3"
+                    title="Send"
+                  />                  
+                </div>
               </div>
             </div>
           </div>
@@ -647,6 +663,18 @@ onMounted(async () => {
   font-family: "Montserrat Regular", sans-serif;
   font-size: 0.5rem;
   letter-spacing: 0.05rem;
+}
+.dash-msg-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+.dash-msg-info svg {
+  fill: var(--color-gray-500);
+}
+.msg-readed svg {
+  fill: var(--color-success);
 }
 .dash-empty-chats {
   height: 100%;

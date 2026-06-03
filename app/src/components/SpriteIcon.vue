@@ -40,7 +40,9 @@ type IconName =
   | "visibility"
   | "visibilityoff"
   | "menu"
-  | "close";
+  | "close"
+  | "check"
+  | "checked";
 
 const props = withDefaults(
   defineProps<{

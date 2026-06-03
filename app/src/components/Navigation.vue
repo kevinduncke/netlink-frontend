@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { useRoute, useRouter } from "vue-router";
 
@@ -8,11 +9,20 @@ import "../styles/navigation-layout.css";
 // COMPONENTS
 import SpriteIcon from "./SpriteIcon.vue";
 
+// USER COMPOSITION
+import { useUserData } from "../shared/userData";
+
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+const { unreadMessagesCount, getUnreadMessagesCount } =
+  useUserData();
 
-function signOut() {
+onMounted(async () => {
+  await getUnreadMessagesCount();
+});
+
+async function signOut() {
   try {
     authStore.logout();
     router.push("/login");
@@ -91,7 +101,7 @@ function signOut() {
           </router-link>
         </div>
         <div
-          class="dash-navbtns"
+          class="dash-navbtns dash-msg-count"
           :class="{ 'dash-navactive': route.name === 'messages' }"
         >
           <router-link to="/messages">
@@ -105,6 +115,9 @@ function signOut() {
               <span>Messages</span>
             </button>
           </router-link>
+          <div class="message-count" v-if="unreadMessagesCount > 0">
+            <span>{{ unreadMessagesCount }}</span>
+          </div>
         </div>
         <div class="dash-navbtns">
           <button class="button">

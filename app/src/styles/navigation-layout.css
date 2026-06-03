@@ -40,6 +40,26 @@
 .dash-navbtns svg {
   margin-right: 1rem;
 }
+.dash-msg-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dash-msg-count a:hover {
+  background: none;
+}
+.message-count {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  width: 1.3rem;
+  height: 1.3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.7rem;
+}
 .dash-navactive {
   background-color: var(--color-primary-dark);
   font-family: "Montserrat SemiBold", sans-serif;

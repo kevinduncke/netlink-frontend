@@ -2,7 +2,7 @@ import type { Ref } from "vue";
 
 import { idEquals } from "../idUtils";
 import type { FollowUser, Followers, UserProfile } from "../../types/users";
-import type { Notification } from "../../types/types";
+import type { NotificationGroup } from "../../types/types";
 import type { MutationFeedbackHandler } from "./feedback";
 
 export interface FollowSnapshot {
@@ -13,7 +13,7 @@ export interface FollowSnapshot {
   followersUsers?: Followers[];
   followingUsers?: FollowUser[];
   selectedUserId?: string | number;
-  notifications?: Notification[];
+  notifications?: NotificationGroup;
 }
 
 export interface FollowState {
@@ -21,8 +21,42 @@ export interface FollowState {
   followersUsers?: Ref<Followers[]>;
   followingUsers?: Ref<FollowUser[]>;
   userProfile?: Ref<UserProfile>;
-  notifications?: Ref<Notification[]>;
+  notifications?: Ref<NotificationGroup>;
   selectedUserId?: Ref<string | number>;
+}
+
+function cloneNotificationGroups(notifications: NotificationGroup): NotificationGroup {
+  return {
+    today: notifications.today.map((notification) => ({ ...notification })),
+    yesterday: notifications.yesterday.map((notification) => ({ ...notification })),
+    older: notifications.older.map((notification) => ({ ...notification })),
+    unReadNotifications: notifications.unReadNotifications,
+  };
+}
+
+function updateNotificationGroups(
+  notifications: NotificationGroup,
+  userId: string | number,
+  nextIsFollowed: boolean,
+): NotificationGroup {
+  return {
+    today: notifications.today.map((notification) =>
+      notification.fromUser?.id !== undefined && idEquals(notification.fromUser.id, userId)
+        ? { ...notification, isFollowedByMe: nextIsFollowed }
+        : notification,
+    ),
+    yesterday: notifications.yesterday.map((notification) =>
+      notification.fromUser?.id !== undefined && idEquals(notification.fromUser.id, userId)
+        ? { ...notification, isFollowedByMe: nextIsFollowed }
+        : notification,
+    ),
+    older: notifications.older.map((notification) =>
+      notification.fromUser?.id !== undefined && idEquals(notification.fromUser.id, userId)
+        ? { ...notification, isFollowedByMe: nextIsFollowed }
+        : notification,
+    ),
+    unReadNotifications: notifications.unReadNotifications,
+  };
 }
 
 export function createFollowSnapshot(
@@ -48,7 +82,9 @@ export function applyOptimisticFollow(
   snapshot.followersUsers = state.followersUsers?.value.map((user) => ({ ...user }));
   snapshot.followingUsers = state.followingUsers?.value.map((user) => ({ ...user }));
   snapshot.selectedUserId = state.selectedUserId?.value;
-  snapshot.notifications = state.notifications?.value.map((notification) => ({ ...notification }));
+  snapshot.notifications = state.notifications?.value
+    ? cloneNotificationGroups(state.notifications.value)
+    : undefined;
 
   if (state.suggestedUsers) {
     state.suggestedUsers.value = state.suggestedUsers.value.filter(
@@ -77,10 +113,10 @@ export function applyOptimisticFollow(
   }
 
   if (state.notifications) {
-    state.notifications.value = state.notifications.value.map((notification) =>
-      notification.fromUser?.id !== undefined && idEquals(notification.fromUser.id, userId)
-        ? { ...notification, isFollowedByMe: nextIsFollowed }
-        : notification,
+    state.notifications.value = updateNotificationGroups(
+      state.notifications.value,
+      userId,
+      nextIsFollowed,
     );
   }
 

@@ -34,11 +34,11 @@ export type User = {
 
 export type UserMention = {
   username: string;
-}
+};
 
 export type SpecificFollower = {
   id: string | number;
-}
+};
 
 export interface Comment {
   id: string | number;
@@ -74,6 +74,15 @@ export type NotificationType =
   | "REPOST"
   | "MENTION"
   | "MESSAGE";
+
+export type GroupedNotifications = Record<string, Notification[]>;
+
+export interface NotificationGroup {
+  today: Notification[];
+  yesterday: Notification[];
+  older: Notification[];
+  unReadNotifications: number;
+}
 
 export interface Notification {
   id: string | number;

@@ -16,7 +16,7 @@ import type { UserProfile } from "../types/users";
 // POSTS COMPOSITION + VARIABLES
 import { usePosts } from "../shared/usePosts";
 import type { ChatMessage, ChatUser } from "../types/chat";
-import type { Notification } from "../types/types";
+import type { NotificationGroup } from "../types/types";
 import {
   consoleMutationFeedback,
   runFollowMutation,
@@ -167,7 +167,12 @@ function createUserData() {
   //================================================
 
   // NOTIFICATIONS
-  const notifications = ref<Notification[]>([]);
+  const notifications = ref<NotificationGroup>({
+    today: [],
+    yesterday: [],
+    older: [],
+    unReadNotifications: 0,
+  });
   const loadingNotifications = ref(false);
   const notificationsError = ref("");
   async function loadNotifications() {
@@ -176,7 +181,12 @@ function createUserData() {
 
     try {
       const response = await api.get("/users/notifications");
-      notifications.value = response.data || [];
+      notifications.value = response.data || {
+        today: [],
+        yesterday: [],
+        older: [],
+        unReadNotifications: 0,
+      };
     } catch (error) {
       notificationsError.value = "Failed to load notifications.";
 
@@ -187,7 +197,12 @@ function createUserData() {
       }
 
       if (axios.isAxiosError(error) && error.response?.status === 404) {
-        notifications.value = [];
+        notifications.value = {
+          today: [],
+          yesterday: [],
+          older: [],
+          unReadNotifications: 0,
+        };
         return;
       }
 
@@ -195,6 +210,11 @@ function createUserData() {
     } finally {
       loadingNotifications.value = false;
     }
+  }
+
+  async function markAllNotificationsAsRead() {
+    await api.patch("/users/notifications/all-read");
+    await loadNotifications();
   }
 
   //================================================
@@ -489,7 +509,7 @@ function createUserData() {
     } else {
       return "public";
     }
-  }  
+  }
 
   // DELETE LOGGED USER ACCOUNT
   async function deleteAccount() {
@@ -735,6 +755,7 @@ function createUserData() {
   const chatMessages = ref<ChatMessage[]>([]);
   const loadingChatMessages = ref(false);
   const chatMessagesError = ref("");
+  const unreadMessagesCount = ref(0);
   const userChatId = ref<string | number>("");
   const displayUserInfo = ref<boolean>(false);
   function resetChatState() {
@@ -782,6 +803,7 @@ function createUserData() {
       chatUserInfo.value = response.data.receiver;
       userChatId.value = chatId;
       displayUserInfo.value = false;
+      await getUnreadMessagesCount();      
     } catch (error) {
       chatMessagesError.value = "Failed to load chat messages.";
 
@@ -817,6 +839,22 @@ function createUserData() {
       return groups;
     }
   });
+
+  // GET UNREAD MESSAGES COUNT
+  async function getUnreadMessagesCount() {
+    try {
+      const response = await api.get("/chats/messages/unread-count");
+      unreadMessagesCount.value = response.data || 0;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
+    }
+  }
 
   // SEND NEW MESSAGE IN SELECTED USER CHAT
   const message = ref<string>("");
@@ -984,6 +1022,7 @@ function createUserData() {
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
+      hour: "numeric",
     });
   }
   function getUserRoute(username: string, userId: string | number) {
@@ -1042,6 +1081,7 @@ function createUserData() {
     chatMessages,
     loadingChatMessages,
     chatMessagesError,
+    unreadMessagesCount,
     userChatId,
     displayUserInfo,
     message,
@@ -1053,6 +1093,7 @@ function createUserData() {
     deleteFavoriteUser,
     removeAllFavoriteUsers,
     loadNotifications,
+    markAllNotificationsAsRead,
     loadSuggestedUsers,
     selectedUser,
     loadSelectedUser,
@@ -1082,6 +1123,7 @@ function createUserData() {
     getUserRoute,
     verifyNewChatSearch,
     clearQuery,
+    getUnreadMessagesCount,
     sendMessage,
     createChat,
     deleteChat,

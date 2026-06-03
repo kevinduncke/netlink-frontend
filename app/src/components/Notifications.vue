@@ -3,6 +3,7 @@
 import { onMounted } from "vue";
 
 // COMPONENTS
+import SpriteIcon from "./SpriteIcon.vue";
 import LoadingState from "./states/LoadingState.vue";
 import ErrorState from "./states/ErrorState.vue";
 import EmptyState from "./states/EmptyState.vue";
@@ -27,6 +28,7 @@ const {
   // FUNCTIONS
   dateConverter,
   loadNotifications,
+  markAllNotificationsAsRead,
   unfollowUser,
   followUser,
   getUserRoute,
@@ -56,6 +58,28 @@ onMounted(async () => {
   <div class="dash-notif-base">
     <div class="notif-head">
       <h2>Notifications</h2>
+      <div
+        class="notif-actions"
+        v-if="notifications && notifications.unReadNotifications > 0"
+      >
+        <button
+          type="button"
+          class="button"
+          @click="markAllNotificationsAsRead"
+        >
+          <SpriteIcon
+            name="checked"
+            size="22"
+            color="#535353"
+            title="Check all notifications as read"
+          />
+        </button>
+        <div class="notif-count">
+          <span>
+            {{ notifications.unReadNotifications }}
+          </span>
+        </div>
+      </div>
     </div>
     <LoadingState
       v-if="loadingNotifications"
@@ -67,44 +91,143 @@ onMounted(async () => {
       :message="notificationsError"
       @retry="loadNotifications"
     />
-    <template v-else-if="notifications.length > 0">
-      <div
-        class="notif-base"
-        v-for="ntf in notifications"
-        :key="ntf.id"
-      >
-        <div class="notif-box">
-          <AvatarIcon />
-          <div>
-            <div class="notif-message">
-              <span>
-                <RouterLink
-                  v-if="ntf.fromUser?.username"
-                  :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
-                  @click="selectedUser(ntf.fromUser?.id)"
-                >
-                  {{ ntf.fromUser?.name }}
-                </RouterLink>
-                {{ ntf.content }}
-              </span>
+    <template
+      v-else-if="
+        notifications &&
+        (notifications.today.length > 0 ||
+          notifications.yesterday.length > 0 ||
+          notifications.older.length > 0)
+      "
+    >
+      <div class="notif-section" v-if="notifications.today.length > 0">
+        <h3>Today</h3>
+        <div
+          class="notif-base"
+          :class="{ 'notif-unread': ntf.read === false }"
+          v-for="ntf in notifications.today"
+          :key="ntf.id"
+        >
+          <div class="notif-box">
+            <AvatarIcon />
+            <div>
+              <div class="notif-message">
+                <span>
+                  <RouterLink
+                    v-if="ntf.fromUser?.username"
+                    :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
+                    @click="selectedUser(ntf.fromUser?.id)"
+                  >
+                    {{ ntf.fromUser?.name }}
+                  </RouterLink>
+                  {{ ntf.content }}
+                </span>
+              </div>
+              <div class="notif-message">
+                <span>{{ dateConverter(ntf.createdAt) }}</span>
+              </div>
             </div>
-            <div class="notif-message">
-              <span>{{ dateConverter(ntf.createdAt) }}</span>
+          </div>
+          <div class="notif-box">
+            <div
+              class="notif-follow"
+              v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
+            >
+              <button
+                type="button"
+                :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
+                @click="handleNotificationFollow(ntf)"
+              >
+                {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
+              </button>
             </div>
           </div>
         </div>
-        <div class="notif-box">
-          <div
-            class="notif-follow"
-            v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
-          >
-            <button
-              type="button"
-              :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
-              @click="handleNotificationFollow(ntf)"
+      </div>
+      <div class="notif-section" v-if="notifications.yesterday.length > 0">
+        <h3>Yesterday</h3>
+        <div
+          class="notif-base"
+          :class="{ 'notif-unread': ntf.read === false }"
+          v-for="ntf in notifications.yesterday"
+          :key="ntf.id"
+        >
+          <div class="notif-box">
+            <AvatarIcon />
+            <div>
+              <div class="notif-message">
+                <span>
+                  <RouterLink
+                    v-if="ntf.fromUser?.username"
+                    :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
+                    @click="selectedUser(ntf.fromUser?.id)"
+                  >
+                    {{ ntf.fromUser?.name }}
+                  </RouterLink>
+                  {{ ntf.content }}
+                </span>
+              </div>
+              <div class="notif-message">
+                <span>{{ dateConverter(ntf.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="notif-box">
+            <div
+              class="notif-follow"
+              v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
             >
-              {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
-            </button>
+              <button
+                type="button"
+                :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
+                @click="handleNotificationFollow(ntf)"
+              >
+                {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notif-section" v-if="notifications.older.length > 0">
+        <h3>Older</h3>
+        <div
+          class="notif-base"
+          :class="{ 'notif-unread': ntf.read === false }"
+          v-for="ntf in notifications.older"
+          :key="ntf.id"
+        >
+          <div class="notif-box">
+            <AvatarIcon />
+            <div>
+              <div class="notif-message">
+                <span>
+                  <RouterLink
+                    v-if="ntf.fromUser?.username"
+                    :to="getUserRoute(ntf.fromUser?.username, ntf.fromUser?.id)"
+                    @click="selectedUser(ntf.fromUser?.id)"
+                  >
+                    {{ ntf.fromUser?.name }}
+                  </RouterLink>
+                  {{ ntf.content }}
+                </span>
+              </div>
+              <div class="notif-message">
+                <span>{{ dateConverter(ntf.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="notif-box">
+            <div
+              class="notif-follow"
+              v-if="ntf.type === 'FOLLOW' && ntf.fromUser?.id !== undefined"
+            >
+              <button
+                type="button"
+                :class="ntf.isFollowedByMe ? 'unfollow-btn' : 'follow-btn'"
+                @click="handleNotificationFollow(ntf)"
+              >
+                {{ ntf.isFollowedByMe ? "Unfollow" : "Follow" }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -122,11 +245,32 @@ onMounted(async () => {
 .dash-notif-base {
   margin-top: 1rem;
 }
+.notif-section h3 {
+  font-family: "Montserrat Light", sans-serif;
+  font-size: var(--font-size-label);
+  margin-bottom: 0.75rem;
+}
 .notif-head {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+.notif-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+.notif-actions button:hover > svg {
+  fill: var(--color-primary);
+}
+.notif-count {
+  background: var(--color-primary);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-md);
+  color: var(--color-white);
+  font-family: "Montserrat Medium", sans-serif;
 }
 .notif-base {
   display: flex;
@@ -134,6 +278,11 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+  padding: 0.35rem;
+}
+.notif-unread {
+  background: var(--color-gray-75);
+  border-radius: var(--radius-md);
 }
 .notif-box {
   display: flex;

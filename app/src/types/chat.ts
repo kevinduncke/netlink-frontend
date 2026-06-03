@@ -10,6 +10,9 @@ export type ChatMessage = {
   chatId: string | number;
   content: string;
   createdAt: string;
+  sent: boolean;
+  read: boolean;
+  received: boolean;
   id: string | number;
   senderId: string | number;
 };

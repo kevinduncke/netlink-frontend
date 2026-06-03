@@ -19,6 +19,7 @@
 
   /* Gray Scale */
   --color-gray-50: #fbfbfb;
+  --color-gray-75: #f8f8f8;
   --color-gray-100: #f4f4f4;
   --color-gray-200: #efefef;
   --color-gray-300: #e8e8e8;
@@ -34,8 +35,8 @@
   /* Status Colors */
   --color-error: #a90000;
   --color-warning: #770500;
-  --color-info: #005261;
-  --color-success: #c31010;
+  --color-info: #6407a6;
+  --color-success: #00aaff;
 
   /* Spacing */
   --spacing-xxs: 0.02rem;

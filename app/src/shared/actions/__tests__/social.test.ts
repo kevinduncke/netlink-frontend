@@ -13,13 +13,17 @@ describe("social follow helpers", () => {
       { id: 1, name: "A" },
       { id: 2, name: "B" },
     ] as any[]);
-    const notifications = ref([
-      {
-        id: "n1",
-        fromUser: { id: 2 },
-        isFollowedByMe: false,
-      },
-    ] as any[]);
+    const notifications = ref({
+      today: [
+        {
+          id: "n1",
+          fromUser: { id: 2 },
+          isFollowedByMe: false,
+        },
+      ],
+      yesterday: [],
+      older: [],
+    } as any);
 
     const snapshot = applyOptimisticFollow(
       {
@@ -32,7 +36,7 @@ describe("social follow helpers", () => {
 
     expect(suggestedUsers.value).toHaveLength(1);
     expect(suggestedUsers.value[0].id).toBe(1);
-    expect(notifications.value[0].isFollowedByMe).toBe(true);
+    expect(notifications.value.today[0].isFollowedByMe).toBe(true);
 
     rollbackOptimisticFollow(
       {
@@ -43,7 +47,7 @@ describe("social follow helpers", () => {
     );
 
     expect(suggestedUsers.value).toHaveLength(2);
-    expect(notifications.value[0].isFollowedByMe).toBe(false);
+    expect(notifications.value.today[0].isFollowedByMe).toBe(false);
   });
 
   it("rolls back when the follow request fails", async () => {
@@ -52,13 +56,17 @@ describe("social follow helpers", () => {
       followersCount: 10,
       isFollowedByMe: false,
     } as any);
-    const notifications = ref([
-      {
-        id: "n1",
-        fromUser: { id: 2 },
-        isFollowedByMe: false,
-      },
-    ] as any[]);
+    const notifications = ref({
+      today: [
+        {
+          id: "n1",
+          fromUser: { id: 2 },
+          isFollowedByMe: false,
+        },
+      ],
+      yesterday: [],
+      older: [],
+    } as any);
 
     await expect(
       runFollowMutation({
@@ -73,6 +81,6 @@ describe("social follow helpers", () => {
 
     expect(userProfile.value.isFollowedByMe).toBe(false);
     expect(userProfile.value.followersCount).toBe(10);
-    expect(notifications.value[0].isFollowedByMe).toBe(false);
+    expect(notifications.value.today[0].isFollowedByMe).toBe(false);
   });
 });

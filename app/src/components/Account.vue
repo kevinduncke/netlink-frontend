@@ -90,7 +90,7 @@ onBeforeRouteLeave(() => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="profile-edit">
         <h2>Edit Profile</h2>
         <LoadingState
@@ -268,7 +268,7 @@ onBeforeRouteLeave(() => {
         </div>
       </div>
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="profile-content">
         <h2>Profile</h2>
         <LoadingState

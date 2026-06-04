@@ -100,7 +100,7 @@ onMounted(async () => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="dash-fav-base">
         <div class="fav-head">
           <h2>Favorites</h2>
@@ -257,7 +257,7 @@ onMounted(async () => {
       </div>
       <Notifications />
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="dash-lposts">
         <h2>Lastest Posts</h2>
         <SkeletonPost v-if="loadingPosts" />

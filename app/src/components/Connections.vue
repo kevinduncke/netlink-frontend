@@ -77,7 +77,7 @@ watch(selectedUserId, async (newUserId) => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="dash-follows-box">
         <button
           class="button"
@@ -189,7 +189,7 @@ watch(selectedUserId, async (newUserId) => {
         icon="connections"
       />
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div v-if="followingUsers.length > 0 || followersUsers.length > 0">
         <div class="dash-profile">
           <h2>Profile</h2>

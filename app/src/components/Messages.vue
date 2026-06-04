@@ -73,7 +73,7 @@ async function refreshSuggestedUsers() {
   await loadSuggestedUsers("following");
 }
 
-let searchUsersTimer: ReturnType<typeof window.setTimeout> | null = null;
+let searchUsersTimer: number | null = null;
 
 watch(queryUsers, () => {
   if (searchUsersTimer) {
@@ -106,7 +106,7 @@ onMounted(async () => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="dash-messages">
         <h2>New Chat</h2>
         <div class="dash-message-form">
@@ -250,7 +250,7 @@ onMounted(async () => {
         />
       </div>
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="dash-header-user" v-if="selectedChat">
         <div class="bar-user-box">
           <button class="button" type="button">

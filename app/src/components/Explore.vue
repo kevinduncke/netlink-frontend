@@ -87,7 +87,7 @@ onMounted(async () => {
   await loadPosts("all");
 });
 
-let searchPostTimer: ReturnType<typeof window.setTimeout> | null = null;
+let searchPostTimer: number | null = null;
 
 watch(
   searchFilters,
@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="search-box">
         <h2>Search</h2>
         <div class="search-box-input shadow-light">
@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
         />
       </div>
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="explore-content">
         <h2>Explore</h2>
         <SkeletonPost v-if="loadingPosts || loadingSearchPosts" />

@@ -590,7 +590,8 @@ function createUserData() {
       if (requestId !== latestSearchRequestId) {
         return;
       }
-      userdata.value = response.data || [];
+      const { posts } = response.data;
+      userdata.value = posts || [];
     } catch (error) {
       searchPostsError.value = "Failed to search posts.";
       console.error("Error searching posts: ", error);
@@ -803,7 +804,7 @@ function createUserData() {
       chatUserInfo.value = response.data.receiver;
       userChatId.value = chatId;
       displayUserInfo.value = false;
-      await getUnreadMessagesCount();      
+      await getUnreadMessagesCount();
     } catch (error) {
       chatMessagesError.value = "Failed to load chat messages.";
 

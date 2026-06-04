@@ -32,3 +32,13 @@ h2 {
   letter-spacing: 0.05rem;
   margin-bottom: 1rem;
 }
+
+.scrollable-hidden {
+  overflow: auto; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.scrollable-hidden::-webkit-scrollbar {
+  display: none;
+}

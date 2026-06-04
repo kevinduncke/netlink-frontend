@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// VUE
+import { ref, onMounted, onUnmounted } from "vue";
+
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
 
@@ -25,6 +28,10 @@ const {
   openEditModalFor,
   editingPost,
   editingComment,
+  loadingPosts,
+  hasMore,
+  currentRoute,
+  loadPosts,
 
   // POST FUNCTIONS
   deletePost,
@@ -49,6 +56,29 @@ const {
   isAuthorPost,
   validatePostOwnership,
 } = usePosts();
+
+// INFINITE SCROLL SNTINELL
+const sentinel = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && currentRoute.value) {
+        loadPosts(currentRoute.value);
+      }
+    },
+    { threshold: 0.1 },
+  );
+
+  if (sentinel.value) {
+    observer.observe(sentinel.value);
+  }
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+});
 </script>
 
 <template>
@@ -285,6 +315,14 @@ const {
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- SENTINEL | INFINITE SCROLL -->
+  <div ref="sentinel" class="scroll-sentinel">
+    <span v-if="loadingPosts">Loading...</span>
+    <span v-else-if="currentRoute && hasMore[currentRoute] === false">
+      You've reached the end of the feed, Go back to read a book instead.
+    </span>
   </div>
 </template>
 
@@ -542,5 +580,13 @@ const {
   font-size: 0.75rem;
   margin: 0;
   text-align: right;
+}
+
+.scroll-sentinel {
+  text-align: center;
+  padding: 1rem;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
+  color: var(--color-primary);
 }
 </style>

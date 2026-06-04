@@ -120,6 +120,9 @@ export function usePosts() {
   // LOAD POST
   const loadingPosts = ref(false);
   const postsError = ref("");
+  const cursors = ref<Record<string, string | null>>({});
+  const hasMore = ref<Record<string, boolean>>({});
+  const currentRoute = ref<string | null>(null);
 
   async function loadPosts(route: string) {
     // CHECK IF USER IS AUTHENTICATED
@@ -128,20 +131,34 @@ export function usePosts() {
       return;
     }
 
+    if (currentRoute.value !== route) {
+      currentRoute.value = route;
+      userdata.value = [];
+      cursors.value[route] = null; // INIT ALL, 'USER/:ID', ETC. ROUTE POSTS
+      hasMore.value[route] = true; // ROUTE STRING
+    }
+
+    if (loadingPosts.value || hasMore.value[route] === false) return;
+
     loadingPosts.value = true;
     postsError.value = "";
 
     try {
-      // CLEAN PREVIOUS DATA
-      userdata.value = [];
-      const response = await api.get(`/post/${route}`);
-      userdata.value = response.data || [];
+      const cursor = cursors.value[route];
+      const params = new URLSearchParams({ limit: "10" });
+      if (cursor) params.append("cursor", cursor);
 
-      if (route === "following") {
-        if (userdata.value.length === 0) {
-          const allPosts = await api.get(`/post/all`);
-          userdata.value = allPosts.data || [];
-        }
+      const response = await api.get(`/post/${route}?${params}`);
+      const { posts: newPosts, nextCursor } = response.data;
+
+      userdata.value.push(...(newPosts || []));
+      cursors.value[route] = nextCursor;
+      hasMore.value[route] = nextCursor !== null;
+
+      if (route === "following" && userdata.value.length === 0) {
+        currentRoute.value = null; // RST
+        loadingPosts.value = false;
+        await loadPosts("all");
       }
     } catch (error) {
       postsError.value = "Failed to load posts.";
@@ -538,6 +555,8 @@ export function usePosts() {
     editingComment,
     loadingPosts,
     postsError,
+    hasMore,
+    currentRoute,
     loadingComments,
     commentsError,
 

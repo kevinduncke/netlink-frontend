@@ -56,7 +56,7 @@ onBeforeRouteLeave((to) => {
 <template>
   <div class="dash-wrapper">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="about-panel">
         <div class="dash-data-box">
           <h2>About this Account</h2>
@@ -127,7 +127,7 @@ onBeforeRouteLeave((to) => {
         </div>
       </div>
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="profile-content">
         <h2>Profile</h2>
         <Profile />

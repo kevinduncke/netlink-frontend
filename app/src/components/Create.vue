@@ -54,7 +54,7 @@ const results = ref<SearchUser[]>([]);
 const loadingSearchUsers = ref(false);
 const searchUsersError = ref("");
 
-let searchUsersTimer: ReturnType<typeof window.setTimeout> | null = null;
+let searchUsersTimer: number | null = null;
 
 async function searchUsers() {
   loadingSearchUsers.value = true;
@@ -105,7 +105,7 @@ onMounted(() => {
 <template>
   <div class="app-layout">
     <Navigation />
-    <div class="dash-sidepanel">
+    <div class="dash-sidepanel scrollable-hidden">
       <div class="createPost">
         <h2>Create Post</h2>
         <div class="post-text body-box shadow-light">
@@ -345,7 +345,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="dash-content">
+    <div class="dash-content scrollable-hidden">
       <div class="dash-myPosts">
         <h2>My Posts</h2>
         <SkeletonPost v-if="loadingPosts" />

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
@@ -32,6 +32,7 @@ const {
   selectedChat,
   loadingChatMessages,
   chatMessagesError,
+  hasMoreMessages,
   userChatId,
   chatUserInfo,
   displayUserInfo,
@@ -73,6 +74,47 @@ async function refreshSuggestedUsers() {
   await loadSuggestedUsers("following");
 }
 
+const chatContainer = ref<HTMLElement | null>(null);
+const topSentinel = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
+
+async function scrollToBottom() {
+  await nextTick();
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+  }
+}
+
+async function loadOlderMessages() {
+  const el = chatContainer.value;
+  if (!el) return;
+
+  const prevScrollHeight = el.scrollHeight;
+  await loadChatMessages(selectedChat.value!, { older: true });
+  await nextTick();
+
+  el.scrollTop = el.scrollHeight - prevScrollHeight;
+}
+
+function setupObserver() {
+  if (observer) {
+    observer.disconnect();
+  }
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && hasMoreMessages.value) {
+        loadOlderMessages();
+      }
+    },
+    { threshold: 0.1 },
+  );
+
+  if (topSentinel.value) {
+    observer.observe(topSentinel.value);
+  }
+}
+
 let searchUsersTimer: number | null = null;
 
 watch(queryUsers, () => {
@@ -85,21 +127,25 @@ watch(queryUsers, () => {
   }, 300);
 });
 
-onBeforeUnmount(() => {
-  if (searchUsersTimer) {
-    window.clearTimeout(searchUsersTimer);
-  }
-});
-
 watch(selectedChat, async () => {
   if (selectedChat.value) {
     await loadChatMessages(selectedChat.value);
+    scrollToBottom();
+    await nextTick();
+    setupObserver();
   }
 });
 
 onMounted(async () => {
   await loadSuggestedUsers("following");
   await loadUserChats();
+});
+
+onBeforeUnmount(() => {
+  if (searchUsersTimer) {
+    window.clearTimeout(searchUsersTimer);
+  }
+  observer?.disconnect();
 });
 </script>
 
@@ -296,7 +342,8 @@ onMounted(async () => {
         </div>
       </div>
       <div
-        class="dash-body-msg"
+        class="dash-body-msg scrollable-hidden"
+        ref="chatContainer"
         v-if="selectedChat"
         :class="{ 'dash-modal-info': displayUserInfo === true }"
       >
@@ -316,39 +363,28 @@ onMounted(async () => {
           message="Send the first message to start the chat."
           icon="messages"
         />
-        <div
-          v-else-if="!displayUserInfo"
-          class="dash-date-group"
-          v-for="(messages, date) in groupMessagesByDate"
-          :key="date"
-        >
-          <div class="dash-date-msg">
-            <span>{{ date }}</span>
+        <div v-else-if="!displayUserInfo">
+          <div ref="topSentinel" class="top-sentinel">
+            <span v-if="loadingChatMessages">Loading older messages...</span>
+            <span v-else-if="hasMoreMessages[selectedChat] === false">
+              No more messages to load.
+            </span>
           </div>
-          <div v-for="msg in messages" :key="msg.id">
-            <div
-              class="dash-message-boxuser"
-              v-if="msg.senderId === chatUserInfo.id"
-            >
-              <div class="dash-user-msg">
-                <p>{{ msg.content }}</p>
-                <time :datetime="msg.createdAt">
-                  {{
-                    new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  }}
-                </time>
-              </div>
+          <div
+            class="dash-date-group"
+            v-for="(messages, date) in groupMessagesByDate"
+            :key="date"
+          >
+            <div class="dash-date-msg">
+              <span>{{ date }}</span>
             </div>
-            <div class="dash-message-boxme" v-else>
-              <div class="dash-my-msg">
-                <p>{{ msg.content }}</p>
-                <div 
-                  class="dash-msg-info"
-                  :class="{ 'msg-readed': msg.read === true }"
-                >
+            <div v-for="msg in messages" :key="msg.id">
+              <div
+                class="dash-message-boxuser"
+                v-if="msg.senderId === chatUserInfo.id"
+              >
+                <div class="dash-user-msg">
+                  <p>{{ msg.content }}</p>
                   <time :datetime="msg.createdAt">
                     {{
                       new Date(msg.createdAt).toLocaleTimeString([], {
@@ -357,20 +393,38 @@ onMounted(async () => {
                       })
                     }}
                   </time>
-                  <SpriteIcon
-                    v-if="msg.received === true"
-                    name="checked"
-                    size="18"
-                    color="#e3e3e3"
-                    title="Received"
-                  />
-                  <SpriteIcon
-                    v-else
-                    name="check"
-                    size="18"
-                    color="#e3e3e3"
-                    title="Send"
-                  />                  
+                </div>
+              </div>
+              <div class="dash-message-boxme" v-else>
+                <div class="dash-my-msg">
+                  <p>{{ msg.content }}</p>
+                  <div
+                    class="dash-msg-info"
+                    :class="{ 'msg-readed': msg.read === true }"
+                  >
+                    <time :datetime="msg.createdAt">
+                      {{
+                        new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      }}
+                    </time>
+                    <SpriteIcon
+                      v-if="msg.received === true"
+                      name="checked"
+                      size="18"
+                      color="#e3e3e3"
+                      title="Received"
+                    />
+                    <SpriteIcon
+                      v-else
+                      name="check"
+                      size="18"
+                      color="#e3e3e3"
+                      title="Send"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -605,6 +659,15 @@ onMounted(async () => {
 .dash-body-msg {
   height: 100%;
   overflow-y: auto;
+}
+.top-sentinel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  color: var(--color-gray-600);
 }
 .dash-date-group {
   padding: 1rem 0;

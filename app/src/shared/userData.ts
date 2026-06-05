@@ -756,6 +756,8 @@ function createUserData() {
   const chatMessages = ref<ChatMessage[]>([]);
   const loadingChatMessages = ref(false);
   const chatMessagesError = ref("");
+  const chatCursors = ref<Record<string, string | null>>({});
+  const hasMoreMessages = ref<Record<string, boolean>>({});
   const unreadMessagesCount = ref(0);
   const userChatId = ref<string | number>("");
   const displayUserInfo = ref<boolean>(false);
@@ -794,17 +796,48 @@ function createUserData() {
   }
 
   // LOAD MESSAGES + GROUP THEM BY DATE
-  async function loadChatMessages(chatId: string | number) {
+  async function loadChatMessages(
+    chatId: string | number,
+    options = { older: false },
+  ) {
     loadingChatMessages.value = true;
     chatMessagesError.value = "";
 
-    try {
-      const response = await api.get(`/chats/${chatId}/messages`);
-      chatMessages.value = response.data.message || [];
-      chatUserInfo.value = response.data.receiver;
-      userChatId.value = chatId;
+    // RST STATE
+    if (!options.older) {
+      chatMessages.value = [];
+      chatCursors.value[chatId] = null;
+      hasMoreMessages.value[chatId] = true;
       displayUserInfo.value = false;
-      await getUnreadMessagesCount();
+    }
+
+    // NO FETCH MORE MESSAGES
+    if (hasMoreMessages.value[chatId] === false) {
+      loadingChatMessages.value = false;
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({ limit: "20" });
+      const cursor = chatCursors.value[chatId];
+      if (cursor) {
+        params.append("cursor", cursor);
+      }
+
+      const response = await api.get(`/chats/${chatId}/messages?${params}`);
+      const { messages: newMessages, nextCursor, receiver } = response.data;
+
+      if (options.older) {
+        chatMessages.value.unshift(...(newMessages || []));
+      } else {
+        chatMessages.value = newMessages || [];
+        chatUserInfo.value = receiver;
+        userChatId.value = chatId;
+        await getUnreadMessagesCount();
+      }
+
+      chatCursors.value[chatId] = nextCursor;
+      hasMoreMessages.value[chatId] = nextCursor !== null;
     } catch (error) {
       chatMessagesError.value = "Failed to load chat messages.";
 
@@ -1082,6 +1115,8 @@ function createUserData() {
     chatMessages,
     loadingChatMessages,
     chatMessagesError,
+    chatCursors,
+    hasMoreMessages,
     unreadMessagesCount,
     userChatId,
     displayUserInfo,

@@ -40,7 +40,6 @@ function createUserData() {
     // FUNCTIONS
     loadPosts,
   } = usePosts();
-  //================================================
 
   // LOAD FAVORITE USERS
   const favoriteUsers = ref<FollowUser[]>([]);
@@ -164,8 +163,6 @@ function createUserData() {
     }
   }
 
-  //================================================
-
   // NOTIFICATIONS
   const notifications = ref<NotificationGroup>({
     today: [],
@@ -217,8 +214,6 @@ function createUserData() {
     await loadNotifications();
   }
 
-  //================================================
-
   // SUGGESTED USERS
   const suggestedUsers = ref<FollowUser[]>([]);
   const loadingSuggestedUsers = ref(false);
@@ -253,8 +248,6 @@ function createUserData() {
       loadingSuggestedUsers.value = false;
     }
   }
-
-  //================================================
 
   // FILTER FOLLOW PANEL
   const followsFilter = ref<string>("following");
@@ -324,8 +317,6 @@ function createUserData() {
       loadingFollowersUsers.value = false;
     }
   }
-
-  //================================================
 
   // LOAD USER PROFILE
   const userProfile = ref<UserProfile>({
@@ -547,8 +538,6 @@ function createUserData() {
         (originalProfile.value.avatarUrl ?? "");
   }
 
-  //================================================
-
   // SEARCH POSTS
   const searchFilters = reactive({
     query: "",
@@ -607,7 +596,7 @@ function createUserData() {
     searchFilters.toDate = "";
   }
 
-  // FOLLOW USERS
+  // FOLLOW || UNFOLLOW USER
   async function followUser(userId: string | number) {
     try {
       await runFollowMutation({
@@ -649,6 +638,58 @@ function createUserData() {
         onFeedback: consoleMutationFeedback,
       });
       selectedUserId.value = 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // BLOCK || UNBLOCK USER
+  async function blockUser(userId: string | number) {
+    try {
+      await api.post(`/privacy/block/${userId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+  async function unblockUser(userId: string | number) {
+    try {
+      await api.delete(`/privacy/block/${userId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // RESTRICT || UNRESTRICT USER
+  async function restrictUser(userId: string | number) {
+    try {
+      await api.post(`/privacy/mute/${userId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+  async function unrestrictUser(userId: string | number) {
+    try {
+      await api.delete(`/privacy/mute/${userId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // REPORT USER
+  async function reportUser(
+    userId: string | number,
+    reason: string,
+    postId?: string | number,
+    messageId?: string | number,
+    details?: string,
+  ) {
+    try {
+      await api.post(`/privacy/report/${userId}`, {
+        reason,
+        postId,
+        messageId,
+        details,
+      });
     } catch (error) {
       throw error;
     }
@@ -704,8 +745,6 @@ function createUserData() {
     queryUsers.value = "";
     searchUsersResults.value = [];
   }
-
-  //================================================
 
   // LOAD USER CHATS
   const userChats = ref<UserChat[]>([]);
@@ -1027,8 +1066,6 @@ function createUserData() {
     await loadPosts(`user/${userId}`);
   }
 
-  //================================================
-
   // HELPER FUNCTIONS
   function selectedUser(userId: string | number) {
     // CHECH IF THE SELECTED USER ID IS THE SAME AS THE CURRENTLY LOGGED USER ID
@@ -1148,6 +1185,11 @@ function createUserData() {
     resetFilters,
     followUser,
     unfollowUser,
+    blockUser,
+    unblockUser,
+    restrictUser,
+    unrestrictUser,
+    reportUser,
     searchUsers,
     loadUserChats,
     filteredSuggestedUsers,

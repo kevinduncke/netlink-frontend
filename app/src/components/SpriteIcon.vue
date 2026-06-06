@@ -42,7 +42,9 @@ type IconName =
   | "menu"
   | "close"
   | "check"
-  | "checked";
+  | "checked"
+  | "report"
+  | "restrict";
 
 const props = withDefaults(
   defineProps<{

@@ -112,6 +112,24 @@ onBeforeRouteLeave((to) => {
             <SpriteIcon name="block" size="24" color="#535353" title="Block" />
             <p>Block</p>
           </button>
+          <button class="button" type="button">
+            <SpriteIcon
+              name="restrict"
+              size="24"
+              color="#535353"
+              title="Restrict"
+            />
+            <p>Restrict</p>
+          </button>
+          <button class="button" type="button">
+            <SpriteIcon
+              name="report"
+              size="24"
+              color="#535353"
+              title="Report"
+            />
+            <p>Report</p>
+          </button>
         </div>
         <div class="dash-data-box">
           <h2>Share Profile</h2>

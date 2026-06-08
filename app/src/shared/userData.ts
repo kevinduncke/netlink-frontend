@@ -674,7 +674,11 @@ function createUserData() {
   }
   async function unblockUser(userId: string | number) {
     try {
-      await api.delete(`/privacy/block/${userId}`);
+      const response = await api.delete(`/privacy/block/${userId}`);
+      if (response.status === 200) {
+        closeModal();
+        router.push("/dashboard");
+      }
     } catch (error) {
       throw error;
     }
@@ -683,14 +687,22 @@ function createUserData() {
   // RESTRICT || UNRESTRICT USER
   async function restrictUser(userId: string | number) {
     try {
-      await api.post(`/privacy/mute/${userId}`);
+      const response = await api.post(`/privacy/mute/${userId}`);
+      if (response.status === 200) {
+        closeModal();
+        router.push("/dashboard");
+      }
     } catch (error) {
       throw error;
     }
   }
   async function unrestrictUser(userId: string | number) {
     try {
-      await api.delete(`/privacy/mute/${userId}`);
+      const response = await api.delete(`/privacy/mute/${userId}`);
+      if (response.status === 200) {
+        closeModal();
+        router.push("/dashboard");
+      }
     } catch (error) {
       throw error;
     }
@@ -705,12 +717,16 @@ function createUserData() {
     details?: string,
   ) {
     try {
-      await api.post(`/privacy/report/${userId}`, {
+      const response = await api.post(`/privacy/report/${userId}`, {
         reason,
         postId,
         messageId,
         details,
       });
+      if (response.status === 200) {
+        closeModal();
+        router.push("/dashboard");
+      }
     } catch (error) {
       throw error;
     }

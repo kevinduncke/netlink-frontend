@@ -40,12 +40,12 @@ const modalOptions = computed(() => {
           "They will be able to contact you and find your profile or posts on Netlink again.",
         actionText: "Unblock User",
         actionHandler: () => unblockUser(modalTargetUserId.value),
-      };    
+      };
     case "restrict":
       return {
         title: "Restrict User",
         description:
-          "They will still be able to see your posts and comment, but their comments will only be visible to them. They also won't see when you're active or if you've read their messages.",
+          "Limit their interactions with you without blocking them. They won't know you've restricted them.",
         actionText: "Restrict User",
         actionHandler: () => restrictUser(modalTargetUserId.value),
       };
@@ -56,7 +56,7 @@ const modalOptions = computed(() => {
           "They will be able to see your profile, posts, comments and send you messages, etc.",
         actionText: "Unrestrict User",
         actionHandler: () => unrestrictUser(modalTargetUserId.value),
-      };        
+      };
     case "report":
       return {
         title: "Report User",
@@ -91,39 +91,38 @@ const reportType = computed(() => {
 <template>
   <div class="modal-overlay scrollable-hidden">
     <div class="modal-content">
-      <h2>{{ modalOptions.title }}</h2>
-      <p>{{ modalOptions.description }}</p>
-      <div v-if="modalCurrentStatus === 'restrict'">
-        <div>
-          <SpriteIcon
-            name="restrict"
-            size="48"
-            color="#535353"
-            title="Restrict"
-          />
-          <p>
-            Limit their interactions with you without blocking them. They won't
-            know you've restricted them.
-          </p>
+      <div class="modal-data">
+        <h2>{{ modalOptions.title }}</h2>
+        <p>{{ modalOptions.description }}</p>
+        <div v-if="modalCurrentStatus === 'restrict'" class="restrict-info">
+          <div class="restrict-info-content">
+            <SpriteIcon
+              name="heart"
+              size="24"
+              color="#535353"
+              title="Restrict"
+            />
+            <p>
+              They won't be able to like or comment on your posts.
+            </p>
+          </div>
+          <div class="restrict-info-content">
+            <SpriteIcon
+              name="messages"
+              size="24"
+              color="#535353"
+              title="Messages"
+            />
+            <p>
+              They won't be able to send you direct messages.
+            </p>
+          </div>
         </div>
-        <div>
-          <SpriteIcon
-            name="messages"
-            size="48"
-            color="#535353"
-            title="Messages"
-          />
-          <p>
-            They won't be able to like or comment on your posts. You'll control
-            if they can send you direct messages.
-          </p>
+        <div v-if="modalCurrentStatus === 'report'">
+          <p>Why are you reporting this user?</p>
+          <button type="button" class="button">{{ reportType }}</button>
         </div>
       </div>
-      <div v-if="modalCurrentStatus === 'report'">
-        <p>Why are you reporting this user?</p>
-        <button type="button" class="button">{{ reportType }}</button>
-      </div>
-      <div v-if="modalCurrentStatus === 'report'"></div>
       <div class="mdl-actions">
         <button
           class="button"
@@ -157,7 +156,6 @@ const reportType = computed(() => {
 }
 .modal-content {
   background: var(--color-white);
-  padding: 1.5rem 0 0 0;
   border-radius: var(--radius-md);
   width: min(100%, 500px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -166,6 +164,10 @@ const reportType = computed(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.modal-data {
+  padding: 1.5rem;
+  text-align: center;
 }
 .modal-content h2 {
   font-family: "Montserrat Medium", sans-serif;
@@ -177,7 +179,22 @@ const reportType = computed(() => {
   font-size: var(--font-size-body);
   color: var(--color-gray-800);
   text-align: center;
-  padding: 1rem 0;
+  padding-top: 1rem;
+}
+.restrict-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.restrict-info-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+.restrict-info-content p {
+  padding: 0;
 }
 .mdl-actions {
   display: flex;

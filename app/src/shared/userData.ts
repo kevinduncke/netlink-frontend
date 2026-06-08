@@ -333,6 +333,8 @@ function createUserData() {
     isFollowedByMe: false,
     privacyMode: false,
     accountVisibility: "public",
+    isBlockedByMe: false,
+    isRestrictedByMe: false,
   });
   function resetUserProfile() {
     userProfile.value = {
@@ -349,6 +351,8 @@ function createUserData() {
       isFollowedByMe: false,
       privacyMode: false,
       accountVisibility: "public",
+      isBlockedByMe: false,
+      isRestrictedByMe: false,
     };
     originalProfile.value = {
       id: "",
@@ -364,6 +368,8 @@ function createUserData() {
       isFollowedByMe: false,
       privacyMode: false,
       accountVisibility: "public",
+      isBlockedByMe: false,
+      isRestrictedByMe: false,
     };
   }
   const loadingUserProfile = ref(false);
@@ -643,10 +649,25 @@ function createUserData() {
     }
   }
 
+  // MODAL ACTIONS AND STATES
+  const modalCurrentStatus = ref<
+    "none" | "block" | "unblock" | "restrict" | "unrestrict" | "report"
+  >("none");
+  const modalTargetUserId = ref<string | number>("");
+  const modalReportTypes = ref<"Account" | "Post" | "Message">("Account");
+  const closeModal = () => {
+    modalCurrentStatus.value = "none";
+    modalTargetUserId.value = "";
+  };
+
   // BLOCK || UNBLOCK USER
   async function blockUser(userId: string | number) {
     try {
-      await api.post(`/privacy/block/${userId}`);
+      const response = await api.post(`/privacy/block/${userId}`);
+      if (response.status === 200) {
+        closeModal();
+        router.push("/dashboard");
+      }
     } catch (error) {
       throw error;
     }
@@ -1099,11 +1120,9 @@ function createUserData() {
   function getUserRoute(username: string, userId: string | number) {
     const currentUser = authStore.user as {
       id?: number | string;
-      userId?: number | string;
     } | null;
-    const currentUserId = currentUser?.id ?? currentUser?.userId;
 
-    return idEquals(userId, currentUserId) ? "/account" : `/user/${username}`;
+    return idEquals(userId, currentUser?.id) ? "/account" : `/user/${username}`;
   }
 
   return {
@@ -1129,6 +1148,9 @@ function createUserData() {
     followersUsers,
     loadingFollowersUsers,
     followersUsersError,
+    modalCurrentStatus,
+    modalTargetUserId,
+    modalReportTypes,
     userProfile,
     loadingUserProfile,
     userProfileError,
@@ -1185,6 +1207,7 @@ function createUserData() {
     resetFilters,
     followUser,
     unfollowUser,
+    closeModal,
     blockUser,
     unblockUser,
     restrictUser,

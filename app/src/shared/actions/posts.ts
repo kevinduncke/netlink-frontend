@@ -105,14 +105,37 @@ export interface CreatePostOptions {
 	onFeedback?: MutationFeedbackHandler;
 }
 
+function mergeCreatedPost(optimisticPost: PostType, serverPost: PostType): PostType {
+	return {
+		...optimisticPost,
+		...serverPost,
+		author: {
+			...optimisticPost.author,
+			...(serverPost.author ?? {}),
+		},
+		repostedBy: serverPost.repostedBy
+			? {
+				...optimisticPost.repostedBy,
+				...serverPost.repostedBy,
+			}
+			: optimisticPost.repostedBy,
+		_count: {
+			...optimisticPost._count,
+			...(serverPost._count ?? {}),
+		},
+		comments: serverPost.comments ?? optimisticPost.comments,
+		mentions: serverPost.mentions ?? optimisticPost.mentions,
+	};
+}
+
 export async function runCreatePost({ posts, post, onRequest, onFeedback }: CreatePostOptions) {
 	const snapshot = applyOptimisticCreatePost(posts, post);
 
 	try {
 		const serverPost = await onRequest(post as Partial<PostType>);
-		// replace optimistic post (by temporary id)
-		const idx = posts.value.findIndex((p) => typeof p.id === 'string' && (p.id as string).startsWith('temp-'));
-		if (idx >= 0) posts.value[idx] = serverPost;
+		const idx = posts.value.findIndex((p) => p.id === post.id);
+		const optimisticPost = posts.value[idx];
+		if (optimisticPost) posts.value[idx] = mergeCreatedPost(optimisticPost, serverPost);
 		onFeedback?.({ kind: 'success', title: 'Post created' });
 		return serverPost;
 	} catch (error) {

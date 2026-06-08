@@ -11,7 +11,10 @@ export const useAuthStore = defineStore("auth", {
       try {
         return JSON.parse(rawUser) as {
           id?: number | string;
-          [key: string]: unknown;
+          name?: string;
+          username?: string;          
+          avatarUrl?: string;
+          email?: string;
         };
       } catch {
         localStorage.removeItem("user");

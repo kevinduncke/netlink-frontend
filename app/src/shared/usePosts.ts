@@ -73,7 +73,12 @@ export function usePosts() {
       const optimisticPost: PostType = {
         id: `temp-${Date.now()}` as any,
         content: createPostData.content,
-        author: authStore.user as any,
+        author: {
+          id: authStore.user?.id,
+          name: authStore.user?.name,
+          username: authStore.user?.username,
+          avatarUrl: authStore.user?.avatarUrl,
+        },
         createdAt: new Date().toISOString(),
         _count: { likes: 0, comments: 0, shares: 0 },
         isRepost: false,

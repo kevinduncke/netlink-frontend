@@ -82,7 +82,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-for="post in userdata" :key="post.id">
+  <div v-for="post in userdata" :key="post.id">  
     <div class="dash-post shadow-light">
       <div class="dash-user-post">
         <div class="dash-username">

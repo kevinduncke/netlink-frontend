@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { applyOptimisticLike, rollbackOptimisticLike, runLikeMutation } from "../posts";
+import { applyOptimisticLike, rollbackOptimisticLike, runCreatePost, runLikeMutation } from "../posts";
 
 describe("post like helpers", () => {
   it("updates and restores like state", () => {
@@ -45,5 +45,50 @@ describe("post like helpers", () => {
     expect(onFeedback).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "error" }),
     );
+  });
+});
+
+describe("create post helpers", () => {
+  it("preserves optimistic nested fields when the server response is partial", async () => {
+    const posts = {
+      value: [
+        {
+          id: "temp-1",
+          author: {
+            id: 5,
+            name: "Alex",
+            username: "alex",
+            bio: "",
+            followers: 0,
+            liked: false,
+          },
+          repostedBy: {
+            id: 5,
+            name: "Alex",
+            username: "alex",
+            bio: "",
+            followers: 0,
+            liked: false,
+          },
+          _count: { likes: 0, comments: 0, shares: 0 },
+          comments: [],
+          mentions: [],
+        },
+      ],
+    } as any;
+
+    await runCreatePost({
+      posts,
+      post: posts.value[0],
+      onRequest: async () => ({
+        id: 99,
+        content: "hello",
+        createdAt: new Date().toISOString(),
+      } as any),
+    });
+
+    expect(posts.value[0].author.username).toBe("alex");
+    expect(posts.value[0].author.name).toBe("Alex");
+    expect(posts.value[0].id).toBe(99);
   });
 });

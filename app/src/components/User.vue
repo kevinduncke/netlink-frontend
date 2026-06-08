@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 
 // COMPONENTS
@@ -8,6 +8,7 @@ import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
 import Post from "./Post.vue";
 import SpriteIcon from "./SpriteIcon.vue";
+import Modal from "./Modal.vue";
 
 // STYLES
 import "../styles/about.css";
@@ -24,6 +25,8 @@ const {
   userProfile,
   selectedUserId,
   dateConverter,
+  modalCurrentStatus,
+  modalTargetUserId,
 
   // FUNCTIONS
   resetUserProfile,
@@ -44,6 +47,12 @@ onMounted(async () => {
   await loadSelectedUser(selectedUserId.value);
 });
 
+watch(selectedUserId, async (newUserId) => {
+  if (newUserId) {
+    await loadSelectedUser(newUserId);
+  }
+});
+
 onBeforeRouteLeave((to) => {
   // Only clear selectedUserId if leaving /user route entirely
   if (!to.path.startsWith("/user/")) {
@@ -54,6 +63,7 @@ onBeforeRouteLeave((to) => {
 </script>
 
 <template>
+  <Modal v-if="modalCurrentStatus !== 'none'" />
   <div class="dash-wrapper">
     <Navigation />
     <div class="dash-sidepanel scrollable-hidden">
@@ -108,20 +118,47 @@ onBeforeRouteLeave((to) => {
             />
             <p>Send a Message</p>
           </button>
-          <button class="button" type="button">
+          <button
+            class="button"
+            type="button"
+            @click="
+              modalCurrentStatus = userProfile.isBlockedByMe
+                ? 'unblock'
+                : 'block';
+              modalTargetUserId = userProfile.id;
+            "
+          >
             <SpriteIcon name="block" size="24" color="#535353" title="Block" />
-            <p>Block</p>
+            <p>{{ userProfile.isBlockedByMe ? "Unblock" : "Block" }}</p>
           </button>
-          <button class="button" type="button">
+          <button
+            class="button"
+            type="button"
+            @click="
+              modalCurrentStatus = userProfile.isRestrictedByMe
+                ? 'unrestrict'
+                : 'restrict';
+              modalTargetUserId = userProfile.id;
+            "
+          >
             <SpriteIcon
               name="restrict"
               size="24"
               color="#535353"
               title="Restrict"
             />
-            <p>Restrict</p>
+            <p>
+              {{ userProfile.isRestrictedByMe ? "Unrestrict" : "Restrict" }}
+            </p>
           </button>
-          <button class="button" type="button">
+          <button
+            class="button"
+            type="button"
+            @click="
+              modalCurrentStatus = 'report';
+              modalTargetUserId = userProfile.id;
+            "
+          >
             <SpriteIcon
               name="report"
               size="24"

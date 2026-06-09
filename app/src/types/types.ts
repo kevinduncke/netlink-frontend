@@ -20,6 +20,7 @@ export type PostType = {
   repostedAt: string;
   repostedBy: User;
   mentions: User[];
+  userRestrictedMe: boolean;
 };
 
 export type User = {

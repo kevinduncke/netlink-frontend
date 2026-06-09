@@ -335,6 +335,7 @@ function createUserData() {
     accountVisibility: "public",
     isBlockedByMe: false,
     isRestrictedByMe: false,
+    hasRestrictedMe: false,
   });
   function resetUserProfile() {
     userProfile.value = {
@@ -353,6 +354,7 @@ function createUserData() {
       accountVisibility: "public",
       isBlockedByMe: false,
       isRestrictedByMe: false,
+      hasRestrictedMe: false,
     };
     originalProfile.value = {
       id: "",
@@ -370,6 +372,7 @@ function createUserData() {
       accountVisibility: "public",
       isBlockedByMe: false,
       isRestrictedByMe: false,
+      hasRestrictedMe: false,
     };
   }
   const loadingUserProfile = ref(false);
@@ -668,7 +671,7 @@ function createUserData() {
         closeModal();
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (error) {        
       throw error;
     }
   }
@@ -676,9 +679,9 @@ function createUserData() {
     try {
       const response = await api.delete(`/privacy/block/${userId}`);
       if (response.status === 200) {
+        userProfile.value.isBlockedByMe = false;
         closeModal();
-        router.push("/dashboard");
-      }
+      }      
     } catch (error) {
       throw error;
     }
@@ -689,8 +692,8 @@ function createUserData() {
     try {
       const response = await api.post(`/privacy/mute/${userId}`);
       if (response.status === 200) {
+        userProfile.value.isRestrictedByMe = true;
         closeModal();
-        router.push("/dashboard");
       }
     } catch (error) {
       throw error;
@@ -700,8 +703,8 @@ function createUserData() {
     try {
       const response = await api.delete(`/privacy/mute/${userId}`);
       if (response.status === 200) {
+        userProfile.value.isRestrictedByMe = false;
         closeModal();
-        router.push("/dashboard");
       }
     } catch (error) {
       throw error;

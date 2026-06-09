@@ -109,7 +109,12 @@ onBeforeRouteLeave((to) => {
             />
             <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow" }}</p>
           </button>
-          <button class="button" type="button" @click="handleSendMessage">
+          <button 
+            class="button" 
+            type="button" 
+            v-if="!userProfile.hasRestrictedMe"
+            @click="handleSendMessage"
+          >
             <SpriteIcon
               name="messages"
               size="24"

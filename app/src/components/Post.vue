@@ -145,7 +145,8 @@ onUnmounted(() => {
           class="button"
           type="button"
           :class="{ 'dash-commented': post._count.comments }"
-          v-if="!post.disableComments"
+          :disabled="post.userRestrictedMe"
+          v-if="!post.disableComments"          
           @click="toggleCommentInput(post.id)"
         >
           <SpriteIcon
@@ -161,6 +162,7 @@ onUnmounted(() => {
           type="button"
           @click="likePost(post.id, post.author.liked)"
           :class="{ 'dash-liked': post.author.liked }"
+          :disabled="post.userRestrictedMe"
         >
           <SpriteIcon name="heart" size="16" color="#535353" title="Likes" />
           <span v-if="!post.hideLikes">{{ post._count.likes || 0 }}</span>
@@ -169,6 +171,7 @@ onUnmounted(() => {
           class="button"
           type="button"
           :class="{ 'dash-shared': post._count.shares }"
+          :disabled="post.userRestrictedMe"
           @click="repost(post.id, post.repostedByMe)"
           v-if="isAuthorPost(post.author.id)"
         >

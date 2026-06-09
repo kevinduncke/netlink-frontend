@@ -34,6 +34,7 @@ export type UserProfile = {
   isFollowedByMe: boolean;
   isBlockedByMe: boolean;
   isRestrictedByMe: boolean;
+  hasRestrictedMe: boolean;
   privacyMode: boolean;
   accountVisibility: "public" | "private";
 };

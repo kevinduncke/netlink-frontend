@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // VUE
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue"
+
+// COMPONENTS
+import Modal from "./Modal.vue";
 
 // USER COMPOSITION
 import { useUserData } from "../shared/userData";
@@ -14,6 +17,10 @@ import SpriteIcon from "./SpriteIcon.vue";
 
 // USER DATA FUNCTIONS
 const {
+  // VARIABLES
+  modalCurrentStatus,
+  modalTargetUserId,
+
   // FUNCTIONS
   selectedUser,
   getUserRoute,
@@ -82,7 +89,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-for="post in userdata" :key="post.id">  
+  <Modal v-if="modalCurrentStatus !== 'none'" />
+  <div v-for="post in userdata" :key="post.id">
     <div class="dash-post shadow-light">
       <div class="dash-user-post">
         <div class="dash-username">
@@ -98,10 +106,7 @@ onUnmounted(() => {
             </span>
           </div>
         </div>
-        <div
-          class="dash-post-opts"
-          v-if="post.isRepost !== true && validatePostOwnership(post.author.id)"
-        >
+        <div class="dash-post-opts">
           <button
             class="button"
             type="button"
@@ -118,11 +123,37 @@ onUnmounted(() => {
             class="dash-pop-delete shadow-light"
             v-if="openOptionsFor === post.id"
           >
-            <button class="button" type="button" @click="deletePost(post.id)">
-              Delete
-            </button>
-            <button class="button" type="button" @click="openEditModal(post)">
-              Edit
+            <div
+              v-if="
+                post.isRepost !== true && validatePostOwnership(post.author.id)
+              "
+            >
+              <button class="button" type="button" @click="deletePost(post.id)">
+                Delete
+              </button>
+              <button class="button" type="button" @click="openEditModal(post)">
+                Edit
+              </button>
+            </div>
+            <button
+              class="button"
+              type="button"
+              @click="
+                modalCurrentStatus = 'report';
+                modalTargetUserId = post.author.id;
+              "
+            >Report</button>
+            <button
+              class="button"
+              type="button"
+              @click="
+                modalCurrentStatus = post.isRestrictedByMe
+                  ? 'unrestrict'
+                  : 'restrict';
+                modalTargetUserId = post.author.id;
+              "
+            >
+              {{ post.isRestrictedByMe ? "Unrestrict" : "Restrict" }}
             </button>
           </div>
         </div>
@@ -146,7 +177,7 @@ onUnmounted(() => {
           type="button"
           :class="{ 'dash-commented': post._count.comments }"
           :disabled="post.userRestrictedMe"
-          v-if="!post.disableComments"          
+          v-if="!post.disableComments"
           @click="toggleCommentInput(post.id)"
         >
           <SpriteIcon

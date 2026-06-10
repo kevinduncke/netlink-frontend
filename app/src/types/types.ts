@@ -21,6 +21,8 @@ export type PostType = {
   repostedBy: User;
   mentions: User[];
   userRestrictedMe: boolean;
+  isFollowedByMe: boolean;
+  isRestrictedByMe: boolean;
 };
 
 export type User = {

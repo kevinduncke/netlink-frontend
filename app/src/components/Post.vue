@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // VUE
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted } from "vue";
 
 // COMPONENTS
 import Modal from "./Modal.vue";
@@ -20,6 +20,7 @@ const {
   // VARIABLES
   modalCurrentStatus,
   modalTargetUserId,
+  reportData,
 
   // FUNCTIONS
   selectedUser,
@@ -33,6 +34,8 @@ const {
   userdata,
   openOptionsFor,
   openEditModalFor,
+  openCommentOptions,
+  closeCommentOptions,
   editingPost,
   editingComment,
   loadingPosts,
@@ -54,6 +57,7 @@ const {
   openEditModal,
   closeEditModal,
   toggleCommentInput,
+  toggleCommentOptions,
   toggleCommentActions,
   startEditComment,
 
@@ -141,8 +145,11 @@ onUnmounted(() => {
               @click="
                 modalCurrentStatus = 'report';
                 modalTargetUserId = post.author.id;
+                reportData.postId = post.id;
               "
-            >Report</button>
+            >
+              Report
+            </button>
             <button
               class="button"
               type="button"
@@ -239,40 +246,64 @@ onUnmounted(() => {
                 </RouterLink>
               </span>
             </div>
-            <div
-              class="dash-usercmt-actions"
-              v-if="isAuthorComment(comment.author.id)"
-            >
-              <button
-                class="button"
-                type="button"
-                v-if="editingComment.openCommentActions === comment.id"
-                @click="startEditComment(comment.id, comment.content)"
+            <div class="dash-usercmt-actions">
+              <div
+                class="dash-editdelete"
+                v-if="isAuthorComment(comment.author.id)"
               >
-                <SpriteIcon
-                  name="edit"
-                  size="20"
-                  color="#535353"
-                  title="Edit comment"
-                />
-              </button>
+                <button
+                  class="button"
+                  type="button"
+                  v-if="editingComment.openCommentActions === comment.id"
+                  @click="startEditComment(comment.id, comment.content)"
+                >
+                  <SpriteIcon
+                    name="edit"
+                    size="20"
+                    color="#535353"
+                    title="Edit comment"
+                  />
+                </button>
+                <button
+                  class="button"
+                  type="button"
+                  v-if="editingComment.openCommentActions === comment.id"
+                  @click="deleteComment(comment.id, post.id)"
+                >
+                  <SpriteIcon
+                    name="trash"
+                    size="20"
+                    color="#535353"
+                    title="Delete comment"
+                  />
+                </button>
+              </div>
+              <div v-if="openCommentOptions === comment.id && closeCommentOptions">
+                <button 
+                  class="button" 
+                  type="button"
+                  @click="
+                    modalCurrentStatus = 'report';
+                    modalTargetUserId = comment.author.id;
+                    reportData.commentId = comment.id;
+                  "                  
+                >
+                  <SpriteIcon
+                    name="report"
+                    size="18"
+                    color="#535353"
+                    title="Report comment"
+                  />
+                </button>
+              </div>
+
               <button
                 class="button"
                 type="button"
-                v-if="editingComment.openCommentActions === comment.id"
-                @click="deleteComment(comment.id, post.id)"
-              >
-                <SpriteIcon
-                  name="trash"
-                  size="20"
-                  color="#535353"
-                  title="Delete comment"
-                />
-              </button>
-              <button
-                class="button"
-                type="button"
-                @click="toggleCommentActions(comment.id)"
+                @click="
+                  toggleCommentActions(comment.id);
+                  toggleCommentOptions(comment.id);
+                "
               >
                 <SpriteIcon
                   name="dots"
@@ -568,6 +599,10 @@ onUnmounted(() => {
   color: #006145;
   font-family: "Montserrat Medium", sans-serif;
   font-size: 0.75rem;
+}
+.dash-editdelete {
+  display: inherit;
+  gap: 0.5rem;
 }
 .dash-usercmt-actions svg {
   fill: #535353;

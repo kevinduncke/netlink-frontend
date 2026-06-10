@@ -12,6 +12,7 @@ import { idEquals, isPresentId } from "./idUtils";
 import type { Followers, FollowUser, UserChat } from "../types/users";
 import type { SearchFavoriteUser, SearchUser } from "../types/search";
 import type { UserProfile } from "../types/users";
+import type { Report } from "../types/types";
 
 // POSTS COMPOSITION + VARIABLES
 import { usePosts } from "../shared/usePosts";
@@ -657,7 +658,9 @@ function createUserData() {
     "none" | "block" | "unblock" | "restrict" | "unrestrict" | "report"
   >("none");
   const modalTargetUserId = ref<string | number>("");
-  const modalReportTypes = ref<"Account" | "Post" | "Message">("Account");
+  const modalReportTypes = ref<
+    "Account" | "User" | "Post" | "Comment" | "Message" | "None"
+  >("None");
   const closeModal = () => {
     modalCurrentStatus.value = "none";
     modalTargetUserId.value = "";
@@ -671,7 +674,7 @@ function createUserData() {
         closeModal();
         router.push("/dashboard");
       }
-    } catch (error) {        
+    } catch (error) {
       throw error;
     }
   }
@@ -681,7 +684,7 @@ function createUserData() {
       if (response.status === 200) {
         userProfile.value.isBlockedByMe = false;
         closeModal();
-      }      
+      }
     } catch (error) {
       throw error;
     }
@@ -712,19 +715,21 @@ function createUserData() {
   }
 
   // REPORT USER
-  async function reportUser(
-    userId: string | number,
-    reason: string,
-    postId?: string | number,
-    messageId?: string | number,
-    details?: string,
-  ) {
+  const reportData = reactive<Report>({
+    userId: null,
+    details: "",
+    postId: null,
+    commentId: null,
+    messageId: null,
+  });
+  async function reportUser(userId: string | number) {
     try {
       const response = await api.post(`/privacy/report/${userId}`, {
-        reason,
-        postId,
-        messageId,
-        details,
+        reason: modalReportTypes.value,
+        postId: reportData.postId,
+        commentId: reportData.commentId,
+        messageId: reportData.messageId,
+        details: reportData.details,
       });
       if (response.status === 200) {
         closeModal();
@@ -733,6 +738,20 @@ function createUserData() {
     } catch (error) {
       throw error;
     }
+  }
+  function handleReport() {
+    console.log("REPORT EXECUTED");
+    if (modalTargetUserId.value === null) {
+      console.log("Missing required report data:", {
+        modalTargetUserId: modalTargetUserId.value,
+        postId: reportData.postId,
+        commentId: reportData.commentId,
+        messageId: reportData.messageId,
+        details: reportData.details,
+      });
+      return;
+    }
+    reportUser(modalTargetUserId.value);
   }
 
   // SEARCH USERS
@@ -1170,6 +1189,7 @@ function createUserData() {
     modalCurrentStatus,
     modalTargetUserId,
     modalReportTypes,
+    reportData,
     userProfile,
     loadingUserProfile,
     userProfileError,
@@ -1231,6 +1251,7 @@ function createUserData() {
     unblockUser,
     restrictUser,
     unrestrictUser,
+    handleReport,
     reportUser,
     searchUsers,
     loadUserChats,

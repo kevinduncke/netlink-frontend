@@ -14,13 +14,14 @@ const {
   modalCurrentStatus,
   modalTargetUserId,
   modalReportTypes,
+  reportData,
 
   // FUNCTIONS
   blockUser,
   unblockUser,
   restrictUser,
   unrestrictUser,
-  reportUser,
+  handleReport,
 } = useUserData();
 
 const modalOptions = computed(() => {
@@ -64,7 +65,7 @@ const modalOptions = computed(() => {
           "Reporting a user will send their profile and recent activity to our moderation team for review. We take all reports seriously and will take appropriate action if any violations of our community guidelines are found.",
         actionText: "Report User",
         type: "",
-        actionHandler: () => reportUser(modalTargetUserId.value, ""),
+        actionHandler: () => handleReport(),
       };
     default:
       return {
@@ -83,8 +84,12 @@ const reportType = computed(() => {
       return "Report Post";
     case "Message":
       return "Report Message";
-    default:
+    case "User":
       return "Report User";
+    case "None":
+      return "None";
+    default:
+      return "Unable to report";
   }
 });
 </script>
@@ -102,9 +107,7 @@ const reportType = computed(() => {
               color="#535353"
               title="Restrict"
             />
-            <p>
-              They won't be able to like or comment on your posts.
-            </p>
+            <p>They won't be able to like or comment on your posts.</p>
           </div>
           <div class="restrict-info-content">
             <SpriteIcon
@@ -113,14 +116,63 @@ const reportType = computed(() => {
               color="#535353"
               title="Messages"
             />
-            <p>
-              They won't be able to send you direct messages.
-            </p>
+            <p>They won't be able to send you direct messages.</p>
           </div>
         </div>
         <div v-if="modalCurrentStatus === 'report'">
-          <p>Why are you reporting this user?</p>
-          <button type="button" class="button">{{ reportType }}</button>
+          <div v-if="reportType === 'None'">
+            <p>What do you want to report?</p>
+            <div>
+              <button
+                type="button"
+                class="button"
+                @click="modalReportTypes = 'Account'"
+              >
+                Report Account
+              </button>
+              <button
+                type="button"
+                class="button"
+                @click="modalReportTypes = 'User'"
+              >
+                Report User
+              </button>
+              <button
+                type="button"
+                class="button"
+                @click="modalReportTypes = 'Post'"
+              >
+                Report Post
+              </button>
+              <button
+                type="button"
+                class="button"
+                @click="modalReportTypes = 'Comment'"
+              >
+                Report Comment
+              </button>
+              <button
+                type="button"
+                class="button"
+                @click="modalReportTypes = 'Message'"
+              >
+                Report Message
+              </button>
+            </div>
+            <div>
+              <p>
+                Can you give a brief description of why are you reporting this
+                user?
+              </p>
+              <textarea
+                name="report-details"
+                id="report-details"
+                cols="30"
+                rows="5"
+                v-model="reportData.details"
+              ></textarea>
+            </div>
+          </div>
         </div>
       </div>
       <div class="mdl-actions">
@@ -134,7 +186,8 @@ const reportType = computed(() => {
         <button
           class="button mdl-action"
           type="button"
-          @click="modalOptions.actionHandler"
+          @click="modalOptions.actionHandler()"
+          v-if="reportType !== 'None'"
         >
           {{ modalOptions.actionText }}
         </button>

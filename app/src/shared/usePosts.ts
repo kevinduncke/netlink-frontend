@@ -54,6 +54,8 @@ export function usePosts() {
   // POST COMPONENT OPTIONS
   const openOptionsFor = ref<number | string>("");
   const openEditModalFor = ref<number | string>("");
+  const openCommentOptions = ref<number | string | null>(null);
+  const closeCommentOptions = ref<boolean>(false);
 
   // EDIT POST
   const editingPost = ref<PostType | null>(null);
@@ -441,6 +443,10 @@ export function usePosts() {
       editingComment.openCommentPostId === postId ? null : postId;
     loadComments(postId);
   }
+  function toggleCommentOptions(commentId: number | string){
+    openCommentOptions.value = commentId;
+    closeCommentOptions.value = !closeCommentOptions.value;
+  }
   function toggleCommentActions(commentId: number | string) {
     editingComment.openCommentActions =
       editingComment.openCommentActions === commentId ? null : commentId;
@@ -556,6 +562,8 @@ export function usePosts() {
     createPostData,
     openOptionsFor,
     openEditModalFor,
+    openCommentOptions,
+    closeCommentOptions,
     editingPost,
     editingComment,
     loadingPosts,
@@ -592,6 +600,7 @@ export function usePosts() {
     toggleHideLikes,
     toggleDisableComments,
     toggleCommentInput,
+    toggleCommentOptions,
     toggleCommentActions,
     startEditComment,
 

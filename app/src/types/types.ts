@@ -39,6 +39,14 @@ export type UserMention = {
   username: string;
 };
 
+export type Report = {
+  userId: string | number | null;
+  details: string;
+  postId?: string | number | null;
+  commentId?: string | number | null;
+  messageId?: string | number | null;
+}
+
 export type SpecificFollower = {
   id: string | number;
 };

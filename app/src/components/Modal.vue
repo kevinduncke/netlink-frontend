@@ -78,8 +78,6 @@ const modalOptions = computed(() => {
 });
 const reportType = computed(() => {
   switch (modalReportTypes.value) {
-    case "Account":
-      return "Report Account";
     case "Post":
       return "Report Post";
     case "Message":
@@ -122,57 +120,53 @@ const reportType = computed(() => {
         <div v-if="modalCurrentStatus === 'report'">
           <div v-if="reportType === 'None'">
             <p>What do you want to report?</p>
-            <div>
-              <button
-                type="button"
-                class="button"
-                @click="modalReportTypes = 'Account'"
-              >
-                Report Account
-              </button>
-              <button
-                type="button"
-                class="button"
-                @click="modalReportTypes = 'User'"
-              >
-                Report User
-              </button>
-              <button
-                type="button"
-                class="button"
-                @click="modalReportTypes = 'Post'"
-              >
-                Report Post
-              </button>
-              <button
-                type="button"
-                class="button"
-                @click="modalReportTypes = 'Comment'"
-              >
-                Report Comment
-              </button>
-              <button
-                type="button"
-                class="button"
-                @click="modalReportTypes = 'Message'"
-              >
-                Report Message
-              </button>
-            </div>
-            <div>
-              <p>
-                Can you give a brief description of why are you reporting this
-                user?
-              </p>
-              <textarea
-                name="report-details"
-                id="report-details"
-                cols="30"
-                rows="5"
-                v-model="reportData.details"
-              ></textarea>
+            <div class="report-subtypes">
+              <div class="subtypes-actions">
+                <button
+                  type="button"
+                  class="button"
+                  @click="modalReportTypes = 'User'"
+                >
+                  Report User
+                </button>
+                <button
+                  type="button"
+                  class="button"
+                  @click="modalReportTypes = 'Post'"
+                >
+                  Report Post
+                </button>
+              </div>
+              <div class="subtypes-actions">
+                <button
+                  type="button"
+                  class="button"
+                  @click="modalReportTypes = 'Comment'"
+                >
+                  Report Comment
+                </button>
+                <button
+                  type="button"
+                  class="button"
+                  @click="modalReportTypes = 'Message'"
+                >
+                  Report Message
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+        <div class="report-details" v-if="reportType !== 'None'">
+          <p>
+            Can you give a brief description of why are you reporting this user?
+          </p>
+          <input
+            type="text"
+            id="report-input"
+            name="Report details"
+            v-model="reportData.details"
+            placeholder="Report details (optional)"
+          />
         </div>
       </div>
       <div class="mdl-actions">
@@ -231,8 +225,33 @@ const reportType = computed(() => {
   font-family: "Montserrat Regular", sans-serif;
   font-size: var(--font-size-body);
   color: var(--color-gray-800);
-  text-align: center;
+  text-align: justify;
   padding-top: 1rem;
+}
+.report-subtypes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.report-details {
+  margin-top: 1rem;
+}
+.report-details p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
+  color: var(--color-gray-800);
+  text-align: left;
+}
+.report-details input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-body);
+  box-sizing: border-box;
+}
+.report-details input:focus {
+  outline: none;
 }
 .restrict-info {
   display: flex;
@@ -257,13 +276,14 @@ const reportType = computed(() => {
 .modal-content button {
   background: var(--color-white);
   width: 100%;
-  padding: 0.95rem 0;
+  padding: 0.55rem 0;
   border: none;
   font-family: "Montserrat Medium", sans-serif;
+  font-size: var(--font-size-label);
   cursor: pointer;
 }
 .modal-content button:hover {
-  background: var(--color-gray-50);
+  background: var(--color-gray-100);
 }
 .mdl-action {
   color: var(--color-error);

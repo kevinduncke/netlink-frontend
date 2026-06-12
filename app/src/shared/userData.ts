@@ -659,7 +659,7 @@ function createUserData() {
   >("none");
   const modalTargetUserId = ref<string | number>("");
   const modalReportTypes = ref<
-    "Account" | "User" | "Post" | "Comment" | "Message" | "None"
+    "User" | "Post" | "Comment" | "Message" | "None"
   >("None");
   const closeModal = () => {
     modalCurrentStatus.value = "none";

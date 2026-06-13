@@ -42,9 +42,9 @@ export type UserMention = {
 export type Report = {
   userId: string | number | null;
   details: string;
-  postId?: string | number | null;
-  commentId?: string | number | null;
-  messageId?: string | number | null;
+  reason: string | null;
+  referenceId?: string | number | null;
+  type: "USER" | "POST" | "COMMENT" | "MESSAGE" | null;
 }
 
 export type SpecificFollower = {

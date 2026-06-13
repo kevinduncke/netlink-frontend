@@ -9,6 +9,7 @@ import LoadingState from "./states/LoadingState.vue";
 import ErrorState from "./states/ErrorState.vue";
 import EmptyState from "./states/EmptyState.vue";
 import SkeletonUserRow from "./states/SkeletonUserRow.vue";
+import Modal from "./Modal.vue";
 
 // STYLES
 import "../styles/app-layout.css";
@@ -39,6 +40,9 @@ const {
   dateConverter,
   chatMessages,
   message,
+  modalCurrentStatus,
+  modalTargetUserId,  
+  reportData,
 
   // FUNCTIONS
   searchUsers,
@@ -150,6 +154,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <Modal v-if="modalCurrentStatus !== 'none'" />  
   <div class="app-layout">
     <Navigation />
     <div class="dash-sidepanel scrollable-hidden">
@@ -393,6 +398,33 @@ onBeforeUnmount(() => {
                       })
                     }}
                   </time>
+                </div>
+                <div class="dash-user-options">
+                  <button 
+                    type="button" 
+                    class="button"
+                    @click="
+                      modalCurrentStatus = 'report';
+                      modalTargetUserId = chatUserInfo.id;
+                      reportData.referenceId = msg.id;
+                      reportData.type = 'MESSAGE';
+                    "
+                  >
+                    <SpriteIcon
+                      name="report"
+                      size="18"
+                      color="#868686"
+                      title="Report"
+                    />
+                  </button>
+                  <button type="button" class="button">
+                    <SpriteIcon
+                      name="reply"
+                      size="18"
+                      color="#868686"
+                      title="Reply"
+                    />
+                  </button>                  
                 </div>
               </div>
               <div class="dash-message-boxme" v-else>
@@ -687,8 +719,18 @@ onBeforeUnmount(() => {
   width: 100%;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+.dash-message-boxuser:hover > .dash-user-options {
+  display: block;
+}
+.dash-user-options {
+  display: none;
+}
+.dash-user-options button:hover > svg {
+  fill: var(--color-primary);
 }
 .dash-message-boxme {
   width: 100%;

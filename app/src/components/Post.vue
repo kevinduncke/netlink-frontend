@@ -145,7 +145,8 @@ onUnmounted(() => {
               @click="
                 modalCurrentStatus = 'report';
                 modalTargetUserId = post.author.id;
-                reportData.postId = post.id;
+                reportData.referenceId = post.id;
+                reportData.type = 'POST';
               "
             >
               Report
@@ -285,7 +286,8 @@ onUnmounted(() => {
                   @click="
                     modalCurrentStatus = 'report';
                     modalTargetUserId = comment.author.id;
-                    reportData.commentId = comment.id;
+                    reportData.referenceId = comment.id;
+                    reportData.type = 'COMMENT';
                   "                  
                 >
                   <SpriteIcon

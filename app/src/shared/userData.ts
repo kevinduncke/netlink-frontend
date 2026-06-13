@@ -664,6 +664,11 @@ function createUserData() {
   const closeModal = () => {
     modalCurrentStatus.value = "none";
     modalTargetUserId.value = "";
+    modalReportTypes.value = "None";
+    reportData.userId = null;
+    reportData.reason = null;
+    reportData.details = "";
+    reportData.referenceId = null;
   };
 
   // BLOCK || UNBLOCK USER
@@ -718,39 +723,28 @@ function createUserData() {
   const reportData = reactive<Report>({
     userId: null,
     details: "",
-    postId: null,
-    commentId: null,
-    messageId: null,
+    reason: null,
+    type: null,
+    referenceId: null,
   });
   async function reportUser(userId: string | number) {
     try {
       const response = await api.post(`/privacy/report/${userId}`, {
-        reason: modalReportTypes.value,
-        postId: reportData.postId,
-        commentId: reportData.commentId,
-        messageId: reportData.messageId,
+        targetUserId: userId,
+        type: reportData.type,
+        reason: reportData.reason,
+        referenceId: reportData.referenceId,
         details: reportData.details,
       });
       if (response.status === 200) {
         closeModal();
-        router.push("/dashboard");
       }
     } catch (error) {
       throw error;
     }
   }
   function handleReport() {
-    console.log("REPORT EXECUTED");
-    if (modalTargetUserId.value === null) {
-      console.log("Missing required report data:", {
-        modalTargetUserId: modalTargetUserId.value,
-        postId: reportData.postId,
-        commentId: reportData.commentId,
-        messageId: reportData.messageId,
-        details: reportData.details,
-      });
-      return;
-    }
+    if (modalTargetUserId.value === null) return;
     reportUser(modalTargetUserId.value);
   }
 

@@ -13,7 +13,6 @@ const {
   // VARIABLES
   modalCurrentStatus,
   modalTargetUserId,
-  modalReportTypes,
   reportData,
 
   // FUNCTIONS
@@ -22,7 +21,39 @@ const {
   restrictUser,
   unrestrictUser,
   handleReport,
+  closeModal,
 } = useUserData();
+
+const reportReasons = [
+  {
+    id: "bullying",
+    label: "Bullying or harassment",
+  },
+  {
+    id: "spam",
+    label: "Spam or misleading information",
+  },
+  {
+    id: "selfinjury",
+    label: "Self-harm or suicide",
+  },
+  {
+    id: "hate",
+    label: "Hate speech or violence",
+  },
+  {
+    id: "items",
+    label: "Selling or promoting restricted items",
+  },
+  {
+    id: "sexual",
+    label: "Sexually explicit content",
+  },
+  {
+    id: "information",
+    label: "Misleading information",
+  },
+];
 
 const modalOptions = computed(() => {
   switch (modalCurrentStatus.value) {
@@ -60,11 +91,10 @@ const modalOptions = computed(() => {
       };
     case "report":
       return {
-        title: "Report User",
+        title: "Report",
         description:
           "Reporting a user will send their profile and recent activity to our moderation team for review. We take all reports seriously and will take appropriate action if any violations of our community guidelines are found.",
-        actionText: "Report User",
-        type: "",
+        actionText: "Report",
         actionHandler: () => handleReport(),
       };
     default:
@@ -76,18 +106,19 @@ const modalOptions = computed(() => {
       };
   }
 });
+
 const reportType = computed(() => {
-  switch (modalReportTypes.value) {
-    case "Post":
-      return "Report Post";
-    case "Message":
-      return "Report Message";
-    case "User":
-      return "Report User";
-    case "None":
-      return "None";
+  switch (reportData.type) {
+    case "USER":
+      return "user";
+    case "POST":
+      return "post";
+    case "COMMENT":
+      return "comment";
+    case "MESSAGE":
+      return "message";
     default:
-      return "Unable to report";
+      return "";
   }
 });
 </script>
@@ -95,7 +126,7 @@ const reportType = computed(() => {
   <div class="modal-overlay scrollable-hidden">
     <div class="modal-content">
       <div class="modal-data">
-        <h2>{{ modalOptions.title }}</h2>
+        <h2>{{ modalOptions.title }} {{ reportType }}</h2>
         <p>{{ modalOptions.description }}</p>
         <div v-if="modalCurrentStatus === 'restrict'" class="restrict-info">
           <div class="restrict-info-content">
@@ -118,70 +149,44 @@ const reportType = computed(() => {
           </div>
         </div>
         <div v-if="modalCurrentStatus === 'report'">
-          <div v-if="reportType === 'None'">
-            <p>What do you want to report?</p>
-            <div class="report-subtypes">
-              <div class="subtypes-actions">
-                <button
-                  type="button"
-                  class="button"
-                  @click="modalReportTypes = 'User'"
-                >
-                  Report User
-                </button>
-                <button
-                  type="button"
-                  class="button"
-                  @click="modalReportTypes = 'Post'"
-                >
-                  Report Post
-                </button>
-              </div>
-              <div class="subtypes-actions">
-                <button
-                  type="button"
-                  class="button"
-                  @click="modalReportTypes = 'Comment'"
-                >
-                  Report Comment
-                </button>
-                <button
-                  type="button"
-                  class="button"
-                  @click="modalReportTypes = 'Message'"
-                >
-                  Report Message
-                </button>
-              </div>
+          <p>Why are you reporting this {{ reportType }}?</p>
+          <div class="report-reason">
+            <div
+              v-for="reason in reportReasons"
+              :key="reason.id"
+              class="post-types"
+            >
+              <input
+                v-model="reportData.reason"
+                type="radio"
+                name="report-reason"
+                :id="reason.id"
+                :value="reason.label"
+              />
+              <label :for="reason.id">{{ reason.label }}</label>
             </div>
           </div>
-        </div>
-        <div class="report-details" v-if="reportType !== 'None'">
-          <p>
-            Can you give a brief description of why are you reporting this user?
-          </p>
-          <input
-            type="text"
-            id="report-input"
-            name="Report details"
-            v-model="reportData.details"
-            placeholder="Report details (optional)"
-          />
+          <div class="report-details">
+            <p>Can you give a brief description of why are you reporting?</p>
+            <input
+              type="text"
+              id="report-input"
+              name="Report details"
+              v-model="reportData.details"
+              placeholder="Report details (optional)"
+            />
+          </div>
         </div>
       </div>
       <div class="mdl-actions">
-        <button
-          class="button"
-          type="button"
-          @click="modalCurrentStatus = 'none'"
-        >
+        <button class="button" type="button" @click="closeModal()">
           Cancel
         </button>
         <button
           class="button mdl-action"
           type="button"
+          :disabled="reportData.reason === null"
           @click="modalOptions.actionHandler()"
-          v-if="reportType !== 'None'"
         >
           {{ modalOptions.actionText }}
         </button>
@@ -228,10 +233,23 @@ const reportType = computed(() => {
   text-align: justify;
   padding-top: 1rem;
 }
-.report-subtypes {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+.restrict-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
+.restrict-info-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+.restrict-info-content p {
+  padding: 0;
+}
+
 .report-details {
   margin-top: 1rem;
 }
@@ -253,21 +271,26 @@ const reportType = computed(() => {
 .report-details input:focus {
   outline: none;
 }
-.restrict-info {
+.report-reason {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
 }
-.restrict-info-content {
+.post-types {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  gap: 0.5rem;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-start;
 }
-.restrict-info-content p {
-  padding: 0;
+.post-types label {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: var(--font-size-caption);
 }
+
 .mdl-actions {
   display: flex;
   width: 100%;

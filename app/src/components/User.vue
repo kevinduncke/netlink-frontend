@@ -27,6 +27,7 @@ const {
   dateConverter,
   modalCurrentStatus,
   modalTargetUserId,
+  reportData,
 
   // FUNCTIONS
   resetUserProfile,
@@ -109,9 +110,9 @@ onBeforeRouteLeave((to) => {
             />
             <p>{{ userProfile.isFollowedByMe ? "Unfollow" : "Follow" }}</p>
           </button>
-          <button 
-            class="button" 
-            type="button" 
+          <button
+            class="button"
+            type="button"
             v-if="!userProfile.hasRestrictedMe"
             @click="handleSendMessage"
           >
@@ -162,6 +163,8 @@ onBeforeRouteLeave((to) => {
             @click="
               modalCurrentStatus = 'report';
               modalTargetUserId = userProfile.id;
+              reportData.referenceId = userProfile.id;
+              reportData.type = 'USER';
             "
           >
             <SpriteIcon

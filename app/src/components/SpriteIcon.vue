@@ -44,7 +44,9 @@ type IconName =
   | "check"
   | "checked"
   | "report"
-  | "restrict";
+  | "restrict"
+  | "reply"
+  | "reply-all";
 
 const props = withDefaults(
   defineProps<{

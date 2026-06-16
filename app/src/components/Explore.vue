@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // VUE
 import { computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { debounce } from "lodash-es";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
@@ -55,6 +56,11 @@ const {
   loadPosts,
 } = usePosts();
 
+onMounted(async () => {
+  await loadSuggestedUsers("users");
+  await loadPosts("all");
+});
+
 const hasActiveSearch = computed(() => {
   return (
     searchFilters.query.trim() !== "" ||
@@ -82,31 +88,31 @@ async function refreshSuggestedUsers() {
   await loadSuggestedUsers("users");
 }
 
-onMounted(async () => {
-  await loadSuggestedUsers("users");
-  await loadPosts("all");
-});
-
-let searchPostTimer: number | null = null;
+const debouncedSearch = debounce(() => {
+  searchPost();
+}, 600);
 
 watch(
-  searchFilters,
+  () => searchFilters.query,
   () => {
-    if (searchPostTimer) {
-      window.clearTimeout(searchPostTimer);
-    }
-
-    searchPostTimer = window.setTimeout(() => {
-      searchPost();
-    }, 300);
+    debouncedSearch();
   },
-  { deep: true },
+);
+
+watch(
+  [
+    () => searchFilters.people,
+    () => searchFilters.shared,
+    () => searchFilters.fromDate,
+    () => searchFilters.toDate,
+  ],
+  () => {
+    searchPost();
+  },
 );
 
 onBeforeUnmount(() => {
-  if (searchPostTimer) {
-    window.clearTimeout(searchPostTimer);
-  }
+  debouncedSearch.cancel();
 });
 </script>
 

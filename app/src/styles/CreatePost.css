@@ -34,6 +34,10 @@
   font-family: "Montserrat SemiBold", sans-serif;
   font-size: 0.8rem;
 }
+.mediaPost button:disabled {
+  background-color: var(--color-gray-300);
+  color: var(--color-gray-600);
+}
 .addMentions {
   margin-bottom: 1.5rem;
 }

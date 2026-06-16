@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // VUE
 import { onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { debounce } from "lodash-es";
 
 // SERVICES
 import api from "../services/api";
@@ -54,8 +55,6 @@ const results = ref<SearchUser[]>([]);
 const loadingSearchUsers = ref(false);
 const searchUsersError = ref("");
 
-let searchUsersTimer: number | null = null;
-
 async function searchUsers() {
   loadingSearchUsers.value = true;
   searchUsersError.value = "";
@@ -76,20 +75,16 @@ async function searchUsers() {
   }
 }
 
-watch(query, () => {
-  if (searchUsersTimer) {
-    window.clearTimeout(searchUsersTimer);
-  }
+const debouncedSearch = debounce(() => {
+  searchUsers();
+}, 400);
 
-  searchUsersTimer = window.setTimeout(() => {
-    searchUsers();
-  }, 300);
+watch(query, () => {
+  debouncedSearch();
 });
 
 onBeforeUnmount(() => {
-  if (searchUsersTimer) {
-    window.clearTimeout(searchUsersTimer);
-  }
+  debouncedSearch.cancel();
 });
 
 function addMention(username: string) {

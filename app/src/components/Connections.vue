@@ -5,7 +5,7 @@ import { onMounted, watch } from "vue";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
-import Post from "./Post.vue";
+import Post from "./Posts.vue";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 import SkeletonUserRow from "./states/SkeletonUserRow.vue";
 import SkeletonPost from "./states/SkeletonPost.vue";

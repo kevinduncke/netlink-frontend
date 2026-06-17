@@ -182,6 +182,18 @@ export function usePosts() {
     }
   }
 
+  async function loadPost(postId: number | string) {
+    try {
+      // CHECK IF USER IS AUTHENTICATED
+      if (!authStore.token) {
+        router.push("/login");
+        return;
+      }
+
+      const response = await api.get(`/post/${postId}`);
+    } catch (error) {}
+  }
+
   // DELETE POST
   async function deletePost(postId: number | string) {
     try {
@@ -443,7 +455,7 @@ export function usePosts() {
       editingComment.openCommentPostId === postId ? null : postId;
     loadComments(postId);
   }
-  function toggleCommentOptions(commentId: number | string){
+  function toggleCommentOptions(commentId: number | string) {
     openCommentOptions.value = commentId;
     closeCommentOptions.value = !closeCommentOptions.value;
   }

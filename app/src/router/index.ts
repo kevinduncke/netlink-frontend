@@ -15,6 +15,7 @@ import Connections from "../components/Connections.vue";
 import Messages from "../components/Messages.vue";
 import User from "../components/User.vue";
 import Menu from "../components/Menu.vue";
+import Post from "../components/Post.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -93,6 +94,12 @@ const routes: RouteRecordRaw[] = [
     path: "/menu",
     component: Menu,
     name: "menu",
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/post/:id",
+    component: Post,
+    name: "post",
     meta: { requiresAuth: true },
   },
 ];

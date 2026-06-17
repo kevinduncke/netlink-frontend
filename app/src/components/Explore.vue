@@ -5,7 +5,7 @@ import { debounce } from "lodash-es";
 
 // COMPONENTS
 import Navigation from "./Navigation.vue";
-import Post from "./Post.vue";
+import Post from "./Posts.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 import SkeletonUserRow from "./states/SkeletonUserRow.vue";
 import SkeletonPost from "./states/SkeletonPost.vue";

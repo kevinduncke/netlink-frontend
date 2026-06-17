@@ -6,7 +6,7 @@ import { onBeforeRouteLeave } from "vue-router";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
-import Post from "./Post.vue";
+import Post from "./Posts.vue";
 import LoadingState from "./states/LoadingState.vue";
 import ErrorState from "./states/ErrorState.vue";
 import EmptyState from "./states/EmptyState.vue";

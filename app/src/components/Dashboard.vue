@@ -5,7 +5,7 @@ import { onMounted, watch } from "vue";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Notifications from "./Notifications.vue";
-import Post from "./Post.vue";
+import Post from "./Posts.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 import ErrorState from "./states/ErrorState.vue";
 import EmptyState from "./states/EmptyState.vue";

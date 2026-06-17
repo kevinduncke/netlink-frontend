@@ -6,7 +6,7 @@ import { onBeforeRouteLeave, useRouter } from "vue-router";
 // COMPONENTS
 import Navigation from "./Navigation.vue";
 import Profile from "./Profile.vue";
-import Post from "./Post.vue";
+import Post from "./Posts.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 import Modal from "./Modal.vue";
 

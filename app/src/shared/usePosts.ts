@@ -21,6 +21,7 @@ import {
 // TYPES
 import type {
   PostType,
+  UniquePost,
   Comment,
   EditingComment,
   CreatePost,
@@ -30,6 +31,8 @@ import type {
 
 // POSTS
 export const userdata = ref<PostType[]>([]);
+export const selectedPostId = ref<string | number>("");
+export const uniquePost = ref<UniquePost>({} as UniquePost);
 
 // STATES
 
@@ -58,7 +61,7 @@ export function usePosts() {
   const closeCommentOptions = ref<boolean>(false);
 
   // EDIT POST
-  const editingPost = ref<PostType | null>(null);
+  const editingPost = ref<PostType | UniquePost | null>(null);
 
   // EDIT COMMENT
   const editingComment: EditingComment = reactive({
@@ -190,8 +193,15 @@ export function usePosts() {
         return;
       }
 
-      const response = await api.get(`/post/${postId}`);
-    } catch (error) {}
+      const response = await api.get(`/post/p/${postId}`);
+      if(!response.data) {
+        postsError.value = "Post not found.";
+        return;
+      }
+      uniquePost.value = response.data;
+    } catch (error) {
+      console.error("Error loading post:", error);
+    }
   }
 
   // DELETE POST
@@ -443,7 +453,7 @@ export function usePosts() {
   function displayPostOptions(postId: number | string) {
     openOptionsFor.value = openOptionsFor.value === postId ? "" : postId;
   }
-  function openEditModal(post: PostType) {
+  function openEditModal(post: PostType | UniquePost) {
     openEditModalFor.value = openEditModalFor.value === post.id ? "" : post.id;
     editingPost.value = { ...post };
   }
@@ -571,6 +581,8 @@ export function usePosts() {
   return {
     // VARIABLES
     userdata,
+    uniquePost,
+    selectedPostId,
     createPostData,
     openOptionsFor,
     openEditModalFor,
@@ -593,6 +605,7 @@ export function usePosts() {
 
     // POST FUNCTIONS
     loadPosts,
+    loadPost,
     deletePost,
     saveEdit,
     likePost,

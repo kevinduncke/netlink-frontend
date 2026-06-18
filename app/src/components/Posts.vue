@@ -15,6 +15,9 @@ import { usePosts } from "../shared/usePosts.ts";
 import AvatarIcon from "../assets/icons/avatar-icon.vue";
 import SpriteIcon from "./SpriteIcon.vue";
 
+// STYLES
+import "../styles/post.css";
+
 // USER DATA FUNCTIONS
 const {
   // VARIABLES
@@ -32,6 +35,7 @@ const {
 const {
   // VARIABLES
   userdata,
+  selectedPostId,
   openOptionsFor,
   openEditModalFor,
   openCommentOptions,
@@ -139,7 +143,11 @@ onUnmounted(() => {
                 Edit
               </button>
             </div>
-            <RouterLink :to="`/post/${post.id}`">Go to Post</RouterLink>
+            <RouterLink
+              :to="`/post/${post.id}`"
+              @click="selectedPostId = post.id"
+              >Go to Post</RouterLink
+            >
             <button
               class="button"
               type="button"
@@ -397,129 +405,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.dash-post {
-  background-color: #ffffff;
-  padding: 0.8rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-.dash-user-post {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.dash-username {
-  display: inherit;
-  justify-content: start;
-  align-items: center;
-  gap: 0.5rem;
-}
-.dash-username a:hover {
-  background: none;
-}
-
-.dash-post-opts {
-  position: relative;
-  display: inherit;
-  justify-content: end;
-  align-items: center;
-}
-.dash-post-opts button {
-  display: inherit;
-  padding: 0;
-}
-.dash-post-opts button svg {
-  margin: 0;
-}
-.dash-pop-delete {
-  position: absolute;
-  top: -15px;
-  width: 100px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  margin: 2rem 0 0 0;
-}
-.dash-pop-delete a {
-  display: block;
-  text-decoration: none;
-  text-align: center;
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: var(--font-size-caption);
-  color: var(--color-black);
-  padding: var(--spacing-xs);
-}
-.dash-pop-delete button {
-  width: 100%;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-xs);
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: var(--font-size-caption);
-}
-.dash-pop-delete button:hover {
-  background-color: var(--color-gray-100);
-}
-
-.dash-user-post svg {
-  height: 18px;
-  width: 18px;
-  margin-right: 0.5rem;
-  fill: #006145;
-}
-.dash-user-post span {
-  font-family: "Montserrat SemiBold", sans-serif;
-  letter-spacing: 0.02rem;
-  font-size: 0.8rem;
-}
-.dash-user-post span a,
-.dash-repost-by a {
-  text-decoration: none;
-  color: var(--color-primary);
-}
-.dash-content-post {
-  font-family: "Montserrat Regular", sans-serif;
-  font-size: 0.8rem;
-  padding: 0.5rem;
-}
-.dash-content-post a {
-  text-decoration: none;
-  font-family: "Montserrat Medium", sans-serif;
-  color: var(--color-primary);
-}
-.dash-content-post a:hover {
-  background: none;
-}
-
-.dash-options-post {
-  display: flex;
-  flex-direction: row;
-}
-.dash-options-post button {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-right: var(--spacing-sm);
-}
-.dash-options-post svg {
-  height: 14px;
-  width: 14px;
-  margin-right: var(--spacing-xs);
-  fill: var(--color-gray-800);
-}
-.dash-options-post span {
-  font-family: "Montserrat Light", sans-serif;
-  font-size: 0.7rem;
-}
-
-.dash-liked svg {
-  fill: #c31010;
-}
-.dash-shared svg {
-  fill: #005261;
-}
-.dash-commented svg {
-  fill: #006145;
-}
-
 .edit-post-modal {
   background-color: #fafafa;
   padding: 1.5rem;

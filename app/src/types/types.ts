@@ -25,6 +25,31 @@ export type PostType = {
   isRestrictedByMe: boolean;
 };
 
+export type UniquePost = {
+  id: number;
+  createdAt: string;
+  content: string;
+  location: string;
+  imageUrl?: string;
+  hideLikes: boolean;
+  disableComments: boolean;
+  isRepost: boolean;
+  repostedByMe: boolean;
+  userRestrictedMe: boolean;
+  isFollowedByMe: boolean;
+  isRestrictedByMe: boolean;
+  _count: {
+    comments: number;
+    likes: number;
+    shares: number;
+  };
+  author: User;
+  comments: Comment[];
+  likes: Likes[];
+  shares: Shares[];
+  mentions: Mentions[];
+}
+
 export type User = {
   id: string | number;
   name: string;
@@ -34,6 +59,24 @@ export type User = {
   followers: string | number;
   liked: boolean;
 };
+
+export type Likes = {
+  id: string | number;
+  createdAt: string;
+  user: User;
+}
+
+export type Mentions = {
+  id: string | number;
+  name: string;
+  username: string;
+}
+
+export type Shares = {
+  id: string | number;
+  createdAt: string;
+  user: User;
+}
 
 export type UserMention = {
   username: string;

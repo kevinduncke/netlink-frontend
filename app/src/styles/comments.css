@@ -1,0 +1,26 @@
+.dash-comment {
+  background-color: #ffffff;
+  padding: 0.8rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.dash-username-comment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+}
+.dash-username-comment svg {
+  margin-right: var(--spacing-sm);
+  fill: var(--color-primary);
+}
+.dash-username-comment span a {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.dash-usercmt-info {
+  display: flex;
+  align-items: center;
+}

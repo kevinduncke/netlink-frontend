@@ -17,6 +17,7 @@ import SpriteIcon from "./SpriteIcon.vue";
 
 // STYLES
 import "../styles/post.css";
+import "../styles/comments.css";
 
 // USER DATA FUNCTIONS
 const {
@@ -438,36 +439,6 @@ onUnmounted(() => {
 .edit-actions button:first-child {
   color: #626262;
   border: 1px solid #626262;
-}
-
-.dash-username-comment {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.5rem;
-}
-.dash-username-comment svg {
-  margin-right: var(--spacing-sm);
-  fill: var(--color-primary);
-}
-.dash-username-comment span a {
-  font-family: "Montserrat SemiBold", sans-serif;
-  font-size: 0.75rem;
-  color: var(--color-primary);
-  text-decoration: none;
-}
-.dash-usercmt-info {
-  display: flex;
-  align-items: center;
-}
-.dash-username-comment button {
-  background: none;
-  display: flex;
-  outline: none;
-  padding: 0;
-}
-.dash-username-comment button > svg {
-  margin: 0;
 }
 
 .dash-comments-post,

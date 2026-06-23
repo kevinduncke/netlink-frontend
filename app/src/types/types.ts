@@ -36,7 +36,6 @@ export type UniquePost = {
   isRepost: boolean;
   repostedByMe: boolean;
   userRestrictedMe: boolean;
-  isFollowedByMe: boolean;
   isRestrictedByMe: boolean;
   _count: {
     comments: number;
@@ -58,6 +57,7 @@ export type User = {
   avatarUrl?: string;
   followers: string | number;
   liked: boolean;
+  isFollowedByMe: boolean;
 };
 
 export type Likes = {

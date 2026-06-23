@@ -1,8 +1,34 @@
-.dash-comment {
-  background-color: #ffffff;
-  padding: 0.8rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
+.post-comment-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm); 
+}
+.post-comment-text textarea {
+  width: 100%;
+  height: 100px;
+  border: none;
+  resize: none;
+  outline: none;
+  font-family: "Montserrat Light", sans-serif;
+  font-size: 0.8rem;
+  padding: 0.7rem;
+  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+}
+.post-comment-base button {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+.post-comments {
+  margin-top: 1.5rem;
 }
 .dash-username-comment {
   display: flex;
@@ -23,4 +49,53 @@
 .dash-usercmt-info {
   display: flex;
   align-items: center;
+}
+
+/* UNIQUE POST COMMENT */
+.dash-comment {
+  background-color: #ffffff;
+  padding: 0.8rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.dash-comment p {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.75rem;
+  color: var(--color-gray-900);
+  margin: 0.2rem 0;
+}
+.dash-comment p:last-child {
+  margin-top: 0.5rem;
+  color: var(--color-gray-600);
+  font-size: 0.6rem;
+}
+.dash-userinfo-comment {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+.dash-userinfo-comment span a {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.dash-post-comment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dash-comment-empty,
+.dash-shares-empty,
+.dash-likes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
 }

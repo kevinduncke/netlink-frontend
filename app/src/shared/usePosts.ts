@@ -44,7 +44,7 @@ export function usePosts() {
 
   // CREATE POST
   const createPostData: CreatePost = reactive({
-    content: "What's on your mind today?",
+    content: "",
     mentions: [] as UserMention[],
     location: "",
     imageUrl: "",
@@ -194,7 +194,7 @@ export function usePosts() {
       }
 
       const response = await api.get(`/post/p/${postId}`);
-      if(!response.data) {
+      if (!response.data) {
         postsError.value = "Post not found.";
         return;
       }
@@ -341,6 +341,26 @@ export function usePosts() {
       });
 
       editingComment.postComment = "";
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        authStore.logout();
+        router.push("/login");
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  // UNIQUE POST NEW COMMENT
+  const uniquePostComment = ref<string>("");
+  async function newUniqueComment(postId: number | string) {
+    try {
+      const response = await api.post(`/post/comment/${postId}`, {
+        content: uniquePostComment.value,
+      });
+      uniquePost.value.comments?.unshift(response.data);
+      uniquePostComment.value = "";
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authStore.logout();
@@ -590,6 +610,7 @@ export function usePosts() {
     closeCommentOptions,
     editingPost,
     editingComment,
+    uniquePostComment,
     loadingPosts,
     postsError,
     hasMore,
@@ -614,6 +635,7 @@ export function usePosts() {
     // COMMENTS FUNCTIONS
     loadComments,
     newComment,
+    newUniqueComment,
     editComment,
     deleteComment,
 

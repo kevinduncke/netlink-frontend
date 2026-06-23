@@ -1,3 +1,36 @@
+.dash-info {
+  background-color: #ffffff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.dash-info p {
+  font-family: "Montserrat SemiBold", sans-serif;
+  font-size: 0.8rem;
+  color: var(--color-gray-900);
+  margin: 0.4rem 0;
+}
+.dash-info span {
+  font-family: "Montserrat Regular", sans-serif;
+  font-size: 0.8rem;
+  color: var(--color-gray-900);
+}
+.dash-info-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+.dash-info-actions button:hover > svg{
+  fill: var(--color-primary);
+}
+
+.post-base {
+  margin-top: 1.5rem;
+}
 .dash-post {
   background-color: #ffffff;
   padding: 0.8rem;
@@ -119,4 +152,8 @@
 }
 .dash-commented svg {
   fill: #006145 !important;
+}
+
+.post-comment-base, .post-liked {
+  margin-bottom: 1.5rem;
 }

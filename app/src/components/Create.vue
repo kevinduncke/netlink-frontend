@@ -107,6 +107,7 @@ onMounted(() => {
           <textarea
             name="text"
             id="text"
+            placeholder="What's on your mind today?"
             v-model="createPostData.content"
           ></textarea>
           <p>

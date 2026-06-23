@@ -32,6 +32,7 @@ import type {
 // POSTS
 export const userdata = ref<PostType[]>([]);
 export const selectedPostId = ref<string | number>("");
+export const uniquePostType = ref<"Post" | "Share">("Post");
 export const uniquePost = ref<UniquePost>({} as UniquePost);
 
 // STATES
@@ -192,7 +193,6 @@ export function usePosts() {
         router.push("/login");
         return;
       }
-
       const response = await api.get(`/post/p/${postId}`);
       if (!response.data) {
         postsError.value = "Post not found.";
@@ -201,6 +201,21 @@ export function usePosts() {
       uniquePost.value = response.data;
     } catch (error) {
       console.error("Error loading post:", error);
+    }
+  }
+
+  async function loadShare(shareId: number | string) {
+    try {
+      // CHECK IF USER IS AUTHENTICATED
+      if (!authStore.token) {
+        router.push("/login");
+        return;
+      }
+      
+      const response = await api.get(`/post/share/${shareId}`);
+      uniquePost.value = response.data.post;
+    } catch (error) {
+      console.error("Error loading share: ", error);
     }
   }
 
@@ -602,6 +617,7 @@ export function usePosts() {
     // VARIABLES
     userdata,
     uniquePost,
+    uniquePostType,
     selectedPostId,
     createPostData,
     openOptionsFor,
@@ -627,6 +643,7 @@ export function usePosts() {
     // POST FUNCTIONS
     loadPosts,
     loadPost,
+    loadShare,
     deletePost,
     saveEdit,
     likePost,

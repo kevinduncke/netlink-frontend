@@ -43,7 +43,9 @@ const {
   // VARIABLES
   selectedPostId,
   loadPost,
+  loadShare,
   uniquePost,
+  uniquePostType,
   uniquePostComment,
 
   // POST FUNCTIONS
@@ -58,7 +60,11 @@ const {
 } = usePosts();
 
 onMounted(async () => {
-  await loadPost(selectedPostId.value);
+  if (uniquePostType.value === "Post") {
+    await loadPost(selectedPostId.value);
+  } else if (uniquePostType.value === "Share") {
+    await loadShare(selectedPostId.value);
+  }
   if (!uniquePost.value.content) {
     router.push("/dashboard");
   }

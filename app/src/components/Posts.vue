@@ -47,6 +47,7 @@ const {
   hasMore,
   currentRoute,
   loadPosts,
+  uniquePostType,
 
   // POST FUNCTIONS
   deletePost,
@@ -146,8 +147,15 @@ onUnmounted(() => {
             </div>
             <RouterLink
               :to="`/post/${post.id}`"
-              @click="selectedPostId = post.id"
+              v-if="post.isRepost !== true"
+              @click="selectedPostId = post.id, uniquePostType = 'Post'"
               >Go to Post</RouterLink
+            >
+            <RouterLink
+              :to="`/post/${post.id}`"
+              v-else
+              @click="selectedPostId = post.id, uniquePostType = 'Share'"
+              >Go to Repost</RouterLink
             >
             <button
               class="button"
